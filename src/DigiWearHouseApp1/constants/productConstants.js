@@ -1,40 +1,107 @@
 
-export const DRESS_TYPES = {
-  "ETHNIC WEAR": [
-    "SAREE",
-    "SALWAR SUITS",
-    "LEHENGAS",
-    "ANARKALI",
-    "DUPATTAS",
-    "ETHNIC JACKET",
+// export const DRESS_TYPES = {
+//   "ETHNIC WEAR": [
+//     "SAREE",
+//     "SALWAR SUITS",
+//     "LEHENGAS",
+//     "ANARKALI",
+//     "DUPATTAS",
+//     "ETHNIC JACKET",
+//   ],
+//   "TOP WEAR": [
+//     "T-SHIRTS",
+//     "SHIRTS",
+//     "BLOUSES",
+//   ],
+//   "BOTTOM WEAR": [
+//     "JEANS",
+//     "TROUSERS",
+//     "SKIRTS",
+//   ],
+//   // "DRESSES & JUMPSUITS": [
+//   //   "MAXI DRESSES",
+//   //   "JUMPSUITS",
+//   // ],
+//   // "LOUNGE & SLEEPWEAR": [
+//   //   "NIGHT SUITS",
+//   //   "PAJAMAS",
+//   // ],
+//   // "ACTIVE WEAR": [
+//   //   "SPORTS BRAS",
+//   //   "LEGGINGS",
+//   // ],
+//   // "WINTER WEAR": [
+//   //   "SWEATERS",
+//   //   "JACKETS",
+//   // ],
+// };
+
+export const READY_TO_WEAR_DRESS_TYPES = {
+  "Ethnic Wear": [
+    "Salwar Suit Sets (Top, Bottom & Dupatta)",
+    "Kurta & Dupatta Sets",
+    "Saree",
+    "Lehenga",
   ],
-  "TOP WEAR": [
-    "T-SHIRTS",
-    "SHIRTS",
-    "BLOUSES",
+  "Top Wear": [
+    "T-Shirts",
+    "Shirts",
+    "Blouses",
   ],
-  // "BOTTOM WEAR": [
-  //   "JEANS",
-  //   "TROUSERS",
-  //   "SKIRTS",
+  "Bottom Wear": [
+    "Jeans",
+    "Trousers",
+    "Skirts",
+  ],
+  // You can add these later if needed:
+  // "Dresses & Jumpsuits": [
+  //   "Maxi Dresses",
+  //   "Jumpsuits",
   // ],
-  // "DRESSES & JUMPSUITS": [
-  //   "MAXI DRESSES",
-  //   "JUMPSUITS",
+  // "Active Wear": [
+  //   "Sports Bras",
+  //   "Leggings",
   // ],
-  // "LOUNGE & SLEEPWEAR": [
-  //   "NIGHT SUITS",
-  //   "PAJAMAS",
+  // "Winter Wear": [
+  //   "Sweatshirts",
+  //   "Jackets",
   // ],
-  // "ACTIVE WEAR": [
-  //   "SPORTS BRAS",
-  //   "LEGGINGS",
-  // ],
-  // "WINTER WEAR": [
-  //   "SWEATERS",
-  //   "JACKETS",
+  // "Lounge & Sleepwear": [
+  //   "Night Suits",
+  //   "Pajamas",
   // ],
 };
+
+// Unstitched Categories
+export const UNSTITCHED_DRESS_TYPES = {
+  "Ethnic Wear": [
+    "Salwar Suit Sets (Top, Bottom & Dupatta)",
+    "Kurta & Dupatta Sets",
+    "Saree Fabrics",
+    "Lehenga Fabrics",
+  ],
+  "Fabric by Meter": [
+    "Cotton Fabric",
+    "Silk Fabric",
+    "Chiffon/Georgette Fabric",
+    "Linen Fabric",
+  ],
+  "Printed & Embroidered Sets": [
+    "Printed Suit Sets",
+    "Embroidered Suit Sets",
+    "Handloom Suit Sets",
+  ],
+  "Seasonal Fabrics": [
+    "Summer Cotton Sets",
+    "Winter Woolen Suit Fabrics",
+    "Festive Wear Fabrics",
+  ],
+};
+
+// Keep the old DRESS_TYPES for backward compatibility (optional)
+export const DRESS_TYPES = READY_TO_WEAR_DRESS_TYPES;
+
+
 
 export const MATERIAL_TYPES = [
   "Cotton",

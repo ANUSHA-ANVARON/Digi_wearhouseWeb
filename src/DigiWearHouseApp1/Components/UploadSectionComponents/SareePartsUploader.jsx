@@ -439,13 +439,14 @@
 import React, { useState, useEffect } from 'react';
 import { Upload, X, CheckCircle, Sparkles, AlertCircle, Download } from 'lucide-react';
 import { uploadToCloudinary } from '../../utilities/cloudinary';
+import { useNavigate } from 'react-router-dom';
 
 const SareePartsUploader = ({ formData = {}, onChange = () => {} }) => {
   const [uploading, setUploading] = useState(false);
   const [draggedPart, setDraggedPart] = useState(null);
   const [error, setError] = useState(null);
   const [generatingComplete, setGeneratingComplete] = useState(false);
-
+const navigate=useNavigate()
   const partLabels = {
     blouse: { name: 'Blouse', description: 'The fitted upper garment/top part', icon: '👚' },
     pleats: { name: 'pleates', description: 'The folded front portion of the saree', icon: '📏' },
@@ -685,10 +686,10 @@ onChange('imageUrls', updatedImageUrls);
     return formData.generatedSareeViews ? Object.keys(formData.generatedSareeViews).length : 0;
   };
 
-  const base64ToBlob = async (base64String) => {
-    const response = await fetch(base64String);
-    return response.blob();
-  };
+  // const base64ToBlob = async (base64String) => {
+  //   const response = await fetch(base64String);
+  //   return response.blob();
+  // };
 
   const downloadView = (viewType) => {
     const viewData = formData.generatedSareeViews?.[viewType];
@@ -716,11 +717,33 @@ onChange('imageUrls', updatedImageUrls);
 
   return (
     <div className="max-w-6xl mx-auto p-6 bg-gray-50">
+      
       {/* Header */}
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Upload Photos</h1>
         <p className="text-gray-600 mb-4">Add Photos of your saree parts</p>
       </div>
+      <div className='pb-6'>
+        <button
+            onClick={() => navigate("/instructions")}
+          className="text-blue-600 cursor-pointer hover:text-blue-700 font-medium flex items-center space-x-2"
+        >
+          <span>View Instructions</span>
+          <svg 
+            className="w-4 h-4" 
+            fill="none" 
+            stroke="currentColor" 
+            viewBox="0 0 24 24"
+          >
+            <path 
+              strokeLinecap="round" 
+              strokeLinejoin="round" 
+              strokeWidth={2} 
+              d="M9 5l7 7-7 7" 
+            />
+          </svg>
+        </button>
+        </div>
 
       {/* Upload Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">

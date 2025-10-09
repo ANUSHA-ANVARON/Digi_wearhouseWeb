@@ -27,14 +27,14 @@ const Navbar = () => {
   // Function to handle FAQ navigation
   const handleFAQClick = (e) => {
     e.preventDefault();
-    
+
     if (location.pathname === "/") {
       // If already on home page, just scroll to FAQ section
       const faqElement = document.getElementById("faq");
       if (faqElement) {
-        faqElement.scrollIntoView({ 
-          behavior: "smooth", 
-          block: "start" 
+        faqElement.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
         });
       }
     } else {
@@ -44,14 +44,14 @@ const Navbar = () => {
       setTimeout(() => {
         const faqElement = document.getElementById("faq");
         if (faqElement) {
-          faqElement.scrollIntoView({ 
-            behavior: "smooth", 
-            block: "start" 
+          faqElement.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
           });
         }
       }, 100); // Small delay to ensure the page has loaded
     }
-    
+
     // Close mobile menu if open
     setIsMobileMenuOpen(false);
   };
@@ -245,12 +245,12 @@ const Navbar = () => {
         setIsProfileOpen(false);
       }
     };
-    
+
     // Add a small delay to prevent immediate closure
     const timeoutId = setTimeout(() => {
       document.addEventListener("mousedown", handleClickOutside);
     }, 0);
-    
+
     return () => {
       clearTimeout(timeoutId);
       document.removeEventListener("mousedown", handleClickOutside);
@@ -261,17 +261,17 @@ const Navbar = () => {
   const handleCategoriesToggle = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     // Temporarily disable the outside click handler
     const currentState = isCategoriesOpen;
-    
+
     setIsCategoriesOpen(!currentState);
-    
+
     if (currentState) {
       setSelectedCategory(null);
     }
-    
-    console.log('Categories toggled from:', currentState, 'to:', !currentState);
+
+    console.log("Categories toggled from:", currentState, "to:", !currentState);
   };
 
   // Determine navigation items based on current route
@@ -280,7 +280,7 @@ const Navbar = () => {
     location.pathname === "/who-we-are" ||
     location.pathname === "/privacy-policy" ||
     location.pathname === "/contact-us";
-  
+
   const navItems = isHomeRoute
     ? [
         { name: "Home", type: "link", path: "/" },
@@ -291,7 +291,7 @@ const Navbar = () => {
     : [
         { name: "Dashboard", type: "link", path: "/dashboard" },
         { name: "Orders", type: "link", path: "/orders" },
-        {name:"Add Product", type:"link", path:"/upload-products"}
+        { name: "Add Product", type: "link", path: "/upload-products" },
       ];
 
   return (
@@ -300,116 +300,119 @@ const Navbar = () => {
       <nav className="bg-white shadow-sm border-b  border-gray-100 sticky top-0 z-50">
         {/* Top section with logo and icons */}
         <div className="max-w-7xl mx-auto  px-4  sm:px-6  lg:px-8">
-        <div className="flex justify-between items-center h-16 px-2 sm:px-4">
-  {/* Logo */}
-  <Link to={"/"}>
-    <div className="flex items-center justify-center pt-2">
-      <img src={logo} alt="DVYB Logo" className="h-10" />
-    </div>
-  </Link>
-
-  {/* Right side icons */}
-  <div className="flex items-center space-x-3">
-    {/* Notification Icon */}
-    <div className="relative" ref={notifRef}>
-      <button
-        className="p-2 cursor-pointer text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors duration-200"
-        onClick={(e) => {
-          e.stopPropagation();
-          setIsNotificationOpen(!isNotificationOpen);
-        }}
-      >
-        <img src={notificationIcon} alt="notifications" className="w-6 h-6" />
-      </button>
-
-      {isNotificationOpen && (
-        <div 
-          className="absolute right-0 w-80 bg-white backdrop-blur-lg rounded-2xl shadow-xl text-center z-50 border border-gray-100"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {/* Arrow */}
-          <div className="absolute -top-2 right-5 w-4 h-4 bg-white rotate-45 shadow-md border-l border-t border-gray-100"></div>
-
-          {/* Close button */}
-          <button
-            onClick={() => setIsNotificationOpen(false)}
-            className="absolute top-3 right-3 text-gray-500 hover:text-black transition-colors"
-          >
-            <X size={18} />
-          </button>
-
-          {/* Bell Icon */}
-          <div className="flex justify-center mb-4 pt-6">
-            <span className="text-yellow-400 text-6xl">🔔</span>
-          </div>
-
-          {/* Message */}
-          <p className="text-gray-700 font-medium mb-4">
-            No Notification yet
-          </p>
-
-          {/* Button */}
-          <button className="cursor-pointer bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors mb-6">
-            Explore Categories
-          </button>
-        </div>
-      )}
-    </div>
-
-    {/* Profile Icon */}
-    <div className="relative" ref={profileRef}>
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          setIsProfileOpen(!isProfileOpen);
-        }}
-        className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors duration-200"
-      >
-        <img src={user_icon} alt="profile" className="w-6 h-6" />
-      </button>
-
-      {isProfileOpen && (
-        <div 
-          className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-xl shadow-lg z-50"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="py-1">
-            <Link to={"/profile"}>
-              <button className="cursor-pointer flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                <Settings size={18} className="mr-3" />
-                <span>Settings</span>
-              </button>
+          <div className="flex justify-between items-center h-16 px-2 sm:px-4">
+            {/* Logo */}
+            <Link to={"/"}>
+              <div className="flex items-center justify-center pt-2">
+                <img src={logo} alt="DVYB Logo" className="h-10" />
+              </div>
             </Link>
-            <Link to={"/register"}>
-              <button className="cursor-pointer flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                <LogOut size={18} className="mr-3" />
-                <span>Logout</span>
-              </button>
-            </Link>
+
+            {/* Right side icons */}
+            <div className="flex items-center space-x-3">
+              {/* Notification Icon */}
+              <div className="relative" ref={notifRef}>
+                <button
+                  className="p-2 cursor-pointer text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors duration-200"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsNotificationOpen(!isNotificationOpen);
+                  }}
+                >
+                  <img
+                    src={notificationIcon}
+                    alt="notifications"
+                    className="w-6 h-6"
+                  />
+                </button>
+
+                {isNotificationOpen && (
+                  <div
+                    className="absolute right-0 w-80 bg-white backdrop-blur-lg rounded-2xl shadow-xl text-center z-50 border border-gray-100"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {/* Arrow */}
+                    <div className="absolute -top-2 right-5 w-4 h-4 bg-white rotate-45 shadow-md border-l border-t border-gray-100"></div>
+
+                    {/* Close button */}
+                    <button
+                      onClick={() => setIsNotificationOpen(false)}
+                      className="absolute top-3 right-3 text-gray-500 hover:text-black transition-colors"
+                    >
+                      <X size={18} />
+                    </button>
+
+                    {/* Bell Icon */}
+                    <div className="flex justify-center mb-4 pt-6">
+                      <span className="text-yellow-400 text-6xl">🔔</span>
+                    </div>
+
+                    {/* Message */}
+                    <p className="text-gray-700 font-medium mb-4">
+                      No Notification yet
+                    </p>
+
+                    {/* Button */}
+                    <button className="cursor-pointer bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors mb-6">
+                      Explore Categories
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Profile Icon */}
+              <div className="relative" ref={profileRef}>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsProfileOpen(!isProfileOpen);
+                  }}
+                  className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors duration-200"
+                >
+                  <img src={user_icon} alt="profile" className="w-6 h-6" />
+                </button>
+
+                {isProfileOpen && (
+                  <div
+                    className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-xl shadow-lg z-50"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className="py-1">
+                      <Link to={"/profile"}>
+                        <button className="cursor-pointer flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                          <Settings size={18} className="mr-3" />
+                          <span>Settings</span>
+                        </button>
+                      </Link>
+                      <Link to={"/register"}>
+                        <button className="cursor-pointer flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                          <LogOut size={18} className="mr-3" />
+                          <span>Logout</span>
+                        </button>
+                      </Link>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Mobile Menu Button */}
+              <div className="lg:hidden">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsMobileMenuOpen(!isMobileMenuOpen);
+                  }}
+                  className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors duration-200"
+                >
+                  {isMobileMenuOpen ? (
+                    <X className="w-6 h-6" />
+                  ) : (
+                    <Menu className="w-6 h-6" />
+                  )}
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
-      )}
-    </div>
-
-    {/* Mobile Menu Button */}
-    <div className="lg:hidden">
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          setIsMobileMenuOpen(!isMobileMenuOpen);
-        }}
-        className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors duration-200"
-      >
-        {isMobileMenuOpen ? (
-          <X className="w-6 h-6" />
-        ) : (
-          <Menu className="w-6 h-6" />
-        )}
-      </button>
-    </div>
-  </div>
-</div>
-
         </div>
 
         {/* Bottom section with navigation items */}
@@ -421,7 +424,7 @@ const Navbar = () => {
                 if (item.type === "link") {
                   return (
                     <Link key={item.name} to={item.path}>
-                      <span className="cursor-pointer text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors">
+                      <span className="cursor-pointer  text-gray-700 hover:text-blue-600 px-3 py-2 text-[17px] font-medium transition-colors">
                         {item.name}
                       </span>
                     </Link>
@@ -454,7 +457,7 @@ const Navbar = () => {
                     onClick={handleCategoriesToggle}
                     className="flex items-center space-x-1 text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors duration-200"
                   >
-                    <span>Categories</span>
+                    <span className="text-[16px]">Categories</span>
                     <ChevronDown
                       className={`w-4 h-4 transition-transform duration-200 ${
                         isCategoriesOpen ? "rotate-180" : ""
@@ -463,9 +466,9 @@ const Navbar = () => {
                   </button>
                   {isCategoriesOpen && (
                     <div
-                      className="absolute top-full left-[-55px] transform -translate-x-1/2 mt-2 bg-white rounded-lg shadow-xl border border-gray-100 z-50 overflow-hidden"
+                      className="absolute top-full left-[-150px] transform -translate-x-1/2 mt-2 bg-white rounded-lg shadow-xl border border-gray-100 z-50 overflow-hidden"
                       style={{
-                        width: "100vw",
+                        width: "96vw",
                         maxHeight: "80vh",
                         overflowY: "auto",
                       }}
@@ -592,162 +595,164 @@ const Navbar = () => {
         </div>
 
         {/* Mobile Menu */}
-       {isMobileMenuOpen && (
-  <div className="lg:hidden border-t border-gray-200 bg-white">
-    <div className="px-2 pt-2 pb-3 space-y-1">
-      {navItems.map((item) => {
-        // unified class for every mobile menu item
-        const commonClass =
-          "block w-full text-center px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md transition-colors cursor-pointer";
+        {isMobileMenuOpen && (
+          <div className="lg:hidden border-t border-gray-200 bg-white">
+            <div className="px-2 pt-2 pb-3 space-y-1">
+              {navItems.map((item) => {
+                // unified class for every mobile menu item
+                const commonClass =
+                  "block w-full text-center px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md transition-colors cursor-pointer";
 
-        if (item.type === "link") {
-          return (
-            <Link
-              key={item.name}
-              to={item.path}
-              className={commonClass}
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              {item.name}
-            </Link>
-          );
-        } else if (item.type === "custom") {
-          return (
-            <button
-              key={item.name}
-              onClick={(e) => {
-                // forward event so your handleFAQClick can call preventDefault if needed
-                item.action?.(e);
-                setIsMobileMenuOpen(false);
-              }}
-              className={commonClass}
-            >
-              {item.name}
-            </button>
-          );
-        } else {
-          return (
-            <a
-              key={item.name}
-              href={item.path}
-              className={commonClass}
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              {item.name}
-            </a>
-          );
-        }
-      })}
-
-      {/* Mobile Categories (only for non-home route) */}
-      {!isHomeRoute && (
-       <div className="px-3 py-2">
-  <button
-    onClick={handleCategoriesToggle}
-    className="flex flex-col items-center w-full text-base font-medium text-gray-700 hover:text-blue-600 transition-colors"
-  >
-    <div className="flex items-center justify-center space-x-1">
-      <span>Categories</span>
-      <ChevronDown
-        className={`w-4 h-4 transition-transform duration-200 ${
-          isCategoriesOpen ? "rotate-180" : ""
-        }`}
-      />
-    </div>
-  </button>
-
-          {isCategoriesOpen && (
-            <div className="mt-2 pl-4 space-y-2" onClick={(e) => e.stopPropagation()}>
-              {!selectedCategory ? (
-                categories.map((category) => (
-                  <button
-                    key={category.id}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedCategory(category);
-                    }}
-                    className="flex items-center space-x-3 py-2 text-sm text-gray-600 hover:text-blue-600 w-full text-left"
-                  >
-                    <div
-                      className="w-8 h-8 rounded-full flex items-center justify-center"
-                      style={{
-                        backgroundColor: category.backgroundColor,
-                      }}
+                if (item.type === "link") {
+                  return (
+                    <Link
+                      key={item.name}
+                      to={item.path}
+                      className={commonClass}
+                      onClick={() => setIsMobileMenuOpen(false)}
                     >
-                      <img
-                        src={category.image}
-                        alt={category.name}
-                        className="w-full h-full object-cover rounded-full"
+                      {item.name}
+                    </Link>
+                  );
+                } else if (item.type === "custom") {
+                  return (
+                    <button
+                      key={item.name}
+                      onClick={(e) => {
+                        // forward event so your handleFAQClick can call preventDefault if needed
+                        item.action?.(e);
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className={commonClass}
+                    >
+                      {item.name}
+                    </button>
+                  );
+                } else {
+                  return (
+                    <a
+                      key={item.name}
+                      href={item.path}
+                      className={commonClass}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      {item.name}
+                    </a>
+                  );
+                }
+              })}
+
+              {/* Mobile Categories (only for non-home route) */}
+              {!isHomeRoute && (
+                <div className="px-3 py-2">
+                  <button
+                    onClick={handleCategoriesToggle}
+                    className="flex flex-col items-center w-full text-base font-medium text-gray-700 hover:text-blue-600 transition-colors"
+                  >
+                    <div className="flex items-center justify-center space-x-1">
+                      <span>Categories</span>
+                      <ChevronDown
+                        className={`w-4 h-4 transition-transform duration-200 ${
+                          isCategoriesOpen ? "rotate-180" : ""
+                        }`}
                       />
                     </div>
-                    <span>{category.name}</span>
                   </button>
-                ))
-              ) : (
-                // mobile subcategories
-                <div className="space-y-3">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedCategory(null);
-                    }}
-                    className="flex items-center text-sm text-blue-600 hover:text-blue-800 mb-3"
-                  >
-                    <svg
-                      className="w-4 h-4 mr-2"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+
+                  {isCategoriesOpen && (
+                    <div
+                      className="mt-2 pl-4 space-y-2"
+                      onClick={(e) => e.stopPropagation()}
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15 19l-7-7 7-7"
-                      />
-                    </svg>
-                    Back to Categories
-                  </button>
-
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                    {selectedCategory.name}
-                  </h3>
-
-                  {Object.entries(selectedCategory.subcategories).map(
-                    ([subcategoryName, items]) => (
-                      <div key={subcategoryName} className="space-y-2">
-                        <h4 className="text-sm font-medium text-blue-600 border-b border-gray-200 pb-1">
-                          {subcategoryName}
-                        </h4>
-                        <div className="space-y-1 pl-3">
-                          {items.map((item, index) => (
-                            <button
-                              key={index}
-                              className="block text-xs text-gray-600 hover:text-blue-600 py-1 w-full text-left"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setIsCategoriesOpen(false);
-                                setSelectedCategory(null);
-                                setIsMobileMenuOpen(false);
+                      {!selectedCategory ? (
+                        categories.map((category) => (
+                          <button
+                            key={category.id}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedCategory(category);
+                            }}
+                            className="flex items-center space-x-3 py-2 text-sm text-gray-600 hover:text-blue-600 w-full text-left"
+                          >
+                            <div
+                              className="w-8 h-8 rounded-full flex items-center justify-center"
+                              style={{
+                                backgroundColor: category.backgroundColor,
                               }}
                             >
-                              {item}
-                            </button>
-                          ))}
+                              <img
+                                src={category.image}
+                                alt={category.name}
+                                className="w-full h-full object-cover rounded-full"
+                              />
+                            </div>
+                            <span>{category.name}</span>
+                          </button>
+                        ))
+                      ) : (
+                        // mobile subcategories
+                        <div className="space-y-3">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedCategory(null);
+                            }}
+                            className="flex items-center text-sm text-blue-600 hover:text-blue-800 mb-3"
+                          >
+                            <svg
+                              className="w-4 h-4 mr-2"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15 19l-7-7 7-7"
+                              />
+                            </svg>
+                            Back to Categories
+                          </button>
+
+                          <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                            {selectedCategory.name}
+                          </h3>
+
+                          {Object.entries(selectedCategory.subcategories).map(
+                            ([subcategoryName, items]) => (
+                              <div key={subcategoryName} className="space-y-2">
+                                <h4 className="text-sm font-medium text-blue-600 border-b border-gray-200 pb-1">
+                                  {subcategoryName}
+                                </h4>
+                                <div className="space-y-1 pl-3">
+                                  {items.map((item, index) => (
+                                    <button
+                                      key={index}
+                                      className="block text-xs text-gray-600 hover:text-blue-600 py-1 w-full text-left"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setIsCategoriesOpen(false);
+                                        setSelectedCategory(null);
+                                        setIsMobileMenuOpen(false);
+                                      }}
+                                    >
+                                      {item}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            )
+                          )}
                         </div>
-                      </div>
-                    )
+                      )}
+                    </div>
                   )}
                 </div>
               )}
             </div>
-          )}
-        </div>
-      )}
-    </div>
-  </div>
-)}
-
+          </div>
+        )}
       </nav>
     </>
   );

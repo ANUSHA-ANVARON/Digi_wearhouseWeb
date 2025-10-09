@@ -24,6 +24,7 @@ import PrivacyAndPolicy from '../DigiWearHouseApp1/Pages/PrivacyPolicy.jsx';
 import OrdersManagementSystem from '../DigiWearHouseApp1/Pages/OrdersManagementSystem.jsx';
 import SizeChart from '../DigiWearHouseApp1/Components/SizeChart.jsx';
 import ScrolltoTop from '../DigiWearHouseApp1/Components/ScrolltoTop.jsx'
+import ViewInstructionsPage from '../DigiWearHouseApp1/Pages/ViewInstructionsPage.jsx';
 
 function DigiwearHouse() {
   const location = useLocation();
@@ -65,6 +66,7 @@ function DigiwearHouse() {
           <Route path="/upload-products" element={<UploadProducts />} />
           <Route path="/tryon-preview" element={<TryonPreview />} />
           <Route path="/size-chart" element={<SizeChart />} />
+          <Route path="/instructions" element={<ViewInstructionsPage/>}/>
           {/* <Route path="/" element={<Navigate to="/login" replace />} /> */}
 
           {/* Redirect to login if no route matches */}

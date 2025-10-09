@@ -4,7 +4,9 @@ import FormInput from '../UploadSectionComponents/FormInput';
 import FormSelect from '../UploadSectionComponents/FormSelect';
 import ProductTypeToggle from '../UploadSectionComponents/SizeandPricingComps/ProductTypeToggle';
 import { 
-  DRESS_TYPES, 
+  // DRESS_TYPES, 
+  READY_TO_WEAR_DRESS_TYPES,
+  UNSTITCHED_DRESS_TYPES,
   MATERIAL_TYPES, 
   DESIGN_TYPES, 
   CATEGORIES 
@@ -15,6 +17,19 @@ const GeneralTab = ({ formData, onChange,errors,clearError }) => {
 
   // Extract parent categories (keys of DRESS_TYPES)
 // Extract parent categories (keys of DRESS_TYPES) as simple array
+  // const categoryOptions = Object.keys(DRESS_TYPES);
+
+  // // Get subcategories based on selected category as simple array
+  // const subCategoryOptions = formData.dressCategory
+  //   ? DRESS_TYPES[formData.dressCategory]
+  //   : [];
+
+
+  const DRESS_TYPES = formData.productType === "Unstitched" 
+    ? UNSTITCHED_DRESS_TYPES 
+    : READY_TO_WEAR_DRESS_TYPES;
+
+  // Extract parent categories (keys of DRESS_TYPES) as simple array
   const categoryOptions = Object.keys(DRESS_TYPES);
 
   // Get subcategories based on selected category as simple array
@@ -55,10 +70,10 @@ const GeneralTab = ({ formData, onChange,errors,clearError }) => {
             placeholder="Choose Category"
           />
           
-          <ProductTypeToggle
+          {/* <ProductTypeToggle
             value={formData.productType || "Ready to Wear"}
             onChange={(value) => onChange("productType", value)}
-          />
+          /> */}
           
           {/* <FormSelect
             label="Dress Type"
@@ -68,6 +83,42 @@ const GeneralTab = ({ formData, onChange,errors,clearError }) => {
             placeholder="Select Dress"
           /> */}
          {/* Dress Category Dropdown */}
+          {/* <FormSelect
+            label="Dress Category"
+            value={formData.dressCategory || ""}
+            onChange={(e) => {
+              onChange("dressCategory", e.target.value);
+              onChange("dressType", ""); // Reset subcategory when category changes
+            }}
+            options={categoryOptions}
+            placeholder="Select Dress Category"
+          /> */}
+
+          {/* Dress Type Dropdown (sub-category) */}
+          {/* <FormSelect
+            label="Dress Type"
+            value={formData.dressType || ""}
+            onChange={(e) => onChange("dressType", e.target.value)}
+            options={subCategoryOptions}
+            placeholder={
+              formData.dressCategory
+                ? "Select Sub Category"
+                : "Choose category first"
+            }
+            disabled={!formData.dressCategory}
+          /> */}
+
+            <ProductTypeToggle
+            value={formData.productType || "Ready to Wear"}
+            onChange={(value) => {
+              onChange("productType", value);
+              // Reset dress category and type when product type changes
+              onChange("dressCategory", "");
+              onChange("dressType", "");
+            }}
+          />
+          
+          {/* Dress Category Dropdown */}
           <FormSelect
             label="Dress Category"
             value={formData.dressCategory || ""}
