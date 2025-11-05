@@ -1,47 +1,96 @@
+export const INITIAL_FORM_DATA = {
+  // Basic info
+  title: "",
+  description: "",
+  productType: "Ready to Wear", // "Ready to Wear" | "Unstitched"
+  category: "", // WOMEN / MEN / KIDS
+  // Dress category -> dress type -> dress sub-category chain
+  dressCategory: "",    // e.g. "Ethnic Wear"
+  dressType: "",        // e.g. "Saree" or "Lehenga"
+  dressSubCategory: "", // e.g. "Banarasi Saree" (optional deeper level)
 
-// export const DRESS_TYPES = {
-//   "ETHNIC WEAR": [
-//     "SAREE",
-//     "SALWAR SUITS",
-//     "LEHENGAS",
-//     "ANARKALI",
-//     "DUPATTAS",
-//     "ETHNIC JACKET",
-//   ],
-//   "TOP WEAR": [
-//     "T-SHIRTS",
-//     "SHIRTS",
-//     "BLOUSES",
-//   ],
-//   "BOTTOM WEAR": [
-//     "JEANS",
-//     "TROUSERS",
-//     "SKIRTS",
-//   ],
-//   // "DRESSES & JUMPSUITS": [
-//   //   "MAXI DRESSES",
-//   //   "JUMPSUITS",
-//   // ],
-//   // "LOUNGE & SLEEPWEAR": [
-//   //   "NIGHT SUITS",
-//   //   "PAJAMAS",
-//   // ],
-//   // "ACTIVE WEAR": [
-//   //   "SPORTS BRAS",
-//   //   "LEGGINGS",
-//   // ],
-//   // "WINTER WEAR": [
-//   //   "SWEATERS",
-//   //   "JACKETS",
-//   // ],
-// };
+  // Pricing & stock
+  price: "",            // selling price (string or number)
+  mrp: "",              // original MRP
+  discountPercent: 0,   // computed or manual
+  currency: "INR",
+  stock: 0,             // total stock across sizes/colors
+  sku: "",              // optional SKU / product code
+  isBackorderAllowed: false,
+  isReturnable: true,
+  deliveryEstimate: "", // e.g. "3-7 business days"
+
+  // Sizes & variants
+  productSizeType: "standard", // "standard" | "custom" | "length" etc
+  selectedSizes: [],           // ["S","M"]
+  SIZES: ["XS","S","M","L","XL","XXL"],
+
+  // Colors & swatches
+  availableColors: [],         // array of color codes / objects shown in UI (for swatches)
+  selectedColors: [],          // selected color values
+  colorsMetadata: [],          // [{ code, name, value, shades:[] }]
+
+  // Units / inventory mapping per size+color
+  units: {}, // e.g. { "M|red": 10, "L|blue": 5 } or nested object
+
+  // Material & craft
+  fabric: "",
+  craft: "",
+
+  // Saree specific (keeps your existing shape)
+  sareeParts: {
+    blouse: { file: null, preview: null, url: null },
+    pleats: { file: null, preview: null, url: null },
+    pallu: { file: null, preview: null, url: null },
+    shoulder: { file: null, preview: null, url: null }
+  },
+  generatedSareeImage: null,
+  uploadedParts: {},
+
+  // Images
+  imageUrls: [],
+
+  // Flags / UI features
+  premium: null,                // true/false
+  isFeatured: false,
+  isVirtualTryOnEnabled: false, // yellow "VIRTUAL TRY ON" CTA in UI
+  enableLivePreview: false,     // live product preview
+
+  // Product details / metadata (appears in description area on UI)
+  materialCare: "Dry clean only",
+  composition: "",              // e.g. "Net with embroidery"
+  productDimensions: "",        // if applicable
+  numberOfPieces: "",           // e.g. "3 (Lehenga, Blouse, Dupatta)"
+
+  // Ratings & reviews summary
+  rating: 0,
+  reviewsCount: 0,
+  reviewsSummary: {
+    five: 0, four: 0, three: 0, two: 0, one: 0
+  },
+  reviews: [], // array of { id, name, avatar, rating, text, createdAt }
+
+  // Admin notes / supplier info
+  supplierCode: "",
+  supplierInfoUrl: "",
+
+  // timestamps / temporary metadata
+  createdAt: null,
+  updatedAt: null
+};
 
 export const READY_TO_WEAR_DRESS_TYPES = {
   "Ethnic Wear": [
-    "Salwar Suit Sets (Top, Bottom & Dupatta)",
-    "Kurta & Dupatta Sets",
     "Saree",
     "Lehenga",
+    "ANARKALIS",
+    "SHARARAS",
+    "PRET",
+    "FUSION",
+    "WEDDING",
+    "Salwar Suit Sets (Top, Bottom & Dupatta)",
+    "Kurta & Dupatta Sets",
+    
   ],
   "Top Wear": [
     "T-Shirts",
@@ -75,6 +124,11 @@ export const READY_TO_WEAR_DRESS_TYPES = {
 // Unstitched Categories
 export const UNSTITCHED_DRESS_TYPES = {
   "Ethnic Wear": [
+    "ANARKALIS",
+    "SHARARAS",
+    "PRET",
+    "FUSION",
+    "WEDDING",
     "Salwar Suit Sets (Top, Bottom & Dupatta)",
     "Kurta & Dupatta Sets",
     "Saree Fabrics",
@@ -200,31 +254,6 @@ export const CATEGORIES = ["WOMEN", "MEN", "KIDS"];
 
 export const PRODUCT_TYPES = ["Ready to Wear", "Unstitched"];
 
-export const INITIAL_FORM_DATA = {
-  title: "",
-  description: "",
-  productType: "Ready to Wear",
-  category: "", 
-  dressType: "",
-  fabric: "", 
-  craft: "", 
-  price: "",
-  selectedSizes: [],
-  selectedColors: [],
-  units: {}, 
-  imageUrls: [], // For regular products
-  premium: null,
-  
-  // Saree-specific fields
-  sareeParts: {
-    blouse: { file: null, preview: null, url: null },
-    pleats: { file: null, preview: null, url: null },
-    pallu: { file: null, preview: null, url: null },
-    shoulder: { file: null, preview: null, url: null }
-  },
-  generatedSareeImage: null,
-  uploadedParts: {}
-};
 
 export const UPLOAD_CONFIG = {
   MAX_IMAGES: 4,
