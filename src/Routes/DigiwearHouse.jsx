@@ -25,6 +25,7 @@ import OrdersManagementSystem from '../DigiWearHouseApp1/Pages/OrdersManagementS
 import SizeChart from '../DigiWearHouseApp1/Components/SizeChart.jsx';
 import ScrolltoTop from '../DigiWearHouseApp1/Components/ScrolltoTop.jsx'
 import ViewInstructionsPage from '../DigiWearHouseApp1/Pages/ViewInstructionsPage.jsx';
+import RequireRegistration from '../RequireRegistration.jsx';
 
 function DigiwearHouse() {
   const location = useLocation();
@@ -35,10 +36,10 @@ function DigiwearHouse() {
 
 
     <>
-    <ScrolltoTop/>
-      {!hideNavbar && <Navbar />}
-    
+      <ScrolltoTop />
+
       <AppProvider>
+        {!hideNavbar && <Navbar />}
         <Routes>
           {/* Default route */}
           {/* <Route path="/login" element={< DigiWarehouseLogin/>} /> */}
@@ -47,13 +48,22 @@ function DigiwearHouse() {
           <Route path="/" element={<HomePage />} />
           <Route path="/contact-us" element={<ContactUs />} />
           <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
-         
+
           {/* <Route path="/digiwearhouse" element={<DigiwearHouse/>} /> */}
           <Route path="/privacy-policy" element={<PrivacyAndPolicy />} />
 
           <Route path="/who-we-are" element={<Whoweare />} />
           <Route path="/orders" element={<OrdersManagementSystem />} />
-          <Route path="/dashboard" element={<VendorDashboard />} />
+          {/* <Route path="/dashboard" element={} /> */}
+          <Route
+            path="/dashboard"
+            element={
+              <RequireRegistration>
+                <VendorDashboard />
+              </RequireRegistration>
+            }
+          />
+          <Route path="/login" element={<DigiWarehouseRegistration />} />
           <Route path="/profile" element={<Profilepage />} />
           <Route path="/recenltyproducts" element={<UserProductsList />} />
 
@@ -66,7 +76,7 @@ function DigiwearHouse() {
           <Route path="/upload-products" element={<UploadProducts />} />
           <Route path="/tryon-preview" element={<TryonPreview />} />
           <Route path="/size-chart" element={<SizeChart />} />
-          <Route path="/instructions" element={<ViewInstructionsPage/>}/>
+          <Route path="/instructions" element={<ViewInstructionsPage />} />
           {/* <Route path="/" element={<Navigate to="/login" replace />} /> */}
 
           {/* Redirect to login if no route matches */}

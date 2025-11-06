@@ -10,7 +10,7 @@ import dash_icon3 from '../../../assets/dash_icon3.png';
 import dash_icon4 from '../../../assets/dash_icon4.png';
 
 const VendorDashboard = () => {
-  const { currentUser } = useApp();
+  const { currentUser, userData } = useApp();
   const [selectedPeriod, setSelectedPeriod] = useState('Monthly');
   const [dashboardData, setDashboardData] = useState({
     totalProducts: 0,
@@ -37,6 +37,8 @@ const VendorDashboard = () => {
       }
 
       try {
+        console.log(userData, "userdata")
+        console.log(currentUser,"currentUser")
         console.log('Fetching dashboard data for user:', currentUser.uid);
         
         // Fetch user's products
