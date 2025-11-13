@@ -633,7 +633,7 @@ const DigiWarehouseRegistration = () => {
           value={loginData.email}
           onChange={handleLoginInputChange}
           placeholder="Enter your email"
-          className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all duration-200 text-slate-700 placeholder-slate-400 ${
+          className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-[#800000] focus:border-[#800000] transition-all duration-200 text-slate-700 placeholder-slate-400 ${
             errors.email
               ? "border-red-300 bg-red-50"
               : "border-slate-200 bg-slate-50"
@@ -658,7 +658,7 @@ const DigiWarehouseRegistration = () => {
           value={loginData.password}
           onChange={handleLoginInputChange}
           placeholder="Enter your password"
-          className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all duration-200 text-slate-700 placeholder-slate-400 ${
+          className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-[#800000] focus:border-[#800000] transition-all duration-200 text-slate-700 placeholder-slate-400 ${
             errors.password
               ? "border-red-300 bg-red-50"
               : "border-slate-200 bg-slate-50"
@@ -672,7 +672,7 @@ const DigiWarehouseRegistration = () => {
       <button
         onClick={handleLogin}
         disabled={isLoading}
-        className="w-full cursor-pointer bg-cyan-600 hover:bg-cyan-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full cursor-pointer bg-[#800000] hover:bg-[#a00000] text-white font-semibold py-3 px-4 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {isLoading ? (
           <div className="flex items-center justify-center">
@@ -758,7 +758,7 @@ const DigiWarehouseRegistration = () => {
           value={registerData.username}
           onChange={handleRegisterInputChange}
           placeholder="Enter username"
-          className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all duration-200 text-slate-700 placeholder-slate-400 bg-slate-50 ${
+          className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-[#800000] focus:border-[#800000] transition-all duration-200 text-slate-700 placeholder-slate-400 bg-slate-50 ${
             errors.username ? "border-red-300" : "border-slate-200"
           }`}
         />
@@ -778,7 +778,7 @@ const DigiWarehouseRegistration = () => {
             value={registerData.firstName}
             onChange={handleRegisterInputChange}
             placeholder="First name"
-            className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all duration-200 text-slate-700 placeholder-slate-400 bg-slate-50 ${
+            className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-[#800000] focus:border-[#800000] transition-all duration-200 text-slate-700 placeholder-slate-400 bg-slate-50 ${
               errors.firstName ? "border-red-300" : "border-slate-200"
             }`}
           />
@@ -796,7 +796,7 @@ const DigiWarehouseRegistration = () => {
             value={registerData.contactNumber}
             onChange={handleRegisterInputChange}
             placeholder="10-digit number"
-            className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all duration-200 text-slate-700 placeholder-slate-400 bg-slate-50 ${
+            className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-[#800000] focus:border-[#800000] transition-all duration-200 text-slate-700 placeholder-slate-400 bg-slate-50 ${
               errors.contactNumber ? "border-red-300" : "border-slate-200"
             }`}
           />
@@ -817,7 +817,7 @@ const DigiWarehouseRegistration = () => {
           onChange={handleRegisterInputChange}
           placeholder="Enter your email"
           text-start
-          className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all duration-200 text-slate-700 placeholder-slate-400 bg-slate-50 ${
+          className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-[#800000] focus:border-[#800000] transition-all duration-200 text-slate-700 placeholder-slate-400 bg-slate-50 ${
             errors.email ? "border-red-300" : "border-slate-200"
           }`}
         />
@@ -837,7 +837,7 @@ const DigiWarehouseRegistration = () => {
             value={registerData.password}
             onChange={handleRegisterInputChange}
             placeholder="Min 6 characters"
-            className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all duration-200 text-slate-700 placeholder-slate-400 bg-slate-50 ${
+            className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-[#800000] focus:border-[#800000] transition-all duration-200 text-slate-700 placeholder-slate-400 bg-slate-50 ${
               errors.password ? "border-red-300" : "border-slate-200"
             }`}
           />
@@ -855,7 +855,7 @@ const DigiWarehouseRegistration = () => {
             value={registerData.confirmPassword}
             onChange={handleRegisterInputChange}
             placeholder="Re-enter password"
-            className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all duration-200 text-slate-700 placeholder-slate-400 bg-slate-50 ${
+            className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-[#800000] focus:border-[#800000] transition-all duration-200 text-slate-700 placeholder-slate-400 bg-slate-50 ${
               errors.confirmPassword ? "border-red-300" : "border-slate-200"
             }`}
           />
@@ -870,7 +870,7 @@ const DigiWarehouseRegistration = () => {
       <button
         onClick={handleRegisterSubmit}
         disabled={isLoading}
-        className="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full bg-[#800000] hover:bg-[#a00000] text-white font-semibold py-3 px-4 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {isLoading ? (
           <div className="flex items-center justify-center">
@@ -893,7 +893,7 @@ const DigiWarehouseRegistration = () => {
           value={shopData.shopName}
           onChange={handleShopInputChange}
           placeholder="Shop Name"
-          className={`w-full border-b py-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-cyan-500 ${
+          className={`w-full border-b py-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#800000] ${
             errors.shopName ? "border-red-300" : "border-slate-300"
           }`}
         />
@@ -909,7 +909,7 @@ const DigiWarehouseRegistration = () => {
           value={shopData.shopAddress}
           onChange={handleShopInputChange}
           placeholder="Shop Address"
-          className={`w-full border-b py-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-cyan-500 ${
+          className={`w-full border-b py-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#800000] ${
             errors.shopAddress ? "border-red-300" : "border-slate-300"
           }`}
         />
@@ -926,7 +926,7 @@ const DigiWarehouseRegistration = () => {
             value={shopData.city}
             onChange={handleShopInputChange}
             placeholder="City"
-            className={`w-full border-b py-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-cyan-500 ${
+            className={`w-full border-b py-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#800000] ${
               errors.city ? "border-red-300" : "border-slate-300"
             }`}
           />
@@ -941,7 +941,7 @@ const DigiWarehouseRegistration = () => {
             value={shopData.state}
             onChange={handleShopInputChange}
             placeholder="State"
-            className={`w-full border-b py-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-cyan-500 ${
+            className={`w-full border-b py-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#800000] ${
               errors.state ? "border-red-300" : "border-slate-300"
             }`}
           />
@@ -958,7 +958,7 @@ const DigiWarehouseRegistration = () => {
           value={shopData.pincode}
           onChange={handleShopInputChange}
           placeholder="Pin Code"
-          className={`w-full border-b py-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-cyan-500 ${
+          className={`w-full border-b py-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#800000] ${
             errors.pincode ? "border-red-300" : "border-slate-300"
           }`}
         />
@@ -978,7 +978,7 @@ const DigiWarehouseRegistration = () => {
       <div className="flex justify-center mt-6">
         <button
           onClick={handleShopDetailsSubmit}
-          className="flex cursor-pointer items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white font-semibold py-2 px-6 rounded-lg transition-all duration-200 shadow"
+          className="flex cursor-pointer items-center gap-2 bg-[#800000] hover:bg-[#a00000] text-white font-semibold py-2 px-6 rounded-lg transition-all duration-200 shadow"
         >
           Next <ArrowRight className="w-4 h-4" />
         </button>
@@ -993,7 +993,7 @@ const DigiWarehouseRegistration = () => {
           name="bankName"
           value={bankData.bankName}
           onChange={handleBankInputChange}
-          className={`w-full border-b py-3 text-slate-700 focus:outline-none focus:border-cyan-500 ${
+          className={`w-full border-b py-3 text-slate-700 focus:outline-none focus:border-[#800000] ${
             errors.bankName ? "border-red-300" : "border-slate-300"
           }`}
         >
@@ -1016,7 +1016,7 @@ const DigiWarehouseRegistration = () => {
           value={bankData.branchName}
           onChange={handleBankInputChange}
           placeholder="Enter Branch Name"
-          className={`w-full border-b py-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-cyan-500 ${
+          className={`w-full border-b py-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#800000] ${
             errors.branchName ? "border-red-300" : "border-slate-300"
           }`}
         />
@@ -1032,7 +1032,7 @@ const DigiWarehouseRegistration = () => {
           value={bankData.accountHolder}
           onChange={handleBankInputChange}
           placeholder="Enter Account Holder Name"
-          className={`w-full border-b py-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-cyan-500 ${
+          className={`w-full border-b py-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#800000] ${
             errors.accountHolder ? "border-red-300" : "border-slate-300"
           }`}
         />
@@ -1048,7 +1048,7 @@ const DigiWarehouseRegistration = () => {
           value={bankData.accountNumber}
           onChange={handleBankInputChange}
           placeholder="Account Number"
-          className={`w-full border-b py-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-cyan-500 ${
+          className={`w-full border-b py-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#800000] ${
             errors.accountNumber ? "border-red-300" : "border-slate-300"
           }`}
         />
@@ -1064,7 +1064,7 @@ const DigiWarehouseRegistration = () => {
           value={bankData.reAccountNumber}
           onChange={handleBankInputChange}
           placeholder="Re-enter Account No"
-          className={`w-full border-b py-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-cyan-500 ${
+          className={`w-full border-b py-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#800000] ${
             errors.reAccountNumber ? "border-red-300" : "border-slate-300"
           }`}
         />
@@ -1080,7 +1080,7 @@ const DigiWarehouseRegistration = () => {
           value={bankData.ifscCode}
           onChange={handleBankInputChange}
           placeholder="IFSC Code"
-          className={`w-full border-b py-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-cyan-500 ${
+          className={`w-full border-b py-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#800000] ${
             errors.ifscCode ? "border-red-300" : "border-slate-300"
           }`}
         />
@@ -1092,7 +1092,7 @@ const DigiWarehouseRegistration = () => {
       <div className="flex justify-center mt-6">
         <button
           onClick={handleBankDetailsSubmit}
-          className="flex items-center gap-2 bg-cyan-600 cursor-pointer hover:bg-cyan-700 text-white font-semibold py-2 px-6 rounded-lg transition-all duration-200 shadow"
+          className="flex items-center gap-2 bg-[#800000] cursor-pointer hover:bg-[#a00000] text-white font-semibold py-2 px-6 rounded-lg transition-all duration-200 shadow"
         >
           Next <ArrowRight className="w-4 h-4" />
         </button>
@@ -1124,7 +1124,7 @@ const DigiWarehouseRegistration = () => {
               onChange={handleKycInputChange}
               placeholder="CBTPT5939C"
               maxLength={10}
-              className={`w-full border-b py-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-cyan-500 ${
+              className={`w-full border-b py-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#800000] ${
                 errors.panNumber ? "border-red-300" : "border-slate-300"
               }`}
             />
@@ -1144,7 +1144,7 @@ const DigiWarehouseRegistration = () => {
               onChange={handleKycInputChange}
               placeholder="27ABCDE1234F1Z5"
               maxLength={15}
-              className={`w-full border-b py-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-cyan-500 ${
+              className={`w-full border-b py-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#800000] ${
                 errors.gstinNumber ? "border-red-300" : "border-slate-300"
               }`}
             />
@@ -1165,7 +1165,7 @@ const DigiWarehouseRegistration = () => {
               placeholder="9806 4765 5643"
               maxLength={12}
               pattern="[0-9]*"
-              className={`w-full border-b py-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-cyan-500 ${
+              className={`w-full border-b py-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#800000] ${
                 errors.aadharNumber ? "border-red-300" : "border-slate-300"
               }`}
             />
@@ -1180,7 +1180,7 @@ const DigiWarehouseRegistration = () => {
         <button
           onClick={handleKycSubmit}
           disabled={isLoading}
-          className="bg-cyan-600 cursor-pointer hover:bg-cyan-700 text-white font-semibold py-2 px-6 rounded-lg transition-all duration-200 shadow disabled:opacity-50 disabled:cursor-not-allowed"
+          className="bg-[#800000] cursor-pointer hover:bg-[#a00000] text-white font-semibold py-2 px-6 rounded-lg transition-all duration-200 shadow disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoading ? (
             <div className="flex items-center justify-center gap-2">
@@ -1256,7 +1256,7 @@ const DigiWarehouseRegistration = () => {
         </h3>
         {!otpData.isOtpSent ? (
           <div className="flex flex-col items-center space-y-4">
-            <div className="animate-spin rounded-full h-8 w-8 border-2 border-cyan-500 border-t-transparent"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-2 border-[#800000] border-t-transparent"></div>
             <p className="text-sm text-slate-600">
               Sending verification code to +91{otpData.phoneNumber}...
             </p>
@@ -1278,7 +1278,7 @@ const DigiWarehouseRegistration = () => {
                   value={digit}
                   onChange={(e) => handleOtpChange(index, e.target.value)}
                   onKeyDown={(e) => handleOtpKeyDown(e, index)}
-                  className={`w-12 h-12 text-center text-xl font-bold border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 ${
+                  className={`w-12 h-12 text-center text-xl font-bold border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#800000] ${
                     errors.otp ? "border-red-300" : "border-slate-300"
                   }`}
                 />
@@ -1298,7 +1298,7 @@ const DigiWarehouseRegistration = () => {
                 <button
                   onClick={handleResendOtp}
                   disabled={otpData.resendCount >= 3}
-                  className="text-cyan-600 hover:text-cyan-700 text-sm font-medium"
+                  className="text-[#800000] hover:text-[#a00000] text-sm font-medium"
                 >
                   Resend Code
                 </button>
@@ -1308,7 +1308,7 @@ const DigiWarehouseRegistration = () => {
             <button
               onClick={handleOtpSubmit}
               disabled={isLoading || otpData.otp.join("").length !== 6}
-              className="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-semibold py-3 rounded-xl disabled:opacity-50"
+              className="w-full bg-[#800000] hover:bg-[#a00000] text-white font-semibold py-3 rounded-xl disabled:opacity-50"
             >
               {isLoading ? "Verifying..." : "Verify & Complete"}
             </button>
@@ -1327,11 +1327,18 @@ const DigiWarehouseRegistration = () => {
       <div className="flex-1 flex items-center justify-center bg-white px-6 sm:px-10 md:px-16 lg:px-20 mb-6 sm:mb-8 ml-0 lg:ml-24">
         <div className="w-full max-w-sm sm:max-w-md lg:max-w-md">
           {/* Logo */}
-          <div className="text-center mb-6 sm:mb-8 lg:mr-64">
+          {/* <div className="text-center mb-6 sm:mb-8 lg:mr-64">
+            <img
+              src={digi_logo}
+              alt="DIGI WAREHOUSE Logo"
+              className="mx-auto h-18 sm:h-20  object-contain"
+            />
+          </div> */}
+          <div className="text-center h-18 sm:h-32 lg:h-36 flex items-center justify-center">
             <img
               src={digi_logo}
               alt="DIGI WAREHOUSE Logo"
-              className="mx-auto h-12 sm:h-16 object-contain"
+              className="mx-auto h-24 sm:h-28 object-contain"
             />
           </div>
 
@@ -1368,7 +1375,7 @@ const DigiWarehouseRegistration = () => {
                   Don't have an account?
                   <button
                     onClick={navigateToRegister}
-                    className="cursor-pointer text-cyan-600 hover:text-cyan-700 font-medium ml-1"
+                    className="cursor-pointer text-[#800000] hover:text-[#a00000] font-medium ml-1"
                   >
                     Register
                   </button>
@@ -1380,7 +1387,7 @@ const DigiWarehouseRegistration = () => {
                   Already have an account?
                   <button
                     onClick={navigateToLogin}
-                    className="text-cyan-600 cursor-pointer hover:text-cyan-700 font-medium ml-1"
+                    className="text-[#800000] cursor-pointer hover:text-[#a00000] font-medium ml-1"
                   >
                     Log in
                   </button>
@@ -1409,7 +1416,7 @@ const DigiWarehouseRegistration = () => {
       <div className="hidden md:flex flex-2 relative">
         {/* Split Backgrounds */}
         <div className="w-1/2 bg-white"></div>
-        <div className="w-1/2 bg-[#95CDE2] relative"></div>
+        <div className="w-1/2 bg-[#800000] relative"></div>
 
         {/* Center Image */}
         <div className="absolute inset-0 flex items-center justify-center">

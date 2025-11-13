@@ -1,5 +1,5 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React from "react";
+import { Link } from "react-router-dom";
 
 const SizeSelector = ({ sizes, selectedSizes, onChange }) => (
   <div className="space-y-3">
@@ -8,12 +8,12 @@ const SizeSelector = ({ sizes, selectedSizes, onChange }) => (
         Select Sizes
       </label>
       <Link to="/size-chart">
-        <button className="text-blue-500 text-sm hover:text-blue-600">
+        <button className="text-[#800000] text-sm hover:text-[#800000]">
           Size chart ?
         </button>
       </Link>
     </div>
-    
+
     <div className="flex flex-wrap gap-3">
       {sizes.map((size) => (
         <button
@@ -28,7 +28,7 @@ const SizeSelector = ({ sizes, selectedSizes, onChange }) => (
           }}
           className={`w-12 h-12 rounded-lg font-medium transition-colors ${
             selectedSizes.includes(size)
-              ? "bg-blue-500 text-white"
+              ? "bg-[#800000] text-white" // <-- Changed this line
               : "bg-gray-100 text-gray-700 hover:bg-gray-200"
           }`}
         >
@@ -36,7 +36,7 @@ const SizeSelector = ({ sizes, selectedSizes, onChange }) => (
         </button>
       ))}
     </div>
-    
+
     <p className="text-xs text-gray-500">You can select multiple sizes</p>
   </div>
 );

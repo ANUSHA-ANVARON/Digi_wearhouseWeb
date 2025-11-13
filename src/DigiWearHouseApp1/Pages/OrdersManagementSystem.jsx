@@ -17,7 +17,7 @@ import { useNavigate } from "react-router-dom";
 const OrdersManagementSystem = () => {
   const [activeTab, setActiveTab] = useState("All");
   const [selectedOrder, setSelectedOrder] = useState(null);
-  const navigate=useNavigate()
+  const navigate = useNavigate();
 
   // Sample order data based on the screenshots
   const orders = [
@@ -83,52 +83,52 @@ const OrdersManagementSystem = () => {
       ],
     },
     // {
-    //   id: 2,
-    //   status: "cancelled",
-    //   date: "Apr 8, 2024, 9:07 AM",
-    //   total: 840,
-    //   paymentMethod: "From your card",
-    //   items: 6,
-    //   itemsData: [
-    //     {
-    //       name: "Pink Ethnic lehanga",
-    //       price: 140,
-    //       quantity: 1,
-    //       image: orderImage,
-    //     },
-    //     {
-    //       name: "Pink Ethnic lehanga",
-    //       price: 140,
-    //       quantity: 1,
-    //       image: orderImage,
-    //     },
-    //     {
-    //       name: "Pink Ethnic lehanga",
-    //       price: 140,
-    //       quantity: 1,
-    //       image: orderImage,
-    //     },
-    //     {
-    //       name: "Pink Ethnic lehanga",
-    //       price: 140,
-    //       quantity: 1,
-    //       image: orderImage,
-    //     },
-    //     {
-    //       name: "Pink Ethnic lehanga",
-    //       price: 140,
-    //       quantity: 1,
-    //       image: orderImage,
-    //     },
-    //     {
-    //       name: "Pink Ethnic lehanga",
-    //       price: 140,
-    //       quantity: 1,
-    //       image: orderImage,
-    //     },
-    //   ],
-    //   deliveryAddress:
-    //     "📍 Shop No-07, Top Floor, Rangpur Electronics Bazar-800001",
+    //   id: 2,
+    //   status: "cancelled",
+    //   date: "Apr 8, 2024, 9:07 AM",
+    //   total: 840,
+    //   paymentMethod: "From your card",
+    //   items: 6,
+    //   itemsData: [
+    //     {
+    //       name: "Pink Ethnic lehanga",
+    //       price: 140,
+    //       quantity: 1,
+    //       image: orderImage,
+    //     },
+    //     {
+    //       name: "Pink Ethnic lehanga",
+    //       price: 140,
+    //       quantity: 1,
+    //       image: orderImage,
+    //     },
+    //     {
+    //       name: "Pink Ethnic lehanga",
+    //       price: 140,
+    //       quantity: 1,
+    //       image: orderImage,
+    //     },
+    //     {
+    //       name: "Pink Ethnic lehanga",
+    //       price: 140,
+    //       quantity: 1,
+    //       image: orderImage,
+    //     },
+    //     {
+    //       name: "Pink Ethnic lehanga",
+    //       price: 140,
+    //       quantity: 1,
+    //       image: orderImage,
+    //     },
+    //     {
+    //       name: "Pink Ethnic lehanga",
+    //       price: 140,
+    //   _       quantity: 1,
+    //       image: orderImage,
+    //     },
+    //   ],
+    //   deliveryAddress:
+    //     "📍 Shop No-07, Top Floor, Rangpur Electronics Bazar-800001",
     // },
     {
       id: 3,
@@ -177,9 +177,13 @@ const OrdersManagementSystem = () => {
       ],
       deliveryAddress:
         "📍 Shop No-07, Top Floor, Rangpur Electronics Bazar-800001",
-        timeline: [
+      timeline: [
         { status: "Order Placed", date: "Apr 6, 2024, 9:07 AM", active: true },
-        { status: "Order Shipped", date: "Apr 6, 2024, 9:07 AM", active: false },
+        {
+          status: "Order Shipped",
+          date: "Apr 6, 2024, 9:07 AM",
+          active: false,
+        },
         {
           status: "Order Delivered",
           date: "Apr 6, 2024, 9:07 AM",
@@ -239,11 +243,11 @@ const OrdersManagementSystem = () => {
       case "delivered":
         return "text-green-600 bg-green-50 border-green-200";
       case "shipped":
-        return "text-blue-600 bg-blue-50 border-blue-200";
+        return "text-red-700 bg-red-50 border-red-200"; // Changed from blue to maroon
       case "pending":
-        return "text-orange-600 bg-orange-50 border-orange-200";
+        return "text-amber-600 bg-amber-50 border-amber-200"; // Changed from orange to amber (gold)
       case "cancelled":
-        return "text-red-600 bg-red-50 border-red-200";
+        return "text-red-600 bg-red-50 border-red-200"; // Kept as red, slightly different from shipped
       default:
         return "text-gray-600 bg-gray-50 border-gray-200";
     }
@@ -279,7 +283,6 @@ const OrdersManagementSystem = () => {
 
   const tabs = ["All", "Shipped", "Delivered", "Pending", "Cancelled"];
 
-
   if (selectedOrder) {
     return (
       <div className="min-h-screen bg-gray-50 p-4">
@@ -294,7 +297,7 @@ const OrdersManagementSystem = () => {
                 <ChevronLeft className="w-5 h-5 mr-1" />
                 Back
               </button>
-              <button className="text-blue-600 hover:text-blue-800 font-medium">
+              <button className="text-red-700 hover:text-red-800 font-medium">
                 Help
               </button>
             </div>
@@ -304,7 +307,7 @@ const OrdersManagementSystem = () => {
             {/* Order Status Section */}
             <div className="lg:col-span-2">
               <div className="bg-white rounded-lg shadow-sm p-6">
-                <div className="text-center mb-6 "  >
+                <div className="text-center mb-6 ">
                   <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
                     <CheckCircle className="w-8 h-8 text-green-600" />
                   </div>
@@ -329,7 +332,7 @@ const OrdersManagementSystem = () => {
                       <div key={index} className="flex flex-col items-center">
                         <div
                           className={`w-3 h-3 rounded-full ${
-                            step.active ? "bg-blue-500" : "bg-gray-300"
+                            step.active ? "bg-red-700" : "bg-gray-300"
                           }`}
                         ></div>
                         <div className="text-xs text-gray-500 mt-1 text-center max-w-20">
@@ -353,10 +356,14 @@ const OrdersManagementSystem = () => {
                     >
                       <div className="flex items-center">
                         {/* <div className="w-12 h-12 bg-pink-200 rounded-lg mr-3 flex items-center justify-center">
-                          <div className="w-8 h-8 bg-pink-400 rounded"></div>
-                        </div> */}
+                          <div className="w-8 h-8 bg-pink-400 rounded"></div>
+                        </div> */}
                         <div>
-                          <img src={item.image} alt="item_image" className="w-18 h-14" />
+                          <img
+                            src={item.image}
+                            alt="item_image"
+                            className="w-18 h-14"
+                          />
                         </div>
                         <div>
                           <p className="font-medium text-gray-900">
@@ -444,20 +451,18 @@ const OrdersManagementSystem = () => {
       <div className="max-w-6xl mx-auto p-4">
         {/* Header */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-         <div className="flex items-center mb-6">
-      {/* Back Button */}
-      <button
-        onClick={() => navigate(-1)}
-        className="flex items-center text-gray-600 hover:text-gray-900 mr-3"
-      >
-        <ArrowLeft className="w-5 h-5" />
-      </button>
+          <div className="flex items-center mb-6">
+            {/* Back Button */}
+            <button
+              onClick={() => navigate(-1)}
+              className="flex items-center text-gray-600 hover:text-gray-900 mr-3"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
 
-      {/* Title */}
-      <h1 className="text-2xl font-bold text-gray-900">
-        My Orders
-      </h1>
-    </div>
+            {/* Title */}
+            <h1 className="text-2xl font-bold text-gray-900">My Orders</h1>
+          </div>
 
           {/* Tabs */}
           <div className="flex flex-wrap gap-2 ">
@@ -467,7 +472,7 @@ const OrdersManagementSystem = () => {
                 onClick={() => setActiveTab(tab)}
                 className={`px-4 py-2 text-sm font-medium rounded-t-lg border-b-2 transition-colors ${
                   activeTab === tab
-                    ? "text-blue-600 border-blue-600 bg-blue-50"
+                    ? "text-red-700 border-red-700 bg-red-50"
                     : "text-gray-600 border-transparent hover:text-gray-900 hover:border-gray-300"
                 }`}
               >
@@ -483,16 +488,18 @@ const OrdersManagementSystem = () => {
             <div key={order.id} className="bg-white rounded-lg shadow-sm p-6">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
                 <div className="flex items-center space-x-4 mb-4 sm:mb-0">
-                  <div className="flex items-center space-x-2 cursor-pointer" onClick={() => setSelectedOrder(order)}>
+                  <div
+                    className="flex items-center space-x-2 cursor-pointer"
+                    onClick={() => setSelectedOrder(order)}
+                  >
                     {getStatusIcon(order.status)}
-                    <span className="text-blue-600 font-medium" >
+                    <span className="text-red-700 font-medium">
                       Order{" "}
                       {order.status.charAt(0).toUpperCase() +
                         order.status.slice(1)}
                     </span>
                   </div>
                   <span
-                   
                     className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(
                       order.status
                     )}`}
@@ -521,15 +528,14 @@ const OrdersManagementSystem = () => {
                 <div className="flex flex-wrap space-x-2 mb-4 sm:mb-0">
                   {order.itemsData.slice(0, 6).map((item, index) => (
                     // <div
-                    //   key={index}
-                    //   className="w-12 h-12 bg-pink-200 rounded-lg flex items-center justify-center flex-shrink-0"
+                    //   key={index}
+                    //   className="w-12 h-12 bg-pink-200 rounded-lg flex items-center justify-center flex-shrink-0"
                     // >
-                    //   <div className="w-8 h-8 bg-pink-400 rounded"></div>
+                    //   <div className="w-8 h-8 bg-pink-400 rounded"></div>
                     // </div>
                     <div key={index}>
                       <img src={item.image} alt="" className="w-20 h-14" />
                     </div>
-
                   ))}
                   {order.itemsData.length > 6 && (
                     <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center text-xs text-gray-600 flex-shrink-0">
@@ -540,7 +546,7 @@ const OrdersManagementSystem = () => {
 
                 <button
                   onClick={() => setSelectedOrder(order)}
-                  className="flex items-center space-x-2 px-4 py-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors"
+                  className="flex items-center space-x-2 px-4 py-2 text-red-700 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors"
                 >
                   <Eye className="w-4 h-4" />
                   <span className="font-medium">

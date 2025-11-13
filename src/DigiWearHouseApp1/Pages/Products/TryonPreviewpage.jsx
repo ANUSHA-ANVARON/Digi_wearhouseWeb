@@ -4,65 +4,70 @@ import { useApp } from "../../context/Context";
 import { useNavigate } from "react-router-dom";
 
 // Import hooks
-import { useTryOnLogic } from '../../../hooks/useTryOnLogic';
-import { useProductSubmission } from '../../CustomHooks/useProductSubmission';
+import { useTryOnLogic } from "../../../hooks/useTryOnLogic";
+import { useProductSubmission } from "../../CustomHooks/useProductSubmission";
 
 // Import components
-import { SubmitStatusAlert } from '../../Components/TryOnPreviewPageComps/SubmitStatusAlert';
-import { ProductDetailsCard } from '../../Components/TryOnPreviewPageComps/ProductDetailsCard';
-import { InventoryCard } from '../../Components/TryOnPreviewPageComps/InventoryCard';
-import { PricingCard } from '../../Components/TryOnPreviewPageComps/PricingCard';
-import { StatsCard } from '../../Components/TryOnPreviewPageComps/StatsCard';
-import { VariantsCard } from '../../Components/TryOnPreviewPageComps/VariantsCard';
-import { TryOnViewer } from '../../Components/TryOnPreviewPageComps/TryOnViewer';
+import { SubmitStatusAlert } from "../../Components/TryOnPreviewPageComps/SubmitStatusAlert";
+import { ProductDetailsCard } from "../../Components/TryOnPreviewPageComps/ProductDetailsCard";
+import { InventoryCard } from "../../Components/TryOnPreviewPageComps/InventoryCard";
+import { PricingCard } from "../../Components/TryOnPreviewPageComps/PricingCard";
+import { StatsCard } from "../../Components/TryOnPreviewPageComps/StatsCard";
+import { VariantsCard } from "../../Components/TryOnPreviewPageComps/VariantsCard";
+import { TryOnViewer } from "../../Components/TryOnPreviewPageComps/TryOnViewer";
 
 // Import utils
-import { productUtils } from '../../utilities/ProductUtils';
+import { productUtils } from "../../utilities/ProductUtils";
 
 export default function TryonPreview() {
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const { productData, currentUser } = useApp();
   const navigate = useNavigate();
-  
+
   const tryOnLogic = useTryOnLogic();
   const submissionLogic = useProductSubmission();
 
   const ProductOverviewPage = () => (
     <div className="min-h-screen bg-gray-50 p-4 md:p-6">
-      <SubmitStatusAlert 
-        submitStatus={submissionLogic.submitStatus} 
-        submitMessage={submissionLogic.submitMessage} 
+      <SubmitStatusAlert
+        submitStatus={submissionLogic.submitStatus}
+        submitMessage={submissionLogic.submitMessage}
       />
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center mb-6" onClick={() => navigate(-1)}>
           <ArrowLeft className="w-5 h-5 mr-2 text-gray-600" />
           <span className="text-gray-800 font-medium">Product Overview</span>
           {currentUser && (
-            <span className="ml-auto text-sm text-gray-500">User: {currentUser.email}</span>
+            <span className="ml-auto text-sm text-gray-500">
+              User: {currentUser.email}
+            </span>
           )}
         </div>
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="space-y-6">
             <ProductDetailsCard productData={productData} />
             <InventoryCard productData={productData} />
           </div>
-          
+
           <div className="space-y-6">
             <PricingCard productData={productData} />
             <StatsCard productData={productData} />
             <VariantsCard productData={productData} />
           </div>
         </div>
-        
+
         <div className="mt-8 space-y-4">
           <div className="bg-green-50 border border-green-200 rounded-lg p-4">
             <div className="flex items-center">
               <div className="w-3 h-3 rounded-full bg-green-500 mr-3"></div>
-              <span className="text-green-800 font-medium">Ready to Publish</span>
+              <span className="text-green-800 font-medium">
+                Ready to Publish
+              </span>
             </div>
             <p className="text-sm text-start text-green-700 mt-1">
-              This product will be saved to your account and can be made live for customers to purchase.
+              This product will be saved to your account and can be made live
+              for customers to purchase.
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3">
@@ -77,7 +82,9 @@ export default function TryonPreview() {
               onClick={() => submissionLogic.handleSubmit(productData)}
               disabled={submissionLogic.isSubmitting || !currentUser}
               className={`px-6 py-2 rounded-lg font-medium transition-colors ${
-                submissionLogic.isSubmitting || !currentUser ? "bg-gray-400 text-gray-700 cursor-not-allowed" : "bg-green-500 hover:bg-green-600 text-white"
+                submissionLogic.isSubmitting || !currentUser
+                  ? "bg-gray-400 text-gray-700 cursor-not-allowed"
+                  : "bg-green-500 hover:bg-green-600 text-white"
               }`}
             >
               {submissionLogic.isSubmitting ? (
@@ -97,12 +104,12 @@ export default function TryonPreview() {
 
   const ProductPreviewPage = () => {
     const isSaree = productUtils.isSareeProduct(productData);
-    
+
     return (
       <div className="min-h-screen bg-gray-50 p-4 md:p-6">
-        <SubmitStatusAlert 
-          submitStatus={submissionLogic.submitStatus} 
-          submitMessage={submissionLogic.submitMessage} 
+        <SubmitStatusAlert
+          submitStatus={submissionLogic.submitStatus}
+          submitMessage={submissionLogic.submitMessage}
         />
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-6">
@@ -117,7 +124,9 @@ export default function TryonPreview() {
             </div>
             <div className="flex items-center space-x-4">
               {currentUser && (
-                <span className="text-sm text-gray-500">User: {currentUser.email}</span>
+                <span className="text-sm text-gray-500">
+                  User: {currentUser.email}
+                </span>
               )}
               <button className="flex items-center text-gray-600 hover:text-gray-800">
                 <Edit className="w-4 h-4 mr-1" />
@@ -125,14 +134,13 @@ export default function TryonPreview() {
               </button>
             </div>
           </div>
-          
+
           <p className="text-gray-600 text-sm mb-6">
-            {isSaree ? 
-              "Click on the complete saree to see try-on results" : 
-              "Click on garment images to see try-on results"
-            }
+            {isSaree
+              ? "Click on the complete saree to see try-on results"
+              : "Click on garment images to see try-on results"}
           </p>
-          
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="space-y-6">
               <div className="bg-white rounded-lg border border-gray-200 p-6">
@@ -140,39 +148,63 @@ export default function TryonPreview() {
                   <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
                     <Package className="w-4 h-4 text-blue-600" />
                   </div>
-                  <span className="text-gray-700 font-medium">Product Details</span>
+                  <span className="text-gray-700 font-medium">
+                    Product Details
+                  </span>
                 </div>
                 <div className="space-y-2 text-start p-3">
-                  <div className="text-lg font-semibold text-gray-900">{productData.title || "Untitled Product"}</div>
-                  <div className="text-sm text-gray-600">{productData.category || "No Category"}</div>
-                  <div className="text-sm text-gray-600">{productData.dressType || "No Type"}</div>
-                  <div className="text-sm text-gray-600">{productData.fabric || "No Fabric"}</div>
-                  <div className="text-sm text-gray-600">Type: {productData.productType || "Ready to Wear"}</div>
+                  <div className="text-lg font-semibold text-gray-900">
+                    {productData.title || "Untitled Product"}
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    {productData.category || "No Category"}
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    {productData.dressType || "No Type"}
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    {productData.fabric || "No Fabric"}
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    Type: {productData.productType || "Ready to Wear"}
+                  </div>
                 </div>
               </div>
-              
+
               <div className="bg-blue-50 rounded-lg border border-blue-200 p-6">
                 <div className="flex items-center mb-4">
                   <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
                     <Package className="w-4 h-4 text-blue-600" />
                   </div>
-                  <span className="text-gray-700 font-medium">Pricing & Inventory</span>
+                  <span className="text-gray-700 font-medium">
+                    Pricing & Inventory
+                  </span>
                 </div>
                 <div className="space-y-2 text-start p-5">
-                  <div className="text-2xl font-bold text-gray-900">₹{productData.price || "0"}</div>
+                  <div className="text-2xl font-bold text-gray-900">
+                    ₹{productData.price || "0"}
+                  </div>
                   <div className="text-sm text-gray-500">Base Price</div>
                   {!isSaree && (
                     <>
-                      <div className="text-sm text-blue-600">Available Sizes: {productData.selectedSizes?.join(", ") || "None"}</div>
-                      <div className="text-sm text-blue-600">Available Colors: {productData.selectedColors?.map(productUtils.getColorDisplayName).join(", ") || "None"}</div>
+                      <div className="text-sm text-blue-600">
+                        Available Sizes:{" "}
+                        {productData.selectedSizes?.join(", ") || "None"}
+                      </div>
+                      <div className="text-sm text-blue-600">
+                        Available Colors:{" "}
+                        {productData.selectedColors
+                          ?.map(productUtils.getColorDisplayName)
+                          .join(", ") || "None"}
+                      </div>
                     </>
                   )}
                 </div>
               </div>
             </div>
-            
+
             <div className="lg:col-span-1">
-              <TryOnViewer 
+              <TryOnViewer
                 productData={productData}
                 isProcessing={tryOnLogic.isProcessing}
                 tryOnResult={tryOnLogic.tryOnResult}
@@ -182,13 +214,15 @@ export default function TryonPreview() {
               />
             </div>
           </div>
-          
+
           <div className="mt-8">
             <button
               onClick={() => submissionLogic.handleSubmit(productData)}
               disabled={submissionLogic.isSubmitting || !currentUser}
               className={`w-full px-6 py-3 rounded-lg font-medium transition-colors ${
-                submissionLogic.isSubmitting || !currentUser ? "bg-gray-400 text-gray-700 cursor-not-allowed" : "bg-[#7DBBD1] text-white"
+                submissionLogic.isSubmitting || !currentUser
+                  ? "bg-gray-400 text-gray-700 cursor-not-allowed"
+                  : "bg-[#7DBBD1] text-white"
               }`}
             >
               {submissionLogic.isSubmitting ? (
@@ -213,25 +247,7 @@ export default function TryonPreview() {
   );
 }
 
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//old 
+//old
 
 // import React, { useState } from "react";
 // import { ArrowLeft, Package, Edit, CheckCircle, AlertCircle } from "lucide-react";
@@ -261,9 +277,9 @@ export default function TryonPreview() {
 //   // Helper function to get saree images
 //   const getSareeImages = () => {
 //     if (!productData.sareeParts) return [];
-    
+
 //     const sareeImages = [];
-    
+
 //     if (productData.generatedSareeImage) {
 //       sareeImages.push({
 //         url: productData.generatedSareeImage,
@@ -283,10 +299,9 @@ export default function TryonPreview() {
 //         });
 //       }
 //     });
-    
+
 //     // Add generated saree image last (this is the main one for try-on)
-    
-    
+
 //     return sareeImages;
 //   };
 
@@ -336,9 +351,9 @@ export default function TryonPreview() {
 
 //   const handleThumbnailClick = async (index, imageData = null) => {
 //     setSelectedImageIndex(index);
-    
+
 //     let garmentImageUrl;
-    
+
 //     if (imageData) {
 //       // For saree products, only allow try-on for generated complete saree
 //       if (isSareeProduct() && imageData.type !== 'generated') {
@@ -353,10 +368,10 @@ export default function TryonPreview() {
 //       console.log("No garment image available");
 //       return;
 //     }
-    
+
 //     setIsProcessing(true);
 //     setTryOnResult(null);
-    
+
 //     try {
 //       const response = await fetch("/api/tryon", {
 //         method: "POST",
@@ -366,9 +381,9 @@ export default function TryonPreview() {
 //           garmentImage: garmentImageUrl,
 //         }),
 //       });
-      
+
 //       if (!response.ok) throw new Error(`Backend error: ${response.status}`);
-      
+
 //       const data = await response.json();
 //       if (data.output && data.output.length > 0) {
 //         setTryOnResult(data.output[0]);
@@ -403,10 +418,10 @@ export default function TryonPreview() {
 //       setTimeout(() => setSubmitStatus(null), 5000);
 //       return;
 //     }
-    
+
 //     setIsSubmitting(true);
 //     setSubmitStatus(null);
-    
+
 //     try {
 //       console.log("Submitting product for user:", currentUser.uid);
 //       console.log("Product data:", productData);
@@ -491,7 +506,7 @@ export default function TryonPreview() {
 //           <div className="space-y-6">
 //             <div className="bg-white rounded-lg border border-gray-200 p-6">
 //               <div className="flex items-center mb-4">
-//                 <Package className="w-5 h-5 text-blue-500 mr-2" />
+//                 <Package className="w-5 h-5 text-[#800000] mr-2" />
 //                 <span className="text-gray-700 font-medium">Product Details</span>
 //               </div>
 //               <div className="space-y-1">
@@ -507,7 +522,6 @@ export default function TryonPreview() {
 //                 </div>
 //               )}
 //             </div>
-            
 
 // <div className="bg-white rounded-lg border border-gray-200 p-6">
 //   <h3 className="text-gray-700 font-medium mb-4">Inventory by color</h3>
@@ -535,15 +549,15 @@ export default function TryonPreview() {
 //               <span className="text-sm text-gray-700">{color.name}</span>
 //             </div>
 //             <span className="text-sm text-gray-500">
-//               {isSareeProduct() ? 
+//               {isSareeProduct() ?
 //                 // For sarees, show units if available, otherwise show "1 set"
-//                 (productData.units && productData.units[colorCode] ? 
-//                   Object.values(productData.units[colorCode]).reduce((sum, qty) => sum + (parseInt(qty) || 0), 0) : 
+//                 (productData.units && productData.units[colorCode] ?
+//                   Object.values(productData.units[colorCode]).reduce((sum, qty) => sum + (parseInt(qty) || 0), 0) :
 //                   1
 //                 ) :
 //                 // For regular products, show units as before
-//                 (productData.units[colorCode] ? 
-//                   Object.values(productData.units[colorCode]).reduce((sum, qty) => sum + (parseInt(qty) || 0), 0) : 
+//                 (productData.units[colorCode] ?
+//                   Object.values(productData.units[colorCode]).reduce((sum, qty) => sum + (parseInt(qty) || 0), 0) :
 //                   0
 //                 )
 //               } {isSareeProduct() ? 'sets' : 'pcs'}
@@ -563,17 +577,17 @@ export default function TryonPreview() {
 //   </div>
 // </div>
 //           </div>
-          
+
 //           <div className="space-y-6">
 //             <div className="bg-white rounded-lg border border-gray-200 p-6">
 //               <div className="text-3xl font-bold text-gray-900 mb-1">₹ {productData.price || "0"}</div>
 //               <div className="text-sm text-gray-500">Base Price</div>
 //             </div>
-            
+
 //             <div className="bg-white rounded-lg border border-gray-200 p-6">
 //               <div className="text-3xl font-bold text-gray-900 mb-1">
-//                 {isSareeProduct() ? 
-//                   getSareeImages().length : 
+//                 {isSareeProduct() ?
+//                   getSareeImages().length :
 //                   calculateTotalUnits(productData.units, productData.selectedSizes, productData.selectedColors)
 //                 }
 //               </div>
@@ -581,10 +595,10 @@ export default function TryonPreview() {
 //                 {isSareeProduct() ? "Total Components" : "Total Units"}
 //               </div>
 //             </div>
-            
+
 //             <div className="bg-white rounded-lg border border-gray-200 p-6">
 //               <div className="flex items-center mb-4">
-//                 <div className="w-5 h-5 text-blue-500 mr-2">
+//                 <div className="w-5 h-5 text-[#800000] mr-2">
 //                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
 //                     <circle cx="12" cy="12" r="3" />
 //                     <path d="M12 1v6m0 6v6m11-7h-6m-6 0H1" />
@@ -594,7 +608,7 @@ export default function TryonPreview() {
 //                   {isSareeProduct() ? "Saree Details" : "Variants & Inventory"}
 //                 </span>
 //               </div>
-              
+
 //               {!isSareeProduct() && (
 //                 <div className="grid grid-cols-2 gap-4 mb-6">
 //                   <div>
@@ -627,12 +641,12 @@ export default function TryonPreview() {
 //                   </div>
 //                 </div>
 //               )}
-              
+
 //               <div className="grid grid-cols-3 gap-4 text-center">
 //                 <div>
 //                   <div className="text-2xl font-bold text-gray-900">
-//                     {isSareeProduct() ? 
-//                       getSareeImages().filter(img => img.type === 'part').length : 
+//                     {isSareeProduct() ?
+//                       getSareeImages().filter(img => img.type === 'part').length :
 //                       (productData.selectedSizes?.length || 0) * (productData.selectedColors?.length || 1)
 //                     }
 //                   </div>
@@ -642,8 +656,8 @@ export default function TryonPreview() {
 //                 </div>
 //                 <div>
 //                   <div className="text-2xl font-bold text-gray-900">
-//                     {isSareeProduct() ? 
-//                       getSareeImages().length : 
+//                     {isSareeProduct() ?
+//                       getSareeImages().length :
 //                       (productData.imageUrls?.length || 0)
 //                     }
 //                   </div>
@@ -657,7 +671,7 @@ export default function TryonPreview() {
 //             </div>
 //           </div>
 //         </div>
-        
+
 //         <div className="mt-8 space-y-4">
 //           <div className="bg-green-50 border border-green-200 rounded-lg p-4">
 //             <div className="flex items-center">
@@ -700,7 +714,7 @@ export default function TryonPreview() {
 
 //   const ProductPreviewPage = () => {
 //     const displayImages = getDisplayImages();
-    
+
 //     return (
 //       <div className="min-h-screen bg-gray-50 p-4 md:p-6">
 //         <SubmitStatusAlert />
@@ -725,14 +739,14 @@ export default function TryonPreview() {
 //               </button>
 //             </div>
 //           </div>
-          
+
 //           <p className="text-gray-600 text-sm mb-6">
-//             {isSareeProduct() ? 
-//               "Click on the complete saree to see try-on results" : 
+//             {isSareeProduct() ?
+//               "Click on the complete saree to see try-on results" :
 //               "Click on garment images to see try-on results"
 //             }
 //           </p>
-          
+
 //           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 //             <div className="space-y-6">
 //               <div className="bg-white rounded-lg border border-gray-200 p-6">
@@ -750,7 +764,7 @@ export default function TryonPreview() {
 //                   <div className="text-sm text-gray-600">Type: {productData.productType || "Ready to Wear"}</div>
 //                 </div>
 //               </div>
-              
+
 //               <div className="bg-blue-50 rounded-lg border border-blue-200 p-6">
 //                 <div className="flex items-center mb-4">
 //                   <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
@@ -770,7 +784,7 @@ export default function TryonPreview() {
 //                 </div>
 //               </div>
 //             </div>
-            
+
 //             <div className="lg:col-span-1">
 //               <div className="bg-blue-50 rounded-lg p-6">
 //                 <div className="flex gap-4">
@@ -801,7 +815,7 @@ export default function TryonPreview() {
 //                       )}
 //                     </div>
 //                   </div>
-                  
+
 //                   <div className="w-20 space-y-3">
 //                     <span className="pb-2 font-bold">Try Preview</span>
 //                     {displayImages.length > 0 ? (
@@ -813,18 +827,18 @@ export default function TryonPreview() {
 //                             className={`w-full aspect-square rounded-lg overflow-hidden border-2 transition-all ${
 //                               selectedImageIndex === index ? "border-blue-500 ring-2 ring-blue-200" : "border-gray-200 hover:border-gray-300"
 //                             } ${
-//                               isProcessing || (isSareeProduct() && imageData.type === 'part') 
-//                                 ? "opacity-50 cursor-not-allowed" 
+//                               isProcessing || (isSareeProduct() && imageData.type === 'part')
+//                                 ? "opacity-50 cursor-not-allowed"
 //                                 : "cursor-pointer hover:scale-105"
 //                             }`}
 //                           >
-//                             <img 
-//                               src={imageData.url} 
-//                               alt={imageData.label} 
-//                               className="w-full h-full object-cover" 
+//                             <img
+//                               src={imageData.url}
+//                               alt={imageData.label}
+//                               className="w-full h-full object-cover"
 //                             />
 //                           </button>
-                          
+
 //                           {isSareeProduct() && (
 //                             <>
 //                               <div className="absolute -bottom-1 left-0 right-0">
@@ -851,7 +865,7 @@ export default function TryonPreview() {
 //               </div>
 //             </div>
 //           </div>
-          
+
 //           <div className="mt-8">
 //             <button
 //               onClick={handleSubmitProduct}
@@ -882,7 +896,6 @@ export default function TryonPreview() {
 //     </div>
 //   );
 // }
-
 
 // import React, { useState } from "react";
 // import { ArrowLeft, Package, Edit, CheckCircle, AlertCircle } from "lucide-react";
@@ -1073,7 +1086,7 @@ export default function TryonPreview() {
 //            {/* // Ensure this div is properly closed */}
 // <div className="bg-white rounded-lg border border-gray-200 p-6">
 //   <div className="flex items-center mb-4">
-//     <Package className="w-5 h-5 text-blue-500 mr-2" />
+//     <Package className="w-5 h-5 text-[#800000] mr-2" />
 //     <span className="text-gray-700 font-medium">Product Details</span>
 //   </div>
 //   <div className="space-y-1">
@@ -1145,7 +1158,7 @@ export default function TryonPreview() {
 //             </div>
 //             <div className="bg-white rounded-lg border border-gray-200 p-6">
 //               <div className="flex items-center mb-4">
-//                 <div className="w-5 h-5 text-blue-500 mr-2">
+//                 <div className="w-5 h-5 text-[#800000] mr-2">
 //                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
 //                     <circle cx="12" cy="12" r="3" />
 //                     <path d="M12 1v6m0 6v6m11-7h-6m-6 0H1" />

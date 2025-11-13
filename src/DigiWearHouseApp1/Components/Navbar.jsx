@@ -6,7 +6,7 @@ import menImage from "../../assets/men.png";
 import womenImage from "../../assets/women.png";
 import kidsImage from "../../assets/kids.png";
 import accessoriesImage from "../../assets/accessories.png";
-import logo from "../../assets/digi_logo.svg";
+import logo from "../../assets/digi_logo.png";
 import notificationIcon from "../../assets/notification-icon.svg";
 import user_icon from "../../assets/user-circle.svg";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -304,7 +304,7 @@ const Navbar = () => {
             {/* Logo */}
             <Link to={"/"}>
               <div className="flex items-center justify-center pt-2">
-                <img src={logo} alt="DVYB Logo" className="h-10" />
+                <img src={logo} alt="DVYB Logo" className="h-30" />
               </div>
             </Link>
 
@@ -344,7 +344,7 @@ const Navbar = () => {
 
                     {/* Bell Icon */}
                     <div className="flex justify-center mb-4 pt-6">
-                      <span className="text-yellow-400 text-6xl">🔔</span>
+                      <span className="text-red-700 text-6xl">🔔</span>
                     </div>
 
                     {/* Message */}
@@ -353,7 +353,7 @@ const Navbar = () => {
                     </p>
 
                     {/* Button */}
-                    <button className="cursor-pointer bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors mb-6">
+                    <button className="cursor-pointer bg-red-700 text-white px-4 py-2 rounded-md hover:bg-red-800 transition-colors mb-6">
                       Explore Categories
                     </button>
                   </div>
@@ -424,7 +424,7 @@ const Navbar = () => {
                 if (item.type === "link") {
                   return (
                     <Link key={item.name} to={item.path}>
-                      <span className="cursor-pointer  text-gray-700 hover:text-blue-600 px-3 py-2 text-[17px] font-medium transition-colors">
+                      <span className="cursor-pointer  text-gray-700 hover:text-red-700 px-3 py-2 text-[17px] font-medium transition-colors">
                         {item.name}
                       </span>
                     </Link>
@@ -434,7 +434,7 @@ const Navbar = () => {
                     <button
                       key={item.name}
                       onClick={item.action}
-                      className="cursor-pointer text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors"
+                      className="cursor-pointer text-gray-700 hover:text-red-700 px-3 py-2 text-sm font-medium transition-colors"
                     >
                       {item.name}
                     </button>
@@ -442,7 +442,7 @@ const Navbar = () => {
                 } else {
                   return (
                     <a key={item.name} href={item.path}>
-                      <span className="cursor-pointer text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors">
+                      <span className="cursor-pointer text-gray-700 hover:text-red-700 px-3 py-2 text-sm font-medium transition-colors">
                         {item.name}
                       </span>
                     </a>
@@ -455,7 +455,7 @@ const Navbar = () => {
                 <div className="relative" ref={categoriesRef}>
                   <button
                     onClick={handleCategoriesToggle}
-                    className="flex items-center space-x-1 text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors duration-200"
+                    className="flex items-center space-x-1 text-gray-700 hover:text-red-700 px-3 py-2 text-sm font-medium transition-colors duration-200"
                   >
                     <span className="text-[16px]">Categories</span>
                     <ChevronDown
@@ -522,8 +522,7 @@ const Navbar = () => {
                                   e.stopPropagation();
                                   setSelectedCategory(null);
                                 }}
-                                className="flex items-center transition-colors cursor-pointer"
-                                style={{ color: "rgba(152, 192, 217, 1)" }}
+                                className="flex items-center transition-colors cursor-pointer text-red-700 hover:text-red-800"
                               >
                                 <svg
                                   className="w-5 h-5 mr-2"
@@ -556,10 +555,7 @@ const Navbar = () => {
                                   className="space-y-4"
                                 >
                                   {/* Subcategory Header */}
-                                  <h3
-                                    className="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2"
-                                    style={{ color: "rgba(152, 192, 217, 1)" }}
-                                  >
+                                  <h3 className="text-lg font-semibold text-red-700 border-b border-gray-200 pb-2">
                                     {subcategoryName}
                                   </h3>
 
@@ -569,7 +565,7 @@ const Navbar = () => {
                                       <a
                                         key={index}
                                         href="#"
-                                        className="block text-start ps-8 text-sm text-gray-600 hover:text-blue-600 hover:underline transition-colors duration-200 py-1"
+                                        className="block text-start ps-8 text-sm text-gray-600 hover:text-red-700 hover:underline transition-colors duration-200 py-1"
                                         onClick={(e) => {
                                           e.stopPropagation();
                                           setIsCategoriesOpen(false);
@@ -601,7 +597,7 @@ const Navbar = () => {
               {navItems.map((item) => {
                 // unified class for every mobile menu item
                 const commonClass =
-                  "block w-full text-center px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md transition-colors cursor-pointer";
+                  "block w-full text-center px-3 py-2 text-base font-medium text-gray-700 hover:text-red-700 hover:bg-gray-50 rounded-md transition-colors cursor-pointer";
 
                 if (item.type === "link") {
                   return (
@@ -647,7 +643,7 @@ const Navbar = () => {
                 <div className="px-3 py-2">
                   <button
                     onClick={handleCategoriesToggle}
-                    className="flex flex-col items-center w-full text-base font-medium text-gray-700 hover:text-blue-600 transition-colors"
+                    className="flex flex-col items-center w-full text-base font-medium text-gray-700 hover:text-red-700 transition-colors"
                   >
                     <div className="flex items-center justify-center space-x-1">
                       <span>Categories</span>
@@ -672,7 +668,7 @@ const Navbar = () => {
                               e.stopPropagation();
                               setSelectedCategory(category);
                             }}
-                            className="flex items-center space-x-3 py-2 text-sm text-gray-600 hover:text-blue-600 w-full text-left"
+                            className="flex items-center space-x-3 py-2 text-sm text-gray-600 hover:text-red-700 w-full text-left"
                           >
                             <div
                               className="w-8 h-8 rounded-full flex items-center justify-center"
@@ -697,7 +693,7 @@ const Navbar = () => {
                               e.stopPropagation();
                               setSelectedCategory(null);
                             }}
-                            className="flex items-center text-sm text-blue-600 hover:text-blue-800 mb-3"
+                            className="flex items-center text-sm text-red-700 hover:text-red-800 mb-3"
                           >
                             <svg
                               className="w-4 h-4 mr-2"
@@ -722,14 +718,14 @@ const Navbar = () => {
                           {Object.entries(selectedCategory.subcategories).map(
                             ([subcategoryName, items]) => (
                               <div key={subcategoryName} className="space-y-2">
-                                <h4 className="text-sm font-medium text-blue-600 border-b border-gray-200 pb-1">
+                                <h4 className="text-sm font-medium text-red-700 border-b border-gray-200 pb-1">
                                   {subcategoryName}
                                 </h4>
                                 <div className="space-y-1 pl-3">
                                   {items.map((item, index) => (
                                     <button
                                       key={index}
-                                      className="block text-xs text-gray-600 hover:text-blue-600 py-1 w-full text-left"
+                                      className="block text-xs text-gray-600 hover:text-red-700 py-1 w-full text-left"
                                       onClick={(e) => {
                                         e.stopPropagation();
                                         setIsCategoriesOpen(false);

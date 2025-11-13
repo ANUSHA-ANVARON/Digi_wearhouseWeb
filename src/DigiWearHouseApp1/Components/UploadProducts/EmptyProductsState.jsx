@@ -1,5 +1,5 @@
-import React from 'react';
-import BackButton from '../UploadSectionComponents/BackButton';
+import React from "react";
+import BackButton from "../UploadSectionComponents/BackButton";
 
 const EmptyProductsState = ({ onAddProduct }) => (
   <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -11,7 +11,7 @@ const EmptyProductsState = ({ onAddProduct }) => (
     {/* Main Content */}
     <div className="flex-1 flex flex-col items-center justify-center px-4 pb-20">
       <div className="text-center max-w-md">
-        <h1 className="text-2xl md:text-3xl font-bold text-blue-500 mb-4">
+        <h1 className="text-2xl md:text-3xl font-bold text-[#80000]-500 mb-4">
           Your Products
         </h1>
         <p className="text-gray-700 text-base md:text-lg mb-12">
@@ -32,7 +32,7 @@ const EmptyProductsState = ({ onAddProduct }) => (
 
         <button
           onClick={onAddProduct}
-          className="bg-blue-500 hover:bg-blue-600 text-white px-8 py-4 rounded-lg font-medium text-base md:text-lg transition-colors flex items-center space-x-3 mx-auto"
+          className="bg-[#80000]-500 hover:bg-blue-600 text-white px-8 py-4 rounded-lg font-medium text-base md:text-lg transition-colors flex items-center space-x-3 mx-auto"
         >
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
             <path

@@ -1,23 +1,22 @@
-
-
-
 // components/products/upload/UploadProducts.jsx
-import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom';
-import { useApp } from '../../context/Context'; // Adjust path as needed
-import AddProductForm from '../../Components/UploadProducts/AddProductForm';
-import EmptyProductsState from '../../Components/UploadProducts/EmptyProductsState';
+import React, { useState } from "react";
+import { useLocation } from "react-router-dom";
+import { useApp } from "../../context/Context"; // Adjust path as needed
+import AddProductForm from "../../Components/UploadProducts/AddProductForm";
+import EmptyProductsState from "../../Components/UploadProducts/EmptyProductsState";
 
 const UploadProducts = () => {
-  const { productData } = useApp(); 
+  const { productData } = useApp();
   const location = useLocation();
-  
+
   // Check if user is returning from navigation and was in add product flow
   const [showAddForm, setShowAddForm] = useState(() => {
-    return location.state?.inAddFlow === true || 
-           (productData && Object.keys(productData).length > 0);
+    return (
+      location.state?.inAddFlow === true ||
+      (productData && Object.keys(productData).length > 0)
+    );
   });
-  
+
   // For now, keeping this as false since you mentioned it was previously false
   // You can change this to true when you have actual products
   const [hasProducts] = useState(false);
@@ -41,12 +40,10 @@ const UploadProducts = () => {
 
 export default UploadProducts;
 
-
-
 //previous
 // import React, { useState } from "react";
 // import { useNavigate } from "react-router-dom";
-// import { useApp } from "../../context/Context"; 
+// import { useApp } from "../../context/Context";
 // import { Link , useLocation } from "react-router-dom";
 
 // // Model - Data layer
@@ -120,15 +117,15 @@ export default UploadProducts;
 //     title: "",
 //     description: "",
 //     productType: "",
-//     category: "", 
+//     category: "",
 //     dressType: "",
-//     fabric: "", 
-//     craft: "", 
+//     fabric: "",
+//     craft: "",
 //     price: "",
 //     selectedSizes: [],
 //     selectedColors: [],
-//     units: {}, 
-//     imageUrls: [], 
+//     units: {},
+//     imageUrls: [],
 //   }),
 // };
 
@@ -164,7 +161,7 @@ export default UploadProducts;
 //     {/* Main Content */}
 //     <div className="flex-1 flex flex-col items-center justify-center px-4 pb-20">
 //       <div className="text-center max-w-md">
-//         <h1 className="text-2xl md:text-3xl font-bold text-blue-500 mb-4">
+//         <h1 className="text-2xl md:text-3xl font-bold text-[#800000] mb-4">
 //           Your Products
 //         </h1>
 //         <p className="text-gray-700 text-base md:text-lg mb-12">
@@ -222,7 +219,7 @@ export default UploadProducts;
 //         </button>
 //       ))}
 //     </nav>
-    
+
 //   </div>
 // );
 
@@ -377,7 +374,6 @@ export default UploadProducts;
 //   );
 // };
 
-
 // const SizeSelector = ({ sizes, selectedSizes, onChange }) => (
 //   <div className="space-y-3">
 //     <div className="flex items-center justify-between">
@@ -385,11 +381,11 @@ export default UploadProducts;
 //         Select Sizes
 //       </label>
 //       <Link to={"/size-chart"}>
-//         <button className="text-blue-500 text-sm hover:text-blue-600" >
+//         <button className="text-[#800000] text-sm hover:text-blue-600" >
 //         Size chart ?
 //       </button>
 //       </Link>
-    
+
 //     </div>
 //     <div className="flex flex-wrap gap-3">
 //       {sizes.map((size) => (
@@ -417,7 +413,6 @@ export default UploadProducts;
 //   </div>
 // );
 
-
 // // Updated ColorSelector component that properly stores selections
 // const ColorSelector = ({ selectedColors, onChange }) => {
 //   const [selectedColor, setSelectedColor] = useState(null);
@@ -430,7 +425,7 @@ export default UploadProducts;
 //       name: "Red",
 //       value: "#FF0000",
 //       shades: [
-//         "#8B0000", "#B22222", "#DC143C", "#FF0000", 
+//         "#8B0000", "#B22222", "#DC143C", "#FF0000",
 //         "#FF4500", "#FF6347", "#FF7F7F", "#FFB6B6"
 //       ],
 //     },
@@ -439,7 +434,7 @@ export default UploadProducts;
 //       name: "Pink",
 //       value: "#FF69B4",
 //       shades: [
-//         "#C71585", "#DB7093", "#FF1493", "#FF69B4", 
+//         "#C71585", "#DB7093", "#FF1493", "#FF69B4",
 //         "#FFB6C1", "#FFC0CB", "#FFD6E7"
 //       ],
 //     },
@@ -448,7 +443,7 @@ export default UploadProducts;
 //       name: "Blue",
 //       value: "#0000FF",
 //       shades: [
-//         "#00008B", "#0000CD", "#1E90FF", "#4169E1", 
+//         "#00008B", "#0000CD", "#1E90FF", "#4169E1",
 //         "#4682B4", "#87CEEB", "#B0E0E6"
 //       ],
 //     },
@@ -457,7 +452,7 @@ export default UploadProducts;
 //       name: "Green",
 //       value: "#008000",
 //       shades: [
-//         "#006400", "#228B22", "#008000", "#32CD32", 
+//         "#006400", "#228B22", "#008000", "#32CD32",
 //         "#00FF7F", "#90EE90", "#C1E1C1"
 //       ],
 //     },
@@ -466,7 +461,7 @@ export default UploadProducts;
 //       name: "Orange",
 //       value: "#FFA500",
 //       shades: [
-//         "#FF8C00", "#FF7F50", "#FF6347", "#FFA500", 
+//         "#FF8C00", "#FF7F50", "#FF6347", "#FFA500",
 //         "#FFA07A", "#FFDAB9", "#FFE4B5", "#FFF5E1"
 //       ],
 //     },
@@ -475,7 +470,7 @@ export default UploadProducts;
 //       name: "Purple",
 //       value: "#800080",
 //       shades: [
-//         "#4B0082", "#6A0DAD", "#800080", "#8A2BE2", 
+//         "#4B0082", "#6A0DAD", "#800080", "#8A2BE2",
 //         "#9370DB", "#BA55D3", "#D8BFD8", "#E6E6FA"
 //       ],
 //     },
@@ -484,7 +479,7 @@ export default UploadProducts;
 //       name: "Black",
 //       value: "#000000",
 //       shades: [
-//         "#000000", "#2F2F2F", "#555555", "#808080", 
+//         "#000000", "#2F2F2F", "#555555", "#808080",
 //         "#A9A9A9", "#C0C0C0", "#E0E0E0", "#F5F5F5"
 //       ],
 //     },
@@ -518,28 +513,28 @@ export default UploadProducts;
 //   // Get selected color display info
 //   const getSelectedColorInfo = () => {
 //     if (!selectedColors || selectedColors.length === 0) return null;
-    
+
 //     const selected = selectedColors[0];
-    
+
 //     // Check if it's a base color
 //     const baseColor = colors.find(c => c.code === selected);
 //     if (baseColor) {
 //       return { name: baseColor.name, value: baseColor.value };
 //     }
-    
+
 //     // Check if it's a shade
 //     for (const color of colors) {
-//       const shadeIndex = color.shades.findIndex(shade => 
+//       const shadeIndex = color.shades.findIndex(shade =>
 //         selected === `${color.name.toLowerCase()}_${shade}`
 //       );
 //       if (shadeIndex !== -1) {
-//         return { 
-//           name: `${color.name} Shade`, 
-//           value: color.shades[shadeIndex] 
+//         return {
+//           name: `${color.name} Shade`,
+//           value: color.shades[shadeIndex]
 //         };
 //       }
 //     }
-    
+
 //     return null;
 //   };
 
@@ -580,7 +575,7 @@ export default UploadProducts;
 //           </button>
 //         ))}
 //       </div>
-      
+
 //       <div className="text-center text-xs text-gray-500">
 //         Click to see shades • Double-click to select base color
 //       </div>
@@ -1054,7 +1049,7 @@ export default UploadProducts;
 //           <h4 className="text-base md:text-lg font-medium text-gray-900">
 //             Upload Instructions
 //           </h4>
-//           <button className="text-blue-500 text-sm hover:text-blue-600 flex items-center space-x-1">
+//           <button className="text-[#800000] text-sm hover:text-blue-600 flex items-center space-x-1">
 //             <span>View</span>
 //             <svg
 //               className="w-4 h-4"
@@ -1453,7 +1448,7 @@ export default UploadProducts;
 //           <h4 className="text-base md:text-lg font-medium text-gray-900">
 //             Capture Instructions
 //           </h4>
-//           <button className="text-blue-500 text-sm hover:text-blue-600 flex items-center space-x-1">
+//           <button className="text-[#800000] text-sm hover:text-blue-600 flex items-center space-x-1">
 //             <span>View</span>
 //             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 //               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -1525,7 +1520,7 @@ export default UploadProducts;
 //                 </button>
 //               </div>
 //               <div className="mt-6 text-center">
-//                 <a href="#" className="text-sm text-blue-500 hover:text-blue-600 flex items-center justify-center space-x-1">
+//                 <a href="#" className="text-sm text-[#800000] hover:text-blue-600 flex items-center justify-center space-x-1">
 //                   <span>Need help</span>
 //                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 //                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -1693,21 +1688,19 @@ export default UploadProducts;
 //   );
 // };
 
-
-
 // // Controller Component
 // // Controller Component - FIXED VERSION
 // const UploadProducts = () => {
-//   const { productData } = useApp(); 
+//   const { productData } = useApp();
 //   const location = useLocation();
-  
+
 //   // Check if user is returning from navigation and was in add product flow
 //   const [showAddForm, setShowAddForm] = useState(() => {
 //     // If coming back from navigation and there's form data, show the form
-//     return location.state?.inAddFlow === true || 
+//     return location.state?.inAddFlow === true ||
 //            (productData && Object.keys(productData).length > 0);
 //   });
-  
+
 //   const [hasProducts] = useState(false);
 
 //   const handleAddProduct = () => setShowAddForm(true);

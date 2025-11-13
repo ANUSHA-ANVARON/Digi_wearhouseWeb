@@ -1,5 +1,3 @@
-
-
 import React from "react";
 import { motion } from "framer-motion";
 import { UsersRound, BarChartBig, Upload } from "lucide-react";
@@ -7,9 +5,13 @@ import { UsersRound, BarChartBig, Upload } from "lucide-react";
 // This is a reusable component for the card's visual style.
 const FeatureCard = ({ icon, title, description }) => {
   return (
-    <div className="flex h-[300px] w-full flex-col items-start bg-gradient-to-br from-blue-100 to-blue-200 p-8 text-start rounded-2xl shadow-lg border border-white/40">
-      <div className="mb-4 text-black bg-white p-2 text-start rounded-2xl">{icon}</div>
-      <h3 className="mb-2 text-xl font-bold text-start">{title}</h3>
+    <div className="flex h-[300px] w-full flex-col items-start bg-gradient-to-br from-red-100 to-red-200 p-8 text-start rounded-2xl shadow-lg border border-white/40">
+      <div className="mb-4 text-black bg-[#FEC601] p-2 text-start rounded-2xl">
+        {icon}
+      </div>
+      <h3 className="mb-2 text-xl font-bold text-start text-red-800">
+        {title}
+      </h3>
       <p className="mb-6 text-slate-600">{description}</p>
       {/* <button className="mt-auto rounded-full border border-white px-6 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-white/50">
         Try Feature →
@@ -53,8 +55,8 @@ const FeatureSection = () => {
     hidden: {
       opacity: 0,
       scale: 0.8,
-      x: "-50%", 
-      y: "-50%", 
+      x: "-50%",
+      y: "-50%",
       zIndex: 10,
     },
     visible: {
@@ -71,7 +73,7 @@ const FeatureSection = () => {
     <>
       <div>
         <div className="text-center my-8">
-          <h2 className="text-4xl md:text-5xl font-bold text-[#1F335C] mb-3">
+          <h2 className="text-4xl md:text-5xl font-bold text-red-900 mb-3">
             Powerful Features for Indian Businesses
           </h2>
           <p className="text-gray-500 text-base md:text-lg leading-relaxed">

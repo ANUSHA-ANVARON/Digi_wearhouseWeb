@@ -1,17 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { useApp } from '../../context/Context';
-import firebaseService from '../../../SERVICES/firebaseService';
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { useApp } from "../../context/Context";
+import firebaseService from "../../../SERVICES/firebaseService";
 
-import dash_cover from '../../../assets/dash_cover.png';
-import dash_icon1 from '../../../assets/dash_icon1.png';
-import dash_icon2 from '../../../assets/dash_icon2.png';
-import dash_icon3 from '../../../assets/dash_icon3.png';
-import dash_icon4 from '../../../assets/dash_icon4.png';
+import dash_cover from "../../../assets/dash_cover.png";
+import dash_icon1 from "../../../assets/dash_icon1.png";
+import dash_icon2 from "../../../assets/dash_icon2.png";
+import dash_icon3 from "../../../assets/dash_icon3.png";
+import dash_icon4 from "../../../assets/dash_icon4.png";
 
 const VendorDashboard = () => {
   const { currentUser } = useApp();
-  const [selectedPeriod, setSelectedPeriod] = useState('Monthly');
+  const [selectedPeriod, setSelectedPeriod] = useState("Monthly");
   const [dashboardData, setDashboardData] = useState({
     totalProducts: 0,
     totalInventory: 0,
@@ -19,48 +19,54 @@ const VendorDashboard = () => {
     totalUnitsSold: 0,
     products: [],
     loading: true,
-    error: null
+    error: null,
   });
 
-  const periods = ['Daily', 'Weekly', 'Monthly'];
+  const periods = ["Daily", "Weekly", "Monthly"];
 
   // Fetch dashboard data
   useEffect(() => {
     const fetchDashboardData = async () => {
       if (!currentUser) {
-        setDashboardData(prev => ({ 
-          ...prev, 
-          loading: false, 
-          error: 'Please log in to view dashboard' 
+        setDashboardData((prev) => ({
+          ...prev,
+          loading: false,
+          error: "Please log in to view dashboard",
         }));
         return;
       }
 
       try {
-        console.log('Fetching dashboard data for user:', currentUser.uid);
-        
+        console.log("Fetching dashboard data for user:", currentUser.uid);
+
         // Fetch user's products
         const products = await firebaseService.getUserProducts(currentUser.uid);
-        
+
         // Calculate dashboard metrics
         const totalProducts = products.length;
-        
+
         // Calculate total inventory (sum of all units across all products)
         const totalInventory = products.reduce((total, product) => {
-          const productUnits = Object.values(product.units || {}).reduce((sum, units) => (parseInt(units) || 0), 0);
+          const productUnits = Object.values(product.units || {}).reduce(
+            (sum, units) => parseInt(units) || 0,
+            0
+          );
           return total + productUnits;
         }, 0);
-        
+
         // Calculate total revenue potential (price * inventory)
         const totalRevenue = products.reduce((total, product) => {
-          const productUnits = Object.values(product.units || {}).reduce((sum, units) => sum + (parseInt(units) || 0), 0);
+          const productUnits = Object.values(product.units || {}).reduce(
+            (sum, units) => sum + (parseInt(units) || 0),
+            0
+          );
           const price = parseFloat(product.price) || 0;
-          return total + (price * productUnits);
+          return total + price * productUnits;
         }, 0);
-        
+
         // For now, total units sold is 0 (you'll need order data for this)
         const totalUnitsSold = 0;
-        
+
         setDashboardData({
           totalProducts,
           totalInventory,
@@ -68,22 +74,21 @@ const VendorDashboard = () => {
           totalUnitsSold,
           products,
           loading: false,
-          error: null
+          error: null,
         });
-        
-        console.log('Dashboard data calculated:', {
+
+        console.log("Dashboard data calculated:", {
           totalProducts,
           totalInventory,
           totalRevenue,
-          totalUnitsSold
+          totalUnitsSold,
         });
-        
       } catch (error) {
-        console.error('Error fetching dashboard data:', error);
-        setDashboardData(prev => ({
+        console.error("Error fetching dashboard data:", error);
+        setDashboardData((prev) => ({
           ...prev,
           loading: false,
-          error: error.message || 'Failed to fetch dashboard data'
+          error: error.message || "Failed to fetch dashboard data",
         }));
       }
     };
@@ -93,15 +98,20 @@ const VendorDashboard = () => {
 
   // Calculate chart data based on products (placeholder for now)
   const chartData = [
-    { month: 'May', value: 0, color: 'bg-gray-200' },
-    { month: 'Jun', value: 0, color: 'bg-blue-400' },
-    { month: 'Jul', value: 0, color: 'bg-gray-200' },
-    { month: 'Aug', value: 0, color: 'bg-gray-200' },
-    { month: 'Sep', value: 0, color: 'bg-gray-200' },
-    { month: 'Oct', value: 0, color: 'bg-gray-200' },
-    { month: 'Nov', value: 0, color: 'bg-gray-200' },
-    { month: 'Dec', value: dashboardData.totalRevenue, color: 'bg-slate-600', height: 'h-20' },
-    { month: 'Jan', value: 0, color: 'bg-gray-200' }
+    { month: "May", value: 0, color: "bg-gray-200" },
+    { month: "Jun", value: 0, color: "bg-[#FEC601]" }, // Gold Accent
+    { month: "Jul", value: 0, color: "bg-gray-200" },
+    { month: "Aug", value: 0, color: "bg-gray-200" },
+    { month: "Sep", value: 0, color: "bg-gray-200" },
+    { month: "Oct", value: 0, color: "bg-gray-200" },
+    { month: "Nov", value: 0, color: "bg-gray-200" },
+    {
+      month: "Dec",
+      value: dashboardData.totalRevenue,
+      color: "bg-[#800000]",
+      height: "h-20",
+    }, // Maroon Primary
+    { month: "Jan", value: 0, color: "bg-gray-200" },
   ];
 
   // Loading state
@@ -109,7 +119,7 @@ const VendorDashboard = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#800000] mx-auto mb-4"></div>
           <p className="text-gray-600">Loading dashboard...</p>
         </div>
       </div>
@@ -122,11 +132,13 @@ const VendorDashboard = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center max-w-md p-6 bg-white rounded-lg shadow-sm">
           <div className="text-red-500 text-6xl mb-4">⚠️</div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Dashboard Error</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            Dashboard Error
+          </h2>
           <p className="text-gray-600 mb-4">{dashboardData.error}</p>
-          <button 
+          <button
             onClick={() => window.location.reload()}
-            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors"
+            className="bg-[#800000] hover:bg-[#a00000] text-white px-4 py-2 rounded-lg transition-colors"
           >
             Retry
           </button>
@@ -142,19 +154,21 @@ const VendorDashboard = () => {
         {/* Welcome Section */}
         <div className="mb-6 md:mb-8">
           <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-4 md:mb-6">
-            Welcome, {currentUser?.displayName || currentUser?.email?.split('@')[0] || 'Vendor'}!
+            Welcome,{" "}
+            {currentUser?.displayName ||
+              currentUser?.email?.split("@")[0] ||
+              "Vendor"}
+            !
           </h1>
-          
+
           {/* Hero Image */}
           <div className="relative rounded-lg overflow-hidden bg-gray-800 h-40 md:h-48 lg:h-56 xl:h-64">
-            <img 
-              src={dash_cover}  
+            <img
+              src={dash_cover}
               alt="Warehouse with digital displays"
               className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-r from-gray-900/50 to-gray-800/30"></div>
-            
-            
           </div>
         </div>
 
@@ -164,17 +178,17 @@ const VendorDashboard = () => {
           <Link to={"/products"}>
             <div className="bg-white rounded-lg border-2 border-gray-200 p-4 md:p-6 hover:shadow-md transition-shadow">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg md:text-xl font-semibold text-gray-700">Products</h3>
-                <div className="w-12 h-12 md:w-14 md:h-14 bg-slate-500 rounded-full flex items-center justify-center">
-                  <img src={dash_icon1} className='p-3' alt="" />
+                <h3 className="text-lg md:text-xl font-semibold text-gray-700">
+                  Products
+                </h3>
+                <div className="w-12 h-12 md:w-14 md:h-14 bg-[#FEC601] rounded-full flex items-center justify-center">
+                  <img src={dash_icon1} className="p-3" alt="" />
                 </div>
               </div>
               <div className="text-4xl text-start md:text-5xl font-bold text-gray-800">
                 {dashboardData.totalProducts}
               </div>
-              <div className="text-xs text-gray-500 mt-2">
-                Total units 
-              </div>
+              <div className="text-xs text-gray-500 mt-2">Total units</div>
               {/* {dashboardData.products.length > 0 && (
                 <div className="text-xs text-gray-500 mt-2">
                   Latest: {dashboardData.products[0].title?.substring(0, 20)}...
@@ -187,13 +201,14 @@ const VendorDashboard = () => {
           <Link to={"/inventory"}>
             <div className="bg-white rounded-lg border-2 border-gray-200 p-4 md:p-6 hover:shadow-md transition-shadow">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg md:text-xl font-semibold text-gray-700">Inventory</h3>
-                <div className="w-12 h-12 md:w-14 md:h-14 bg-slate-500 rounded-full flex items-center justify-center">
-                  <img src={dash_icon2} className='p-3' alt="" />
+                <h3 className="text-lg md:text-xl font-semibold text-gray-700">
+                  Inventory
+                </h3>
+                <div className="w-12 h-12 md:w-14 md:h-14 bg-[#FEC601] rounded-full flex items-center justify-center">
+                  <img src={dash_icon2} className="p-3" alt="" />
                 </div>
               </div>
               <div className="text-4xl text-start md:text-5xl font-bold text-gray-800">
-                 
                 {/* {dashboardData.totalInventory} */}
                 {dashboardData.totalProducts}
               </div>
@@ -207,13 +222,15 @@ const VendorDashboard = () => {
           <Link to={"/total-revenue"}>
             <div className="bg-white rounded-lg border-2 border-gray-200 p-4 md:p-6 hover:shadow-md transition-shadow">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg md:text-xl font-semibold text-gray-700">Total Revenue</h3>
-                <div className="w-12 h-12 md:w-14 md:h-14 bg-slate-500 rounded-full flex items-center justify-center">
-                  <img className='p-3' src={dash_icon3} alt="" />
+                <h3 className="text-lg md:text-xl font-semibold text-gray-700">
+                  Total Revenue
+                </h3>
+                <div className="w-12 h-12 md:w-14 md:h-14 bg-[#FEC601] rounded-full flex items-center justify-center">
+                  <img className="p-3" src={dash_icon3} alt="" />
                 </div>
               </div>
               <div className="text-4xl text-start md:text-5xl font-bold text-gray-800">
-              {dashboardData.totalRevenue ? 0 : 0 } 
+                {dashboardData.totalRevenue ? 0 : 0}
                 {/* {dashboardData.totalRevenue.toFixed(0)} */}
               </div>
               <div className="text-xs text-gray-500 mt-2">
@@ -226,9 +243,11 @@ const VendorDashboard = () => {
           <Link to={"/total-units"}>
             <div className="bg-white rounded-lg border-2 border-gray-200 p-4 md:p-6 hover:shadow-md transition-shadow">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg md:text-xl font-semibold text-gray-700">Total Units sold</h3>
-                <div className="w-12 h-12 md:w-14 md:h-14 bg-slate-500 rounded-full flex items-center justify-center">
-                  <img src={dash_icon4} className='p-3' alt="" />
+                <h3 className="text-lg md:text-xl font-semibold text-gray-700">
+                  Total Units sold
+                </h3>
+                <div className="w-12 h-12 md:w-14 md:h-14 bg-[#FEC601] rounded-full flex items-center justify-center">
+                  <img src={dash_icon4} className="p-3" alt="" />
                 </div>
               </div>
               <div className="text-4xl text-start md:text-5xl font-bold text-gray-800">
@@ -245,18 +264,23 @@ const VendorDashboard = () => {
         {dashboardData.products.length > 0 && (
           <div className="bg-white rounded-lg p-4 md:p-6 mb-6 md:mb-8">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl md:text-2xl font-bold text-gray-900">Recent Products</h2>
-              <Link 
-                to="/products" 
-                className="text-blue-500 hover:text-blue-600 text-sm font-medium"
+              <h2 className="text-xl md:text-2xl font-bold text-gray-900">
+                Recent Products
+              </h2>
+              <Link
+                to="/products"
+                className="text-[#800000] hover:text-[#a00000] text-sm font-medium"
               >
                 View All →
               </Link>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {dashboardData.products.slice(0, 3).map((product) => (
-                <div key={product.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow">
+                <div
+                  key={product.id}
+                  className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow"
+                >
                   <div className="flex items-start space-x-3">
                     {/* Product Image */}
                     <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
@@ -272,25 +296,27 @@ const VendorDashboard = () => {
                         </div>
                       )}
                     </div>
-                    
+
                     {/* Product Info */}
                     <div className="flex-1 min-w-0">
                       <h3 className="font-medium text-gray-900 truncate">
-                        {product.title || 'Untitled Product'}
+                        {product.title || "Untitled Product"}
                       </h3>
                       <p className="text-sm text-gray-600">
-                        {product.category || 'No Category'}
+                        {product.category || "No Category"}
                       </p>
                       <div className="flex items-center justify-between mt-2">
                         <span className="text-lg font-bold text-gray-900">
-                          ₹{product.price || '0'}
+                          ₹{product.price || "0"}
                         </span>
-                        <span className={`px-2 py-1 text-xs rounded-full font-medium ${
-                          product.isPublished 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-yellow-100 text-yellow-800'
-                        }`}>
-                          {product.isPublished ? 'Live' : 'Draft'}
+                        <span
+                          className={`px-2 py-1 text-xs rounded-full font-medium ${
+                            product.isPublished
+                              ? "bg-green-100 text-green-800" // Kept semantic colors
+                              : "bg-yellow-100 text-yellow-800"
+                          }`}
+                        >
+                          {product.isPublished ? "Live" : "Draft"}
                         </span>
                       </div>
                     </div>
@@ -304,16 +330,21 @@ const VendorDashboard = () => {
         {/* Performance Section */}
         <div className="bg-white rounded-lg p-4 md:p-6 lg:p-8">
           <div className="mb-6">
-            <h2 className="text-xl md:text-2xl text-start font-bold text-gray-900 mb-1">Performance</h2>
-            <p className="text-gray-600 text-start text-sm md:text-base mb-2">Sales Statistics</p>
+            <h2 className="text-xl md:text-2xl text-start font-bold text-gray-900 mb-1">
+              Performance
+            </h2>
+            <p className="text-gray-600 text-start text-sm md:text-base mb-2">
+              Sales Statistics
+            </p>
             <p className="text-gray-500 text-start text-xs md:text-sm">
-              Updated: {new Date().toLocaleDateString('en-US', { 
-                month: 'short', 
-                day: 'numeric', 
-                year: 'numeric',
-                hour: 'numeric',
-                minute: '2-digit',
-                hour12: true
+              Updated:{" "}
+              {new Date().toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+                hour: "numeric",
+                minute: "2-digit",
+                hour12: true,
               })}
             </p>
           </div>
@@ -327,8 +358,8 @@ const VendorDashboard = () => {
                   onClick={() => setSelectedPeriod(period)}
                   className={`flex-1  px-4 py-2 text-sm md:text-base lg:w-72 sm:w-56  w-auto  font-medium rounded-md transition-colors ${
                     selectedPeriod === period
-                      ? 'bg-[#7DBBD1] text-white'
-                      : 'text-gray-600 hover:text-gray-800' 
+                      ? "bg-[#800000] text-white" // Maroon active
+                      : "text-gray-600 hover:text-gray-800"
                   }`}
                 >
                   {period}
@@ -342,14 +373,12 @@ const VendorDashboard = () => {
             <div>
               <span className="text-sm text-gray-900 md:text-base">High:</span>
               <span className="font-semibold text-gray-600 ml-1">
-                DEC - ₹{Math.max(...chartData.map(d => d.value))}
+                DEC - ₹{Math.max(...chartData.map((d) => d.value))}
               </span>
             </div>
             <div>
               <span className="text-gray-900 text-sm md:text-base">Low:</span>
-              <span className="font-semibold text-gray-600 ml-1">
-                JUN - ₹0
-              </span>
+              <span className="font-semibold text-gray-600 ml-1">JUN - ₹0</span>
             </div>
           </div>
 
@@ -360,16 +389,21 @@ const VendorDashboard = () => {
                 <div key={index} className="flex flex-col items-center flex-1">
                   <div className="relative w-full flex justify-center mb-2">
                     <span className="text-xs md:text-sm text-gray-600">
-                      {item.value > 0 ? `₹${item.value.toFixed(0)}` : '0'}
+                      {item.value > 0 ? `₹${item.value.toFixed(0)}` : "0"}
                     </span>
                   </div>
-                  <div 
-                    className={`w-full max-w-8 md:max-w-12 rounded-t ${item.color} ${
-                      item.height || (item.value > 0 ? 'h-12 md:h-16' : 'h-2 md:h-4')
+                  <div
+                    className={`w-full max-w-8 md:max-w-12 rounded-t ${
+                      item.color
+                    } ${
+                      item.height ||
+                      (item.value > 0 ? "h-12 md:h-16" : "h-2 md:h-4")
                     } transition-all duration-300`}
                   ></div>
                   <div className="mt-2 md:mt-3">
-                    <span className="text-xs md:text-sm text-gray-600 font-medium">{item.month}</span>
+                    <span className="text-xs md:text-sm text-gray-600 font-medium">
+                      {item.month}
+                    </span>
                   </div>
                 </div>
               ))}
@@ -379,14 +413,16 @@ const VendorDashboard = () => {
 
         {/* Quick Actions Section */}
         {dashboardData.totalProducts === 0 && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mt-6">
-            <h3 className="text-lg font-semibold text-blue-900 mb-2">Get Started</h3>
-            <p className="text-blue-700 mb-4">
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 mt-6">
+            <h3 className="text-lg font-semibold text-yellow-900 mb-2">
+              Get Started
+            </h3>
+            <p className="text-yellow-700 mb-4">
               You haven't added any products yet. Start building your catalog!
             </p>
-            <Link 
-              to="/upload-products" 
-              className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium transition-colors inline-block"
+            <Link
+              to="/upload-products"
+              className="bg-[#800000] hover:bg-[#a00000] text-white px-6 py-3 rounded-lg font-medium transition-colors inline-block"
             >
               Add Your First Product
             </Link>

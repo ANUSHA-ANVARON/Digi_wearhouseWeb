@@ -102,7 +102,7 @@ const Footer = () => {
         </div>
 
         {/* Logos and copyright */}
-        <div className="border-t border-gray-200 mt-12 pt-6 flex flex-col items-center md:flex-row md:items-center md:justify-between space-y-6 md:space-y-0">
+        {/* <div className="border-t border-gray-200 mt-12 pt-6 flex flex-col items-center md:flex-row md:items-center md:justify-between space-y-6 md:space-y-0">
           <div className="flex flex-wrap justify-center md:justify-start items-center pl-0 md:pl-96 space-x-6">
             <img src={Footerlog1} alt="DVYB" className="h-10" />
             <img src={Footerlog2} alt="DVYB DIGI WAREHOUSE" className="h-10" />
@@ -111,7 +111,7 @@ const Footer = () => {
 
           <p className="text-center text-gray-500 text-sm">COPYRIGHT © 2025</p>
           <p className="text-center text-gray-400 text-xs">dvyb.in</p>
-        </div>
+        </div> */}
       </div>
     </footer>
   );

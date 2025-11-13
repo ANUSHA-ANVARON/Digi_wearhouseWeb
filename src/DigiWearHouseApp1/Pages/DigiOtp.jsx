@@ -56,11 +56,11 @@ export default function otpPage() {
 
           <p className="text-xs text-gray-500 mb-6">
             I didn’t receive a code.{" "}
-            <button className="text-blue-500 hover:underline">Resend</button>
+            <button className="text-[#800000] hover:underline">Resend</button>
           </p>
 
           {/* Continue Button */}
-          <button className="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition mb-4">
+          <button className="w-full bg-[#800000] text-white py-3 rounded-lg hover:bg-blue-600 transition mb-4">
             Continue
           </button>
 
@@ -72,7 +72,7 @@ export default function otpPage() {
           {/* Register Link */}
           <p className="text-center text-sm text-gray-600">
             Don’t have an Account?{" "}
-            <a href="/register" className="text-blue-500 hover:underline">
+            <a href="/register" className="text-[#800000] hover:underline">
               Register
             </a>
           </p>

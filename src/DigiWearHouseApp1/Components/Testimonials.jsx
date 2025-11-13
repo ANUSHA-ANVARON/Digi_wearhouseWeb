@@ -12,7 +12,7 @@ const TestimonialCard = ({
   className,
 }) => (
   <div
-    className={`bg-blue-50 rounded-lg p-6 shadow-md max-w-md mx-auto mb-17 transition-transform duration-300 ${className}`}
+    className={`bg-red-50 rounded-lg p-6 shadow-md max-w-md mx-auto mb-17 transition-transform duration-300 ${className}`}
   >
     <div className="flex items-center mb-4">
       <img src={image} alt={name} className="w-12 h-12 rounded-full mr-4" />
@@ -22,7 +22,7 @@ const TestimonialCard = ({
       </div>
     </div>
     <p className="text-gray-700 italic">&quot;{testimonial}&quot;</p>
-    <div className="flex justify-between mt-4 text-blue-600 text-sm">
+    <div className="flex justify-between mt-4 text-red-800 text-sm">
       {reached && <span>Reached {reached}</span>}
       {expanded && <span>Expanded reach to {expanded}</span>}
     </div>
@@ -96,8 +96,8 @@ const Testimonials = () => {
   return (
     <div className="container mx-auto p-6">
       <div className="text-center mb-8">
-        <h2 className="text-2xl md:text-3xl font-bold text-[#1F335C]">
-          Why Vendors Love <span className="text-blue-700">DVYB</span>
+        <h2 className="text-2xl md:text-3xl font-bold text-red-900">
+          Why Vendors Love <span className="text-amber-600">DVYB</span>
         </h2>
         <p className="text-gray-600 text-sm md:text-base mt-1">
           Join thousands of successful vendors who've transformed their business
@@ -105,8 +105,8 @@ const Testimonials = () => {
 
         {/* Stats Boxes */}
         {/* <div className="mt-6 mb-4 inline-flex rounded-full overflow-hidden border border-gray-200 shadow-sm">
-          <div className="bg-blue-100 px-6 py-3 text-center">
-            <p className="text-2xl font-semibold text-blue-700">3,157+</p>
+          <div className="bg-red-100 px-6 py-3 text-center">
+            <p className="text-2xl font-semibold text-red-800">3,157+</p>
             <p className="text-xs text-gray-600">Active Vendors</p>
           </div>
           <div className="border-l border-r border-gray-200 bg-green-100 px-6 py-3 text-center">
@@ -114,13 +114,13 @@ const Testimonials = () => {
             <p className="text-xs text-gray-600">Monthly Sales</p>
           </div>
           <div className="bg-yellow-100 px-6 py-3 text-center">
-            <p className="text-2xl font-semibold text-yellow-600">4.8/5</p>
+            <p className="text-2xl font-semibold text-amber-600">4.8/5</p>
             <p className="text-xs text-gray-600">App Rating</p>
           </div>
         </div> */}
         <div className="mt-6 mb-4 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-0 rounded-2xl overflow-hidden border border-gray-200 shadow-sm">
-          <div className="bg-blue-100 px-4 sm:px-6 py-3 text-center">
-            <p className="text-xl sm:text-2xl font-semibold text-blue-700">
+          <div className="bg-red-100 px-4 sm:px-6 py-3 text-center">
+            <p className="text-xl sm:text-2xl font-semibold text-red-800">
               3,157+
             </p>
             <p className="text-xs sm:text-sm text-gray-600">Active Vendors</p>
@@ -133,8 +133,8 @@ const Testimonials = () => {
             <p className="text-xs sm:text-sm text-gray-600">Monthly Sales</p>
           </div>
 
-          <div className="bg-yellow-100 px-4 sm:px-6 py-3 text-center">
-            <p className="text-xl sm:text-2xl font-semibold text-yellow-600">
+          <div className="bg-yellow-50 px-4 sm:px-6 py-3 text-center">
+            <p className="text-xl sm:text-2xl font-semibold text-amber-600">
               4.8/5
             </p>
             <p className="text-xs sm:text-sm text-gray-600">App Rating</p>
