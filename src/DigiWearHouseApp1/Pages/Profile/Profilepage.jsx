@@ -9,7 +9,6 @@ const Profilepage = () => {
   const { currentUser, userData, signOut } = useApp();
   const [activeSection, setActiveSection] = useState("account");
   const [isEditing, setIsEditing] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [updateLoading, setUpdateLoading] = useState(false);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
@@ -70,7 +69,7 @@ const Profilepage = () => {
     { id: "support", label: "Support" },
   ];
 
-  // Load user data
+  // Real-time listener with onSnapshot
   useEffect(() => {
     const loadUserData = async () => {
       if (!currentUser) {
@@ -128,12 +127,13 @@ const Profilepage = () => {
       } finally {
         setLoading(false);
       }
-    };
+    }, (error) => {
+      setError('Failed to load profile data: ' + error.message);
+    });
 
-    loadUserData();
-  }, [currentUser]);
+    return () => unsubscribe(); // Cleanup listener on unmount
+  }, [currentUser, setError]);
 
-  // Clear messages after 5 seconds
   useEffect(() => {
     if (successMessage || error) {
       const timer = setTimeout(() => {
@@ -144,7 +144,6 @@ const Profilepage = () => {
     }
   }, [successMessage, error]);
 
-  // Handle input changes
   const handleInputChange = (field, value) => {
     setProfileData((prev) => ({
       ...prev,
@@ -152,7 +151,6 @@ const Profilepage = () => {
     }));
   };
 
-  // Handle array field changes
   const handleArrayFieldChange = (field, value, isSelected) => {
     setProfileData((prev) => ({
       ...prev,
@@ -162,13 +160,10 @@ const Profilepage = () => {
     }));
   };
 
-  // Handle image uploads
   const handleImageUpload = async (e, type) => {
     if (!isEditing || !currentUser) return;
-
     const file = e.target.files[0];
     if (!file) return;
-
     try {
       setUpdateLoading(true);
       const storageRef = ref(storage, `users/${currentUser.uid}/${type}`);
@@ -196,7 +191,6 @@ const Profilepage = () => {
     }
   };
 
-  // Handle edit/save functionality
   const handleEdit = () => {
     setIsEditing(true);
   };
@@ -227,7 +221,6 @@ const Profilepage = () => {
       setError("Invalid GSTN number");
       return;
     }
-
     setUpdateLoading(true);
     setError("");
 
@@ -238,12 +231,12 @@ const Profilepage = () => {
       switch (activeSection) {
         case "account":
           updateData = {
+            ...updateData,
             firstName: profileData.fullName,
             contactNumber: profileData.mobileNumber,
             address: profileData.address,
             updatedAt: new Date().toISOString(),
           };
-
           if (profileData.fullName !== currentUser.displayName) {
             await updateProfile(currentUser, {
               displayName: profileData.fullName,
@@ -265,6 +258,7 @@ const Profilepage = () => {
 
         case "vendor":
           updateData = {
+            ...updateData,
             vendorPreferences: {
               sellsFor: profileData.sellsFor,
               categories: profileData.selectedCategories,
@@ -278,6 +272,7 @@ const Profilepage = () => {
 
         case "shop":
           updateData = {
+            ...updateData,
             shopDetails: {
               shopName: profileData.shopName,
               gstnNumber: profileData.gstnNumber,
@@ -291,6 +286,7 @@ const Profilepage = () => {
 
         case "payout":
           updateData = {
+            ...updateData,
             bankDetails: {
               bankName: profileData.bankName,
               branchName: profileData.bankAddress,
@@ -303,7 +299,6 @@ const Profilepage = () => {
           };
           break;
       }
-
       await updateDoc(userDocRef, updateData);
       setSuccessMessage("Profile updated successfully!");
       setIsEditing(false);
@@ -982,14 +977,13 @@ const Profilepage = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-blue mx-auto mb-4"></div>
           <p className="text-gray-600">Loading your profile...</p>
         </div>
       </div>
     );
   }
 
-  // Error state for unauthenticated users
   if (error && !currentUser) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">

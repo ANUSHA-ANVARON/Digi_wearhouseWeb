@@ -1,0 +1,181 @@
+import menImage from "../assets/men.png";
+import womenImage from "../assets/women.png";
+import kidsImage from "../assets/kids.png";
+import accessoriesImage from "../assets/accessories.png"; 
+ 
+ // Categories data with subcategories
+  const   categories = [
+    {
+      id: 1,
+      name: "Women",
+      image: womenImage,
+      backgroundColor: "#D4A574",
+      subcategories: {
+        Topwear: [
+          "T-shirts",
+          "Tops & Blouses",
+          "Shirts",
+          "Kurtis & Kurtas",
+          "Tunics",
+          "Tank Tops",
+          "Crop Tops",
+          "Camisoles",
+        ],
+        Bottomwear: [
+          "Jeans",
+          "Trousers & Pants",
+          "Leggings",
+          "Palazzos",
+          "Skirts",
+          "Shorts",
+          "Jeggings",
+          "Culottes",
+          "Dhoti Pants",
+        ],
+        "Ethnic wear": [
+          "Sarees",
+          "Salwar Suits",
+          "Lehengas",
+          "Anarkalis",
+          "Dupattas",
+          "Ethnic Jackets",
+          "Gowns",
+        ],
+        Jumpsuits: [
+          "Maxi Dresses",
+          "Midi Dresses",
+          "Bodycon Dresses",
+          "A-line Dresses",
+          "Jumpsuits",
+          "Rompers",
+        ],
+        Sleepwear: [
+          "Night Suits",
+          "Nighties",
+          "Pyjamas",
+          "Loungewear Sets",
+          "Robes",
+        ],
+        Winterwear: [
+          "Sweaters",
+          "Cardigans",
+          "Sweatshirts",
+          "Jackets",
+          "Coats",
+          "Shawls",
+          "Ponchos",
+        ],
+        Activewear: [
+          "Sports Bras",
+          "Track Pants",
+          "Workout T-Shirts",
+          "Yoga Pants",
+          "Joggers",
+        ],
+        Innerwear: ["Bras", "Panties", "Slips & Camisoles", "Shapewear"],
+        Maternitywear: [
+          "Maternity Dresses",
+          "Feeding Tops",
+          "Maternity Leggings",
+        ],
+      },
+    },
+    {
+      id: 2,
+      name: "Men",
+      image: menImage,
+      backgroundColor: "#E53E3E",
+      subcategories: {
+        Topwear: [
+          "T-shirts",
+          "Shirts",
+          "Polo shirts",
+          "Henleys",
+          "Sweatshirt",
+          "Kurtas",
+        ],
+        Bottomwear: [
+          "Jeans",
+          "Trousers",
+          "Shorts",
+          "Track Pants",
+          "Cargos",
+          "Chinos",
+          "Dhotis & Pajamas",
+        ],
+        "Ethnic wear": [
+          "Kurta Sets",
+          "Sherwanis",
+          "Nehru Jackets",
+          "Pathani Suits",
+        ],
+        Winterwear: [
+          "Jackets",
+          "Sweaters",
+          "Hoodies",
+          "Blazers",
+          "Thermal Wear",
+        ],
+        Activewear: [
+          "Gym T-Shirts",
+          "Running Shorts",
+          "Sports Jackets",
+          "Joggers",
+        ],
+        Innerwear: [
+          "Vests",
+          "Boxers",
+          "Briefs",
+          "Nightwear Sets",
+          "Loungewear Sets",
+        ],
+      },
+    },
+    {
+      id: 3,
+      name: "Kids",
+      image: kidsImage,
+      backgroundColor: "#B8860B",
+      subcategories: {
+        Girls: [
+          "Frocks & Dresses",
+          "Tops & T-Shirts",
+          "Skirts & Shorts",
+          "Jeans & Leggings",
+          "Lehengas",
+          "Kurti set",
+          "Nightwear",
+          "Sweaters & Jacket",
+        ],
+        Boys: [
+          "T-Shirts & Shirts",
+          "Jeans & Trousers",
+          "Kurta sets",
+          "Sherwanis",
+          "Sweatshirts & Jacket",
+          "Nightwear",
+        ],
+        "Infants (0-2)": [
+          "Bodysuits",
+          "Rompers",
+          "Sleepsuits",
+          "Frocks (Girls)",
+          "Sweatshirts & Jacket",
+          "Baby sets",
+          "Thermal Wear",
+          "Diaper pants",
+        ],
+      },
+    },
+    {
+      id: 4,
+      name: "Accessories",
+      image: accessoriesImage,
+      backgroundColor: "#F5DEB3",
+      subcategories: {
+        Accessories: ["Dupattas", "Socks", "Scarves", "Ties", "Pocket Squares"],
+      },
+    },
+  ];
+
+  export default categories

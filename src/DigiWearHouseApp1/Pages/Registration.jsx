@@ -4,21 +4,18 @@ import digiLogoPoster from "../../assets/Digiware_logoPoster.png";
 import digi_logo from "../../assets/digi_logo.png";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, ArrowRight } from "lucide-react";
+import {
+  validateLoginForm,
+  validateRegistrationForm, 
+  validateShopDetails, 
+  validateBankDetails, 
+  validatePAN, 
+  validateGSTIN,
+  validateAadhar, 
+  validateKycDetails } from '../../Validations/registerValidatons'
 
 const DigiWarehouseRegistration = () => {
   const navigate = useNavigate();
-  // const {
-  //   currentUser,
-  //   userData,
-  //   registerUser,
-  //   loginUser,
-  //   checkUserExists,
-  //   signOut,
-  //   clearError,
-  //   error: authError,
-  //   setError,
-  // } = useApp();
-  // Add to your imports in DigiWarehouseRegistration.js
   const {
     currentUser,
     userData,
@@ -33,21 +30,19 @@ const DigiWarehouseRegistration = () => {
     verifyOtp,
     googleSignIn,
     confirmationResult,
+    getVendorProfileByUid,
   } = useApp();
 
-  // Auth States
   const [currentStep, setCurrentStep] = useState("login");
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [successMessage, setSuccessMessage] = useState("");
 
-  // Login States
   const [loginData, setLoginData] = useState({
     email: "",
     password: "",
   });
 
-  // Registration States
   const [registerData, setRegisterData] = useState({
     username: "",
     firstName: "",
@@ -57,7 +52,6 @@ const DigiWarehouseRegistration = () => {
     contactNumber: "",
   });
 
-  // Shop Details States
   const [shopData, setShopData] = useState({
     shopName: "",
     shopAddress: "",
@@ -66,7 +60,6 @@ const DigiWarehouseRegistration = () => {
     pincode: "",
   });
 
-  // Bank Details States
   const [bankData, setBankData] = useState({
     accountHolder: "",
     accountNumber: "",
@@ -76,14 +69,7 @@ const DigiWarehouseRegistration = () => {
     branchName: "",
   });
 
-  // KYC File States
-  const [kycDetails, setKycDetails] = useState({
-    panNumber: "",
-    gstinNumber: "",
-    aadharNumber: "",
-  });
 
-  // Add these new states after your existing states
   const [otpData, setOtpData] = useState({
     otp: ["", "", "", "", "", ""],
     phoneNumber: "",
@@ -92,19 +78,27 @@ const DigiWarehouseRegistration = () => {
     resendCount: 0,
     timer: 0,
   });
+  
+  const [kycDetails, setKycDetails] = useState({
+  panNumber: "",
+  gstinNumber: "",
+  aadharNumber: "",
+});
 
-  // Add timer effect
+
   useEffect(() => {
-    let interval = null;
-    if (otpData.timer > 0) {
-      interval = setInterval(() => {
-        setOtpData((prev) => ({ ...prev, timer: prev.timer - 1 }));
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [otpData.timer]);
+  let interval = null;
+  if (otpData.timer > 0) {
+    interval = setInterval(() => {
+      setOtpData((prev) => ({ ...prev, timer: prev.timer - 1 }));
+    }, 1000);
+  } else if (interval) {
+    clearInterval(interval);
+  }
+  return () => clearInterval(interval);
+}, [otpData.timer]);
 
-  // Clear messages after 5 seconds
+
   useEffect(() => {
     if (successMessage) {
       const timer = setTimeout(() => setSuccessMessage(""), 5000);
@@ -119,156 +113,52 @@ const DigiWarehouseRegistration = () => {
     }
   }, [authError, clearError]);
 
-  // Redirect if user is logged in
   useEffect(() => {
-    if (currentUser && userData) {
-      console.log("User is logged in:", userData);
-      // Add navigation to dashboard here
-      // navigate("/dashboard");
+    if (currentStep === "register" && currentUser) {
+      const fetchProfile = async () => {
+        const profile = await getVendorProfileByUid(currentUser.uid);
+        if (profile) {
+          setRegisterData((prev) => ({
+            ...prev,
+            username: profile.username || "",
+            firstName: profile.firstName || "",
+            email: profile.email || "",
+            contactNumber: profile.contactNumber || "",
+          }));
+          setShopData((prev) => ({
+            ...prev,
+            ...profile.shopDetails,
+          }));
+          setBankData((prev) => ({
+            ...prev,
+            ...profile.bankDetails,
+          }));
+          setKycDetails((prev) => ({
+            ...prev,
+            ...profile.kycDocuments,
+          }));
+          if (profile.registrationCompleted) {
+            navigate("/dashboard");
+          }
+        } else {
+          const prefillData = JSON.parse(sessionStorage.getItem("registerPrefill"));
+          if (prefillData) {
+            setRegisterData((prev) => ({
+              ...prev,
+              email: prefillData.email || "",
+              firstName: prefillData.firstName || "",
+            }));
+            sessionStorage.removeItem("registerPrefill");
+          }
+        }
+      };
+      fetchProfile();
     }
-  }, [currentUser, userData]);
+  }, [currentStep, currentUser, getVendorProfileByUid, navigate]);
 
-  // Validation Functions
-  const validateLoginForm = (data) => {
-    const errors = {};
-    if (!data.email.trim()) errors.email = "Email is required";
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
-      errors.email = "Invalid email format";
-    }
-    if (!data.password.trim()) errors.password = "Password is required";
-    return { isValid: Object.keys(errors).length === 0, errors };
-  };
 
-  const validateRegistrationForm = (data) => {
-    const errors = {};
-    if (!data.username.trim()) errors.username = "Username is required";
-    if (!data.firstName.trim()) errors.firstName = "First name is required";
-    if (!data.email.trim()) errors.email = "Email is required";
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
-      errors.email = "Invalid email format";
-    }
-    if (!data.password.trim()) errors.password = "Password is required";
-    else if (data.password.length < 6) {
-      errors.password = "Password must be at least 6 characters";
-    }
-    if (data.password !== data.confirmPassword) {
-      errors.confirmPassword = "Passwords do not match";
-    }
-    if (!data.contactNumber || !/^\d{10}$/.test(data.contactNumber)) {
-      errors.contactNumber = "Valid 10-digit mobile number is required";
-    }
-    return { isValid: Object.keys(errors).length === 0, errors };
-  };
-
-  const validateShopDetails = (data) => {
-    const errors = {};
-    if (!data.shopName.trim()) errors.shopName = "Shop name is required";
-    if (!data.shopAddress.trim())
-      errors.shopAddress = "Shop address is required";
-    if (!data.city.trim()) errors.city = "City is required";
-    if (!data.state.trim()) errors.state = "State is required";
-    if (!data.pincode || !/^\d{6}$/.test(data.pincode)) {
-      errors.pincode = "Valid 6-digit pincode is required";
-    }
-    return { isValid: Object.keys(errors).length === 0, errors };
-  };
-
-  const validateBankDetails = (data) => {
-    const errors = {};
-    if (!data.bankName) errors.bankName = "Bank name is required";
-    if (!data.branchName.trim()) errors.branchName = "Branch name is required";
-    if (!data.accountHolder.trim())
-      errors.accountHolder = "Account holder name is required";
-    if (!data.accountNumber || !/^\d+$/.test(data.accountNumber)) {
-      errors.accountNumber = "Valid account number is required";
-    }
-    if (data.accountNumber !== data.reAccountNumber) {
-      errors.reAccountNumber = "Account numbers do not match";
-    }
-    if (!data.ifscCode || !/^[A-Z]{4}0[A-Z0-9]{6}$/.test(data.ifscCode)) {
-      errors.ifscCode = "Valid IFSC code is required";
-    }
-    return { isValid: Object.keys(errors).length === 0, errors };
-  };
-
-  const validatePAN = (pan) => {
-    const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
-    return panRegex.test(pan);
-  };
-
-  const validateGSTIN = (gstin) => {
-    const gstinRegex =
-      /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
-    return gstinRegex.test(gstin);
-  };
-
-  const validateAadhar = (aadhar) => {
-    const aadharRegex = /^[0-9]{12}$/;
-    return aadharRegex.test(aadhar);
-  };
-
-  // 3. Update validateKycDetails function (replace existing)
-  const validateKycDetails = () => {
-    const errors = {};
-
-    if (!kycDetails.panNumber.trim()) {
-      errors.panNumber = "PAN number is required";
-    } else if (!validatePAN(kycDetails.panNumber)) {
-      errors.panNumber = "Invalid PAN format (e.g., ABCDE1234F)";
-    }
-
-    if (kycDetails.gstinNumber.trim()) {
-      if (!validateGSTIN(kycDetails.gstinNumber)) {
-        errors.gstinNumber = "Invalid GSTIN format (15 characters)";
-      }
-    }
-
-    if (!kycDetails.aadharNumber.trim()) {
-      errors.aadharNumber = "Aadhar number is required";
-    } else if (!validateAadhar(kycDetails.aadharNumber)) {
-      errors.aadharNumber = "Invalid Aadhar format (12 digits)";
-    }
-
-    return { isValid: Object.keys(errors).length === 0, errors };
-  };
-
-  // Update the initializeRecaptcha function in your Context.js
-  const initializeRecaptcha = () => {
-    try {
-      // Check if container exists first
-      const container = document.getElementById("recaptcha-container");
-      if (!container) {
-        throw new Error(
-          "reCAPTCHA container not found. Please ensure the OTP form is rendered first."
-        );
-      }
-
-      if (!recaptchaVerifier) {
-        const verifier = new RecaptchaVerifier(auth, "recaptcha-container", {
-          size: "invisible",
-          callback: (response) => {
-            console.log("reCAPTCHA solved");
-          },
-          "expired-callback": () => {
-            console.log("reCAPTCHA expired");
-            setError("reCAPTCHA expired. Please try again.");
-          },
-        });
-        setRecaptchaVerifier(verifier);
-        return verifier;
-      }
-      return recaptchaVerifier;
-    } catch (error) {
-      console.error("Error initializing reCAPTCHA:", error);
-      setError("Failed to initialize verification. Please try again.");
-      throw error;
-    }
-  };
-
-  // Event Handlers
   const handleLogin = async () => {
     const validation = validateLoginForm(loginData);
-
     if (!validation.isValid) {
       setErrors(validation.errors);
       return;
@@ -278,12 +168,23 @@ const DigiWarehouseRegistration = () => {
     setErrors({});
     clearError();
     try {
-      await loginUser(loginData.email, loginData.password);
+      const { user } = await loginUser(loginData.email, loginData.password);
       setSuccessMessage("Login successful!");
-      // Add this line:
-      navigate("/dashboard");
+      const profile = await getVendorProfileByUid(user.uid);
+      if (profile && profile.registrationCompleted === true) {
+        console.log("Login successful, navigating to /dashboard");
+        navigate("/dashboard");
+      } else {
+        console.log("Registration incomplete, navigating to /register");
+        navigate("/register");
+        sessionStorage.setItem(
+          "registerNotice",
+          "Please complete your vendor registration to continue."
+        );
+      }
     } catch (error) {
-      setErrors({ general: error.message });
+      console.error("Login error:", error);
+      setErrors({ general: error.message || "Failed to log in. Please try again." });
     } finally {
       setIsLoading(false);
     }
@@ -321,16 +222,13 @@ const DigiWarehouseRegistration = () => {
     }
   };
 
-  // 4. Add KYC input change handler
   const handleKycInputChange = (e) => {
     const { name, value } = e.target;
-
-    // Auto-format inputs
     let formattedValue = value;
     if (name === "panNumber" || name === "gstinNumber") {
       formattedValue = value.toUpperCase();
     } else if (name === "aadharNumber") {
-      formattedValue = value.replace(/\D/g, ""); // Only allow digits
+      formattedValue = value.replace(/\D/g, "");
     }
 
     setKycDetails((prev) => ({
@@ -338,7 +236,6 @@ const DigiWarehouseRegistration = () => {
       [name]: formattedValue,
     }));
 
-    // Clear specific field error when user starts typing
     if (errors[name]) {
       setErrors((prev) => ({
         ...prev,
@@ -396,9 +293,8 @@ const DigiWarehouseRegistration = () => {
     setCurrentStep("kyc");
   };
 
-  // Update handleKycSubmit in your Registration component
   const handleKycSubmit = async () => {
-    const validation = validateKycDetails();
+    const validation = validateKycDetails(kycDetails);
 
     if (!validation.isValid) {
       setErrors(validation.errors);
@@ -408,7 +304,6 @@ const DigiWarehouseRegistration = () => {
     setErrors({});
     clearError();
 
-    // First, move to OTP verification step to render the reCAPTCHA container
     setCurrentStep("otpVerification");
     setOtpData((prev) => ({
       ...prev,
@@ -416,27 +311,23 @@ const DigiWarehouseRegistration = () => {
       isOtpSent: false,
     }));
 
-    // Then send OTP after a brief delay to ensure DOM is ready
     setTimeout(async () => {
       setIsLoading(true);
       try {
         await sendOtp(registerData.contactNumber);
-
         setOtpData((prev) => ({
           ...prev,
           isOtpSent: true,
           timer: 60,
         }));
-
         setSuccessMessage(`OTP sent to +91${registerData.contactNumber}`);
       } catch (error) {
         setErrors({ general: error.message });
-        // Go back to KYC step if OTP sending fails
         setCurrentStep("kyc");
       } finally {
         setIsLoading(false);
       }
-    }, 500); // 500ms delay to ensure DOM is ready
+    }, 500);
   };
 
   const handleGoogleSignIn = async () => {
@@ -445,9 +336,8 @@ const DigiWarehouseRegistration = () => {
     clearError();
     try {
       await googleSignIn();
-      setSuccessMessage("Google sign-in successful!");
-      // Navigate to dashboard or profile completion if needed
-      navigate("/dashboard");
+      setSuccessMessage("Google sign-in successful! Please complete registration.");
+      setCurrentStep("register");
     } catch (error) {
       setErrors({
         general: error.message || "Google sign-in failed. Please try again.",
@@ -476,7 +366,6 @@ const DigiWarehouseRegistration = () => {
       confirmPassword: "",
       contactNumber: "",
     });
-    // setKycFiles({ licenseFront: null, aadharFront: null, aadharBack: null });
   };
 
   const goBack = () => {
@@ -490,9 +379,6 @@ const DigiWarehouseRegistration = () => {
     else if (currentStep === "otpVerification") setCurrentStep("kyc");
   };
 
-  // Send OTP function (you'll need to implement your SMS service)
-
-  // Handle OTP input change
   const handleOtpChange = (index, value) => {
     if (value.length > 1) return;
 
@@ -510,8 +396,6 @@ const DigiWarehouseRegistration = () => {
       setErrors((prev) => ({ ...prev, otp: "" }));
     }
   };
-
-  // Handle OTP submission
 
   const handleOtpSubmit = async () => {
     const otpString = otpData.otp.join("");
@@ -534,7 +418,6 @@ const DigiWarehouseRegistration = () => {
     }
   };
 
-  // Complete registration after OTP verification
   const completeRegistration = async () => {
     try {
       const completeUserData = {
@@ -558,7 +441,6 @@ const DigiWarehouseRegistration = () => {
         completeUserData
       );
       setSuccessMessage("Registration completed successfully!");
-
       setTimeout(() => {
         navigate("/dashboard");
       }, 2000);
@@ -567,8 +449,6 @@ const DigiWarehouseRegistration = () => {
     }
   };
 
-  // Resend OTP
-  // Update handleResendOtp in your Registration component
   const handleResendOtp = async () => {
     if (otpData.resendCount >= 3) {
       setErrors({ otp: "Maximum resend attempts reached" });
@@ -584,7 +464,6 @@ const DigiWarehouseRegistration = () => {
     setErrors({});
 
     try {
-      // Clear previous reCAPTCHA verifier
       if (window.recaptchaVerifier) {
         window.recaptchaVerifier.clear();
       }
@@ -616,7 +495,6 @@ const DigiWarehouseRegistration = () => {
     }
   };
 
-  // Form Renderers
   const renderLoginForm = () => (
     <>
       <div>
@@ -693,18 +571,6 @@ const DigiWarehouseRegistration = () => {
         </div>
       </div>
 
-      {/* <button
-        onClick={handleGoogleSignIn}
-        className="w-full bg-white cursor-pointer hover:bg-slate-50 text-slate-700 font-medium py-3 px-2 rounded-xl border border-slate-200 transition-all duration-200 shadow-sm hover:shadow-md flex items-center justify-center gap-3"
-      >
-        <svg className="w-5 h-5" viewBox="0 0 24 24">
-          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-        </svg>
-        Sign in with<span className="text-blue-600 font-semibold">Google</span>
-      </button> */}
       <button
         onClick={handleGoogleSignIn}
         disabled={isLoading}
@@ -735,11 +601,7 @@ const DigiWarehouseRegistration = () => {
                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
               />
             </svg>
-            Sign in with{" "}
-            <span className="text-blue-600 font-semibold relative right-2">
-              Google
-            </span>
-            {/* <span className="text-blue-600 font-semibold">Google</span> */}
+            Sign in with <span className="text-blue-600 font-semibold">Google</span>
           </>
         )}
       </button>
@@ -860,9 +722,7 @@ const DigiWarehouseRegistration = () => {
             }`}
           />
           {errors.confirmPassword && (
-            <p className="text-red-500 text-xs mt-1">
-              {errors.confirmPassword}
-            </p>
+            <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>
           )}
         </div>
       </div>
@@ -967,14 +827,6 @@ const DigiWarehouseRegistration = () => {
         )}
       </div>
 
-      {/* <div className="flex justify-center mt-6">
-        <button
-          onClick={handleShopDetailsSubmit}
-          className="bg-cyan-600 hover:bg-cyan-700 text-white font-semibold py-2 px-6 rounded-lg transition-all duration-200 shadow"
-        >
-          Next <ArrowRight/>
-        </button>
-      </div> */}
       <div className="flex justify-center mt-6">
         <button
           onClick={handleShopDetailsSubmit}
@@ -1189,7 +1041,7 @@ const DigiWarehouseRegistration = () => {
               <ArrowRight className="w-4 h-4" />
             </div>
           ) : (
-            "Next "
+            "Next"
           )}
         </button>
       </div>
@@ -1316,14 +1168,12 @@ const DigiWarehouseRegistration = () => {
         )}
       </div>
 
-      {/* reCAPTCHA container */}
       <div id="recaptcha-container"></div>
     </div>
   );
 
   return (
     <div className="flex w-screen overflow-hidden min-h-screen">
-      {/* Left Section - Dynamic Form */}
       <div className="flex-1 flex items-center justify-center bg-white px-6 sm:px-10 md:px-16 lg:px-20 mb-6 sm:mb-8 ml-0 lg:ml-24">
         <div className="w-full max-w-sm sm:max-w-md lg:max-w-md">
           {/* Logo */}
@@ -1342,21 +1192,18 @@ const DigiWarehouseRegistration = () => {
             />
           </div>
 
-          {/* Dynamic Form Card */}
           <div className="bg-white rounded-2xl shadow-xl p-8 border border-slate-100 min-h-[500px] flex flex-col justify-between">
             <div>
               <h2 className="text-2xl font-bold text-slate-800 mb-6">
                 {getFormTitle()}
               </h2>
 
-              {/* Success Message */}
               {successMessage && (
                 <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
                   <p className="text-green-700 text-sm">{successMessage}</p>
                 </div>
               )}
 
-              {/* Error Message */}
               {(authError || errors.general) && (
                 <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
                   <p className="text-red-700 text-sm">
@@ -1368,7 +1215,6 @@ const DigiWarehouseRegistration = () => {
               <div className="space-y-6">{getCurrentForm()}</div>
             </div>
 
-            {/* Footer Links */}
             <div className="text-center space-y-2 pt-3">
               {showRegisterLink() && (
                 <p className="text-xs text-slate-500">
@@ -1396,7 +1242,8 @@ const DigiWarehouseRegistration = () => {
 
               {(currentStep === "shopDetails" ||
                 currentStep === "bankDetails" ||
-                currentStep === "kyc") && (
+                currentStep === "kyc" ||
+                currentStep === "otpVerification") && (
                 <div className="flex items-center">
                   <button
                     onClick={goBack}
@@ -1412,13 +1259,10 @@ const DigiWarehouseRegistration = () => {
         </div>
       </div>
 
-      {/* Right Section - Poster (hidden on mobile) */}
       <div className="hidden md:flex flex-2 relative">
-        {/* Split Backgrounds */}
         <div className="w-1/2 bg-white"></div>
         <div className="w-1/2 bg-[#800000] relative"></div>
 
-        {/* Center Image */}
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="rounded-2xl overflow-hidden shadow-2xl w-[602px]">
             <img

@@ -10,21 +10,22 @@ import TotalUnitsSoldController from "../DigiWearHouseApp1/Pages/Dashboard/Total
 import InventoryController from "../DigiWearHouseApp1/Pages/Dashboard/Inventorypage.jsx";
 import TotalRevenueController from "../DigiWearHouseApp1/Pages/Dashboard/Revenuepage.jsx";
 // import CommissionPage from '../DigiWearHouseApp1/Pages/Dashboard/CommissionPage.jsx';
-import RecentlyAddedProductsPage from "../DigiWearHouseApp1/Pages/Dashboard/RecentlyAddedProductsPage.jsx";
-import ProductsPage from "../DigiWearHouseApp1/Pages/Dashboard/ProductPage.jsx";
-import UploadProducts from "../DigiWearHouseApp1/Pages/Products/Uploadproducts.jsx";
-import TryonPreview from "../DigiWearHouseApp1/Pages/Products/TryonPreviewpage.jsx";
-import { AppProvider } from "../DigiWearHouseApp1/context/Context.jsx";
-import UserProductsList from "../DigiWearHouseApp1/Pages/Products/productList.jsx";
-import HomePage from "../DigiWearHouseApp1/Pages/HomePage.jsx";
-import Whoweare from "../DigiWearHouseApp1/Pages/Whoweare.jsx";
-import ContactUs from "../DigiWearHouseApp1/Pages/contactus.jsx";
-import TermsAndConditions from "../DigiWearHouseApp1/Pages/TermsAndConditions.jsx";
-import PrivacyAndPolicy from "../DigiWearHouseApp1/Pages/PrivacyPolicy.jsx";
-import OrdersManagementSystem from "../DigiWearHouseApp1/Pages/OrdersManagementSystem.jsx";
-import SizeChart from "../DigiWearHouseApp1/Components/SizeChart.jsx";
-import ScrolltoTop from "../DigiWearHouseApp1/Components/ScrolltoTop.jsx";
-import ViewInstructionsPage from "../DigiWearHouseApp1/Pages/ViewInstructionsPage.jsx";
+import RecentlyAddedProductsPage from '../DigiWearHouseApp1/Pages/Dashboard/RecentlyAddedProductsPage.jsx';
+import ProductsPage from '../DigiWearHouseApp1/Pages/Dashboard/ProductPage.jsx';
+import UploadProducts from '../DigiWearHouseApp1/Pages/Products/Uploadproducts.jsx';
+import TryonPreview from '../DigiWearHouseApp1/Pages/Products/TryonPreviewpage.jsx';
+import { AppProvider } from "../DigiWearHouseApp1/context/Context.jsx"
+import UserProductsList from '../DigiWearHouseApp1/Pages/Products/productList.jsx';
+import HomePage from '../DigiWearHouseApp1/Pages/HomePage.jsx';
+import Whoweare from '../DigiWearHouseApp1/Pages/Whoweare.jsx';
+import ContactUs from '../DigiWearHouseApp1/Pages/contactus.jsx';
+import TermsAndConditions from '../DigiWearHouseApp1/Pages/TermsAndConditions.jsx';
+import PrivacyAndPolicy from '../DigiWearHouseApp1/Pages/PrivacyPolicy.jsx';
+import OrdersManagementSystem from '../DigiWearHouseApp1/Pages/OrdersManagementSystem.jsx';
+import SizeChart from '../DigiWearHouseApp1/Components/SizeChart.jsx';
+import ScrolltoTop from '../DigiWearHouseApp1/Components/ScrolltoTop.jsx'
+import ViewInstructionsPage from '../DigiWearHouseApp1/Pages/ViewInstructionsPage.jsx';
+import RequireRegistration from '../RequireRegistration.jsx';
 
 function DigiwearHouse() {
   const location = useLocation();
@@ -35,9 +36,9 @@ function DigiwearHouse() {
   return (
     <>
       <ScrolltoTop />
-      {!hideNavbar && <Navbar />}
 
       <AppProvider>
+        {!hideNavbar && <Navbar />}
         <Routes>
           {/* Default route */}
           {/* <Route path="/login" element={< DigiWarehouseLogin/>} /> */}
@@ -45,17 +46,23 @@ function DigiwearHouse() {
           <Route path="/register" element={<DigiWarehouseRegistration />} />
           <Route path="/" element={<HomePage />} />
           <Route path="/contact-us" element={<ContactUs />} />
-          <Route
-            path="/terms-and-conditions"
-            element={<TermsAndConditions />}
-          />
+          <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
 
           {/* <Route path="/digiwearhouse" element={<DigiwearHouse/>} /> */}
           <Route path="/privacy-policy" element={<PrivacyAndPolicy />} />
 
           <Route path="/who-we-are" element={<Whoweare />} />
           <Route path="/orders" element={<OrdersManagementSystem />} />
-          <Route path="/dashboard" element={<VendorDashboard />} />
+          {/* <Route path="/dashboard" element={} /> */}
+          <Route
+            path="/dashboard"
+            element={
+              <RequireRegistration>
+                <VendorDashboard />
+              </RequireRegistration>
+            }
+          />
+          <Route path="/login" element={<DigiWarehouseRegistration />} />
           <Route path="/profile" element={<Profilepage />} />
           <Route path="/recenltyproducts" element={<UserProductsList />} />
 
