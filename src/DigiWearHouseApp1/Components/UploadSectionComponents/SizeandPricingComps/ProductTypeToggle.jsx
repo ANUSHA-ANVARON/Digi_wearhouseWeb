@@ -1,5 +1,5 @@
-import React from 'react';
-import { PRODUCT_TYPES } from '../../../constants/productConstants';
+import React from "react";
+import { PRODUCT_TYPES } from "../../../constants/productConstants";
 
 const ProductTypeToggle = ({ value, onChange }) => (
   <div className="space-y-2">
@@ -14,7 +14,7 @@ const ProductTypeToggle = ({ value, onChange }) => (
           onClick={() => onChange(type)}
           className={`px-6 py-3 rounded-lg font-medium transition-colors ${
             value === type
-              ? "bg-blue-500 text-white"
+              ? "bg-[#800000] text-white"
               : "bg-gray-100 text-gray-700 hover:bg-gray-200"
           }`}
         >

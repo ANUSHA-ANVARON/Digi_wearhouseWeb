@@ -173,7 +173,7 @@ const ImageUploader = ({ formData, onChange }) => {
                       className="hidden"
                       disabled={uploading[section.id]}
                     />
-                    <span className="inline-block px-6 py-2 bg-[#800000] text-white rounded-lg cursor-pointer hover:bg-[#600000] transition-colors text-sm">
+                    <span className="inline-block px-6 py-2  text-black border-2 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors text-sm">
                       {" "}
                       {/* <-- Changed */}
                       {uploading[section.id] ? "Uploading..." : "Upload"}

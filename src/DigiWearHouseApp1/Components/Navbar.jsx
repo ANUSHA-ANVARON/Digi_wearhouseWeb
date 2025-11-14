@@ -133,102 +133,102 @@ const Navbar = () => {
         ],
       },
     },
-    {
-      id: 2,
-      name: "Men",
-      image: menImage,
-      backgroundColor: "#E53E3E",
-      subcategories: {
-        Topwear: [
-          "T-shirts",
-          "Shirts",
-          "Polo shirts",
-          "Henleys",
-          "Sweatshirt",
-          "Kurtas",
-        ],
-        Bottomwear: [
-          "Jeans",
-          "Trousers",
-          "Shorts",
-          "Track Pants",
-          "Cargos",
-          "Chinos",
-          "Dhotis & Pajamas",
-        ],
-        "Ethnic wear": [
-          "Kurta Sets",
-          "Sherwanis",
-          "Nehru Jackets",
-          "Pathani Suits",
-        ],
-        Winterwear: [
-          "Jackets",
-          "Sweaters",
-          "Hoodies",
-          "Blazers",
-          "Thermal Wear",
-        ],
-        Activewear: [
-          "Gym T-Shirts",
-          "Running Shorts",
-          "Sports Jackets",
-          "Joggers",
-        ],
-        Innerwear: [
-          "Vests",
-          "Boxers",
-          "Briefs",
-          "Nightwear Sets",
-          "Loungewear Sets",
-        ],
-      },
-    },
-    {
-      id: 3,
-      name: "Kids",
-      image: kidsImage,
-      backgroundColor: "#B8860B",
-      subcategories: {
-        Girls: [
-          "Frocks & Dresses",
-          "Tops & T-Shirts",
-          "Skirts & Shorts",
-          "Jeans & Leggings",
-          "Lehengas",
-          "Kurti set",
-          "Nightwear",
-          "Sweaters & Jacket",
-        ],
-        Boys: [
-          "T-Shirts & Shirts",
-          "Jeans & Trousers",
-          "Kurta sets",
-          "Sherwanis",
-          "Sweatshirts & Jacket",
-          "Nightwear",
-        ],
-        "Infants (0-2)": [
-          "Bodysuits",
-          "Rompers",
-          "Sleepsuits",
-          "Frocks (Girls)",
-          "Sweatshirts & Jacket",
-          "Baby sets",
-          "Thermal Wear",
-          "Diaper pants",
-        ],
-      },
-    },
-    {
-      id: 4,
-      name: "Accessories",
-      image: accessoriesImage,
-      backgroundColor: "#F5DEB3",
-      subcategories: {
-        Accessories: ["Dupattas", "Socks", "Scarves", "Ties", "Pocket Squares"],
-      },
-    },
+    // {
+    //   id: 2,
+    //   name: "Men",
+    //   image: menImage,
+    //   backgroundColor: "#E53E3E",
+    //   subcategories: {
+    //     Topwear: [
+    //       "T-shirts",
+    //       "Shirts",
+    //       "Polo shirts",
+    //       "Henleys",
+    //       "Sweatshirt",
+    //       "Kurtas",
+    //     ],
+    //     Bottomwear: [
+    //       "Jeans",
+    //       "Trousers",
+    //       "Shorts",
+    //       "Track Pants",
+    //       "Cargos",
+    //       "Chinos",
+    //       "Dhotis & Pajamas",
+    //     ],
+    //     "Ethnic wear": [
+    //       "Kurta Sets",
+    //       "Sherwanis",
+    //       "Nehru Jackets",
+    //       "Pathani Suits",
+    //     ],
+    //     Winterwear: [
+    //       "Jackets",
+    //       "Sweaters",
+    //       "Hoodies",
+    //       "Blazers",
+    //       "Thermal Wear",
+    //     ],
+    //     Activewear: [
+    //       "Gym T-Shirts",
+    //       "Running Shorts",
+    //       "Sports Jackets",
+    //       "Joggers",
+    //     ],
+    //     Innerwear: [
+    //       "Vests",
+    //       "Boxers",
+    //       "Briefs",
+    //       "Nightwear Sets",
+    //       "Loungewear Sets",
+    //     ],
+    //   },
+    // },
+    // {
+    //   id: 3,
+    //   name: "Kids",
+    //   image: kidsImage,
+    //   backgroundColor: "#B8860B",
+    //   subcategories: {
+    //     Girls: [
+    //       "Frocks & Dresses",
+    //       "Tops & T-Shirts",
+    //       "Skirts & Shorts",
+    //       "Jeans & Leggings",
+    //       "Lehengas",
+    //       "Kurti set",
+    //       "Nightwear",
+    //       "Sweaters & Jacket",
+    //     ],
+    //     Boys: [
+    //       "T-Shirts & Shirts",
+    //       "Jeans & Trousers",
+    //       "Kurta sets",
+    //       "Sherwanis",
+    //       "Sweatshirts & Jacket",
+    //       "Nightwear",
+    //     ],
+    //     "Infants (0-2)": [
+    //       "Bodysuits",
+    //       "Rompers",
+    //       "Sleepsuits",
+    //       "Frocks (Girls)",
+    //       "Sweatshirts & Jacket",
+    //       "Baby sets",
+    //       "Thermal Wear",
+    //       "Diaper pants",
+    //     ],
+    //   },
+    // },
+    // {
+    //   id: 4,
+    //   name: "Accessories",
+    //   image: accessoriesImage,
+    //   backgroundColor: "#F5DEB3",
+    //   subcategories: {
+    //     Accessories: ["Dupattas", "Socks", "Scarves", "Ties", "Pocket Squares"],
+    //   },
+    // },
   ];
 
   // Close dropdowns when clicking outside
@@ -298,7 +298,7 @@ const Navbar = () => {
     <>
       {/* Main Navbar */}
       <nav className="bg-white shadow-sm border-b  border-gray-100 sticky top-0 z-50">
-        {/* Top section with logo and icons */}
+        {/* Top section with logo, nav, and icons */}
         <div className="max-w-7xl mx-auto  px-4  sm:px-6  lg:px-8">
           <div className="flex justify-between items-center h-16 px-2 sm:px-4">
             {/* Logo */}
@@ -308,118 +308,9 @@ const Navbar = () => {
               </div>
             </Link>
 
-            {/* Right side icons */}
-            <div className="flex items-center space-x-3">
-              {/* Notification Icon */}
-              <div className="relative" ref={notifRef}>
-                <button
-                  className="p-2 cursor-pointer text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors duration-200"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsNotificationOpen(!isNotificationOpen);
-                  }}
-                >
-                  <img
-                    src={notificationIcon}
-                    alt="notifications"
-                    className="w-6 h-6"
-                  />
-                </button>
-
-                {isNotificationOpen && (
-                  <div
-                    className="absolute right-0 w-80 bg-white backdrop-blur-lg rounded-2xl shadow-xl text-center z-50 border border-gray-100"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    {/* Arrow */}
-                    <div className="absolute -top-2 right-5 w-4 h-4 bg-white rotate-45 shadow-md border-l border-t border-gray-100"></div>
-
-                    {/* Close button */}
-                    <button
-                      onClick={() => setIsNotificationOpen(false)}
-                      className="absolute top-3 right-3 text-gray-500 hover:text-black transition-colors"
-                    >
-                      <X size={18} />
-                    </button>
-
-                    {/* Bell Icon */}
-                    <div className="flex justify-center mb-4 pt-6">
-                      <span className="text-red-700 text-6xl">🔔</span>
-                    </div>
-
-                    {/* Message */}
-                    <p className="text-gray-700 font-medium mb-4">
-                      No Notification yet
-                    </p>
-
-                    {/* Button */}
-                    <button className="cursor-pointer bg-red-700 text-white px-4 py-2 rounded-md hover:bg-red-800 transition-colors mb-6">
-                      Explore Categories
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* Profile Icon */}
-              <div className="relative" ref={profileRef}>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsProfileOpen(!isProfileOpen);
-                  }}
-                  className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors duration-200"
-                >
-                  <img src={user_icon} alt="profile" className="w-6 h-6" />
-                </button>
-
-                {isProfileOpen && (
-                  <div
-                    className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-xl shadow-lg z-50"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <div className="py-1">
-                      <Link to={"/profile"}>
-                        <button className="cursor-pointer flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                          <Settings size={18} className="mr-3" />
-                          <span>Settings</span>
-                        </button>
-                      </Link>
-                      <Link to={"/register"}>
-                        <button className="cursor-pointer flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                          <LogOut size={18} className="mr-3" />
-                          <span>Logout</span>
-                        </button>
-                      </Link>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Mobile Menu Button */}
-              <div className="lg:hidden">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsMobileMenuOpen(!isMobileMenuOpen);
-                  }}
-                  className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors duration-200"
-                >
-                  {isMobileMenuOpen ? (
-                    <X className="w-6 h-6" />
-                  ) : (
-                    <Menu className="w-6 h-6" />
-                  )}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Bottom section with navigation items */}
-        <div className="border-t border-gray-100">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* ====== MOVED DESKTOP NAV START ====== */}
             {/* Desktop Navigation Links - Centered */}
-            <div className="hidden lg:flex items-center justify-center space-x-8 py-4">
+            <div className="hidden lg:flex items-center justify-center space-x-8">
               {navItems.map((item) => {
                 if (item.type === "link") {
                   return (
@@ -587,8 +478,117 @@ const Navbar = () => {
                 </div>
               )}
             </div>
+            {/* ====== MOVED DESKTOP NAV END ====== */}
+
+            {/* Right side icons */}
+            <div className="flex items-center space-x-3">
+              {/* Notification Icon */}
+              <div className="relative" ref={notifRef}>
+                <button
+                  className="p-2 cursor-pointer text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors duration-200"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsNotificationOpen(!isNotificationOpen);
+                  }}
+                >
+                  <img
+                    src={notificationIcon}
+                    alt="notifications"
+                    className="w-6 h-6"
+                  />
+                </button>
+
+                {isNotificationOpen && (
+                  <div
+                    className="absolute right-0 w-80 bg-white backdrop-blur-lg rounded-2xl shadow-xl text-center z-50 border border-gray-100"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {/* Arrow */}
+                    <div className="absolute -top-2 right-5 w-4 h-4 bg-white rotate-45 shadow-md border-l border-t border-gray-100"></div>
+
+                    {/* Close button */}
+                    <button
+                      onClick={() => setIsNotificationOpen(false)}
+                      className="absolute top-3 right-3 text-gray-500 hover:text-black transition-colors"
+                    >
+                      <X size={18} />
+                    </button>
+
+                    {/* Bell Icon */}
+                    <div className="flex justify-center mb-4 pt-6">
+                      <span className="text-red-700 text-6xl">🔔</span>
+                    </div>
+
+                    {/* Message */}
+                    <p className="text-gray-700 font-medium mb-4">
+                      No Notification yet
+                    </p>
+
+                    {/* Button */}
+                    <button className="cursor-pointer bg-red-700 text-white px-4 py-2 rounded-md hover:bg-red-800 transition-colors mb-6">
+                      Explore Categories
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Profile Icon */}
+              <div className="relative" ref={profileRef}>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsProfileOpen(!isProfileOpen);
+                  }}
+                  className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors duration-200"
+                >
+                  <img src={user_icon} alt="profile" className="w-6 h-6" />
+                </button>
+
+                {isProfileOpen && (
+                  <div
+                    className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-xl shadow-lg z-50"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className="py-1">
+                      <Link to={"/profile"}>
+                        <button className="cursor-pointer flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                          <Settings size={18} className="mr-3" />
+                          <span>Settings</span>
+                        </button>
+                      </Link>
+                      <Link to={"/register"}>
+                        <button className="cursor-pointer flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                          <LogOut size={18} className="mr-3" />
+                          <span>Logout</span>
+                        </button>
+                      </Link>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Mobile Menu Button */}
+              <div className="lg:hidden">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsMobileMenuOpen(!isMobileMenuOpen);
+                  }}
+                  className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors duration-200"
+                >
+                  {isMobileMenuOpen ? (
+                    <X className="w-6 h-6" />
+                  ) : (
+                    <Menu className="w-6 h-6" />
+                  )}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
+
+        {/* ====== DELETED THE BOTTOM NAV SECTION ====== */}
+        {/* The <div className="border-t border-gray-100"> that was here is now gone. */}
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (

@@ -19,7 +19,7 @@ const FormInput = ({
         onChange={onChange}
         placeholder={placeholder}
         rows="4"
-        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors resize-none ${
+        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#800000] focus:border-transparent transition-colors resize-none ${
           error ? "border-red-500" : "border-gray-200"
         }`}
       />
@@ -29,7 +29,7 @@ const FormInput = ({
         value={value}
         onChange={onChange}
         placeholder={placeholder}
-        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
+        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#800000]focus:border-transparent transition-colors ${
           error ? "border-red-500" : "border-gray-200"
         }`}
       />
