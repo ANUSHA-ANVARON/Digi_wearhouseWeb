@@ -20,10 +20,10 @@ const SizePricingTab = ({ formData, onChange }) => {
     <div className="space-y-6 md:space-y-8 max-w-2xl mx-auto">
       {!isSaree && !isUnstitched && (
         <SizeSelector
-        <SizeSelector
-          sizes={SIZES}
-          selectedSizes={formData.selectedSizes}
-          onChange={(sizes) => onChange("selectedSizes", sizes)}
+        // <SizeSelector
+        //   sizes={SIZES}
+        //   selectedSizes={formData.selectedSizes}
+        //   onChange={(sizes) => onChange("selectedSizes", sizes)}
         />
       )}
 

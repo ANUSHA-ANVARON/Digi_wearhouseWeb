@@ -3,11 +3,6 @@ import FormInput from "../UploadSectionComponents/FormInput";
 import FormSelect from "../UploadSectionComponents/FormSelect";
 import ProductTypeToggle from "../UploadSectionComponents/SizeandPricingComps/ProductTypeToggle";
 import {
-import React, { useMemo } from "react";
-import FormInput from "../UploadSectionComponents/FormInput";
-import FormSelect from "../UploadSectionComponents/FormSelect";
-import ProductTypeToggle from "../UploadSectionComponents/SizeandPricingComps/ProductTypeToggle";
-import {
   READY_TO_WEAR_DRESS_TYPES,
   UNSTITCHED_DRESS_TYPES,
   MATERIAL_TYPES,
@@ -82,7 +77,6 @@ const getSubSubOptionsForType = (dressType) => {
 };
 
 const GeneralTab = ({ formData, onChange, errors, clearError }) => {
-const GeneralTab = ({ formData, onChange, errors, clearError }) => {
   if (!formData) return <div>Loading...</div>;
 
   // tolerant productType detection
@@ -90,22 +84,8 @@ const GeneralTab = ({ formData, onChange, errors, clearError }) => {
 
   const DRESS_TYPES = productType.toLowerCase().includes("unstit")
     ? UNSTITCHED_DRESS_TYPES
-  // tolerant productType detection
-  const productType = formData.productType || "Ready to Wear";
-
-  const DRESS_TYPES = productType.toLowerCase().includes("unstit")
-    ? UNSTITCHED_DRESS_TYPES
     : READY_TO_WEAR_DRESS_TYPES;
 
-  const { categoryOptions, getSubOptions } = useMemo(
-    () => buildDressTypeData(DRESS_TYPES),
-    [DRESS_TYPES]
-  );
-
-  const subCategoryOptions = useMemo(
-    () => (formData.dressCategory ? getSubOptions(formData.dressCategory) : []),
-    [formData.dressCategory, getSubOptions]
-  );
   const { categoryOptions, getSubOptions } = useMemo(
     () => buildDressTypeData(DRESS_TYPES),
     [DRESS_TYPES]
@@ -137,7 +117,6 @@ const GeneralTab = ({ formData, onChange, errors, clearError }) => {
             placeholder="Elegant Women in Pink Floral Traditional Indian Outfit..."
           />
 
-
           <FormInput
             label="Product Description"
             type="textarea"
@@ -146,34 +125,24 @@ const GeneralTab = ({ formData, onChange, errors, clearError }) => {
             placeholder="A stylish, beautiful pink floral lehenga..."
           />
 
-
           <FormSelect
             label="Category"
             value={formData.category || ""}
             onChange={(e) => onChange("category", e.target.value)}
-            options={normalizeOptions(CATEGORIES)}
             options={normalizeOptions(CATEGORIES)}
             placeholder="Choose Category"
           />
 
           <ProductTypeToggle
             value={productType}
-          <ProductTypeToggle
-            value={productType}
             onChange={(value) => {
-              const normalized = (value || "").trim();
-              onChange("productType", normalized);
-              onChange("dressCategory", ""); // reset
               const normalized = (value || "").trim();
               onChange("productType", normalized);
               onChange("dressCategory", ""); // reset
               onChange("dressType", "");
               onChange("dressSubCategory", "");
-              onChange("dressSubCategory", "");
             }}
           />
-
-          {/* Dress Category (parent) */}
 
           {/* Dress Category (parent) */}
           <FormSelect
@@ -183,13 +152,11 @@ const GeneralTab = ({ formData, onChange, errors, clearError }) => {
               onChange("dressCategory", e.target.value);
               onChange("dressType", ""); // Reset subcategory when category changes
               onChange("dressSubCategory", ""); // reset deeper level
-              onChange("dressSubCategory", ""); // reset deeper level
             }}
             options={categoryOptions}
             placeholder="Select Dress Category"
           />
 
-          {/* Dress Type (sub-category) */}
           {/* Dress Type (sub-category) */}
           <FormSelect
             label="Dress Type"
@@ -198,27 +165,11 @@ const GeneralTab = ({ formData, onChange, errors, clearError }) => {
               onChange("dressType", e.target.value);
               onChange("dressSubCategory", ""); // reset subcategory
             }}
-            onChange={(e) => {
-              onChange("dressType", e.target.value);
-              onChange("dressSubCategory", ""); // reset subcategory
-            }}
             options={subCategoryOptions}
             placeholder={
-              formData.dressCategory ? "Select Sub Category" : "Choose category first"
-            }
-            disabled={!formData.dressCategory || subCategoryOptions.length === 0}
-          />
-
-          {/* NEW: Dress Sub-Category Dropdown */}
-          <FormSelect
-            label="Dress Sub-Category"
-            value={formData.dressSubCategory || ""}
-            onChange={(e) => onChange("dressSubCategory", e.target.value)}
-            options={subSubCategoryOptions}
-            placeholder={
-              formData.dressType
-                ? "Select Dress Sub-Category"
-                : "Choose Dress Type first"
+              formData.dressCategory
+                ? "Select Sub Category"
+                : "Choose category first"
             }
             disabled={
               !formData.dressCategory || subCategoryOptions.length === 0
@@ -244,16 +195,13 @@ const GeneralTab = ({ formData, onChange, errors, clearError }) => {
             value={formData.fabric || ""}
             onChange={(e) => onChange("fabric", e.target.value)}
             options={normalizeOptions(MATERIAL_TYPES)}
-            options={normalizeOptions(MATERIAL_TYPES)}
             placeholder="Select Fabric"
           />
-
 
           <FormSelect
             label="Craft"
             value={formData.craft || ""}
             onChange={(e) => onChange("craft", e.target.value)}
-            options={normalizeOptions(DESIGN_TYPES)}
             options={normalizeOptions(DESIGN_TYPES)}
             placeholder="Select Craft"
           />
@@ -273,39 +221,6 @@ const GeneralTab = ({ formData, onChange, errors, clearError }) => {
       </div>
 
       <div>
-        <label className="block text-start text-sm md:text-base font-medium text-gray-700 mb-2">
-          Is this product premium?
-        </label>
-        <div className="flex space-x-6">
-          <label className="inline-flex items-center">
-            <input
-              type="radio"
-              name="premium"
-              value="yes"
-              checked={formData.premium === true}
-              onChange={() => {
-                onChange("premium", true);
-                clearError && clearError("premium");
-              }}
-              className="form-radio text-blue-600"
-            />
-            <span className="ml-2">Yes</span>
-          </label>
-          <label className="inline-flex items-center">
-            <input
-              type="radio"
-              name="premium"
-              value="no"
-              checked={formData.premium === false}
-              onChange={() => {
-                onChange("premium", false);
-                clearError && clearError("premium");
-              }}
-              className="form-radio text-blue-600"
-            />
-            <span className="ml-2">No</span>
-          </label>
-        </div>
         <label className="block text-start text-sm md:text-base font-medium text-gray-700 mb-2">
           Is this product premium?
         </label>
