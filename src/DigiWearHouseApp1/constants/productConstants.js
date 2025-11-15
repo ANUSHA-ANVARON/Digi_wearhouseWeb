@@ -309,8 +309,6 @@ export const COLORS = [
     name: "White",
     value: "#ffffffff",
     shades: ["#ffffffff"],
-  },{
-    shades: ["#ffffffff"],
   },
 ];
 
