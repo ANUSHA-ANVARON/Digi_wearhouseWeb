@@ -92,6 +92,13 @@ export const READY_TO_WEAR_DRESS_TYPES = {
     "PRET",
     "FUSION",
     "WEDDING",
+    "Saree",
+    "Lehenga",
+    "ANARKALIS",
+    "SHARARAS",
+    "PRET",
+    "FUSION",
+    "WEDDING",
     "Salwar Suit Sets (Top, Bottom & Dupatta)",
     "Kurta & Dupatta Sets",
   ],
@@ -119,6 +126,11 @@ export const READY_TO_WEAR_DRESS_TYPES = {
 // Unstitched Categories
 export const UNSTITCHED_DRESS_TYPES = {
   "Ethnic Wear": [
+    "ANARKALIS",
+    "SHARARAS",
+    "PRET",
+    "FUSION",
+    "WEDDING",
     "ANARKALIS",
     "SHARARAS",
     "PRET",
@@ -296,6 +308,8 @@ export const COLORS = [
     code: "white",
     name: "White",
     value: "#ffffffff",
+    shades: ["#ffffffff"],
+  },{
     shades: ["#ffffffff"],
   },
 ];

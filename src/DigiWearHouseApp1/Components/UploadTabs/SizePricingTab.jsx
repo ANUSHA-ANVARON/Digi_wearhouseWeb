@@ -20,11 +20,13 @@ const SizePricingTab = ({ formData, onChange }) => {
     <div className="space-y-6 md:space-y-8 max-w-2xl mx-auto">
       {!isSaree && !isUnstitched && (
         <SizeSelector
-          sizes={SIZES}
-          selectedSizes={formData.selectedSizes}
-          onChange={(sizes) => onChange("selectedSizes", sizes)}
+        // <SizeSelector
+        //   sizes={SIZES}
+        //   selectedSizes={formData.selectedSizes}
+        //   onChange={(sizes) => onChange("selectedSizes", sizes)}
         />
       )}
+
 
       <FormInput
         label="Price"
@@ -34,10 +36,22 @@ const SizePricingTab = ({ formData, onChange }) => {
         placeholder="Ex. 12,000"
       />
 
+
       <ColorSelector
         selectedColors={formData.selectedColors}
         onChange={(colors) => onChange("selectedColors", colors)}
       />
+
+      {/* Stock */}
+      <FormInput
+        label="Total Stock"
+        type="number"
+        value={formData.stock || 0}
+        onChange={(e) => onChange("stock", Number(e.target.value))}
+        placeholder="0"
+      />
+
+      {/* UnitsSection already expects units; ensure it supports keys like "M|red" */}
 
       {/* Stock */}
       <FormInput
@@ -55,6 +69,7 @@ const SizePricingTab = ({ formData, onChange }) => {
         units={formData.units}
         onChange={(units) => onChange("units", units)}
       />
+
     </div>
   );
 };

@@ -1,6 +1,11 @@
 @import "tailwindcss";
 
 
+@theme{
+--color-primary-blue: #3D7E97;
+}
+
+
 #root {
   /* max-width: 1280px; */
   margin: 0 auto;

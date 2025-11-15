@@ -9,6 +9,7 @@ export const useProductSubmission = () => {
   const [submitMessage, setSubmitMessage] = useState("");
   const { updateProductData, currentUser } = useApp();
   const navigate = useNavigate();
+  const { resetProductData } = useApp();
 
   // Check if product is a saree
   const isSareeProduct = (productData) => {
@@ -96,7 +97,10 @@ export const useProductSubmission = () => {
         setSubmitStatus("success");
         setSubmitMessage(`Product saved successfully! ID: ${result.productId}`);
         updateProductData({ ...productData, id: result.productId });
+        resetProductData(); 
+
         console.log("Product saved successfully with imageUrls:", cleanedData.imageUrls);
+        
         setTimeout(() => navigate("/dashboard"), 2000);
       } else {
         throw new Error(result.message || "Failed to save product");
