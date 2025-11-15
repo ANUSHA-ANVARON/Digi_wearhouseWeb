@@ -1,11 +1,11 @@
 // // server.js
-// import 'dotenv/config';
+// import "dotenv/config";
 // import express from "express";
 // import cors from "cors";
 // import handler from "./api/drape-saree-parts.js"; // import your function
 
-// console.log('Cloudinary Name:', process.env.CLOUDINARY_CLOUD_NAME);
-// console.log('Gemini Key:', process.env.GEMINI_API_KEY);
+// console.log("Cloudinary Name:", process.env.CLOUDINARY_CLOUD_NAME);
+// console.log("Gemini Key:", process.env.GEMINI_API_KEY);
 
 // const app = express();
 
