@@ -22,7 +22,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "http://localhost:5000", // where your Node backend runs
+       target: process.env.VITE_API_URL || "http://localhost:5000",  // where your Node backend runs
         changeOrigin: true,
         secure: false,
       },

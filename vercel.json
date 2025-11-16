@@ -1,10 +1,19 @@
 {
+  "version": 2,
   "rewrites": [
-    { "source": "/(.*)", "destination": "/" }
+    { 
+      "source": "/api/:path*", 
+      "destination": "/api/:path*" 
+    },
+    { 
+      "source": "/(.*)", 
+      "destination": "/index.html" 
+    }
   ],
   "functions": {
-    "api/*.js": {
-      "maxDuration": 300
+    "api/drape-saree-parts/index.js": {
+      "maxDuration": 300,
+      "memory": 3008
     }
   }
 }
