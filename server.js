@@ -1,23 +1,26 @@
-// // server.js
-// import "dotenv/config";
-// import express from "express";
-// import cors from "cors";
-// import handler from "./api/drape-saree-parts.js"; // import your function
+// server.js
+import "dotenv/config";
+import express from "express";
+import cors from "cors";
+import handler from "./api/drape-saree-parts.js"; // import your function
 
-// console.log("Cloudinary Name:", process.env.CLOUDINARY_CLOUD_NAME);
-// console.log("Gemini Key:", process.env.GEMINI_API_KEY);
+import dotenv from "dotenv";
+dotenv.config();
 
-// const app = express();
+console.log("Cloudinary Name:", process.env.CLOUDINARY_CLOUD_NAME);
+console.log("Gemini Key:", process.env.GEMINI_API_KEY);
 
-// // CORS middleware
-// app.use(cors());
+const app = express();
 
-// // Wrap Next.js-style handler into Express
-// app.post("/api/drape-saree-parts", (req, res) => {
-//   handler(req, res);
-// });
+// CORS middleware
+app.use(cors());
 
-// const PORT = 5000;
-// app.listen(PORT, () => {
-//   console.log(`✅ Backend running at http://localhost:${PORT}`);
-// });
+// Wrap Next.js-style handler into Express
+app.post("/api/drape-saree-parts", (req, res) => {
+  handler(req, res);
+});
+
+const PORT = 5000;
+app.listen(PORT, () => {
+  console.log(`✅ Backend running at http://localhost:${PORT}`);
+});
