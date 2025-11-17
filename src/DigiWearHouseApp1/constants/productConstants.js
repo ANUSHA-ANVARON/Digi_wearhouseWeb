@@ -102,8 +102,8 @@ export const READY_TO_WEAR_DRESS_TYPES = {
     "Salwar Suit Sets (Top, Bottom & Dupatta)",
     "Kurta & Dupatta Sets",
   ],
-  "Top Wear": ["T-Shirts", "Shirts", "Blouses"],
-  "Bottom Wear": ["Jeans", "Trousers", "Skirts"],
+  "Top Wear": ["Blouses"],
+  "Bottom Wear": ["Skirts"],
   // You can add these later if needed:
   // "Dresses & Jumpsuits": [
   //   "Maxi Dresses",
@@ -314,7 +314,7 @@ export const COLORS = [
 
 export const SIZES = ["XS", "S", "M", "L", "XL", "XXL"];
 
-export const CATEGORIES = ["WOMEN", "MEN", "KIDS"];
+export const CATEGORIES = ["WOMEN"];
 
 export const PRODUCT_TYPES = ["Ready to Wear", "Unstitched"];
 
