@@ -1,7 +1,7 @@
 // components/products/upload/UploadProducts.jsx
 import React, { useState } from "react";
 import { useLocation } from "react-router-dom";
-import { useApp } from "../../context/Context"; // Adjust path as needed
+import { useApp } from "../../context/Context";
 import AddProductForm from "../../Components/UploadProducts/AddProductForm";
 import EmptyProductsState from "../../Components/UploadProducts/EmptyProductsState";
 
@@ -9,16 +9,18 @@ const UploadProducts = () => {
   const { productData } = useApp();
   const location = useLocation();
 
-  // Check if user is returning from navigation and was in add product flow
+  // 1. Extract the product to edit from navigation state
+  const productToEdit = location.state?.editProduct;
+
+  // Check if user is returning from navigation, was in add flow, OR IS EDITING
   const [showAddForm, setShowAddForm] = useState(() => {
     return (
       location.state?.inAddFlow === true ||
+      !!productToEdit || // Force form open if editing
       (productData && Object.keys(productData).length > 0)
     );
   });
 
-  // For now, keeping this as false since you mentioned it was previously false
-  // You can change this to true when you have actual products
   const [hasProducts] = useState(false);
 
   const handleAddProduct = () => setShowAddForm(true);
@@ -26,7 +28,13 @@ const UploadProducts = () => {
 
   // Show the add product form
   if (showAddForm) {
-    return <AddProductForm onBack={handleBackToProducts} />;
+    return (
+      <AddProductForm
+        onBack={handleBackToProducts}
+        // 2. PASS THE DATA DOWN HERE
+        initialData={productToEdit} 
+      />
+    );
   }
 
   // Show empty state when no products exist
@@ -34,7 +42,6 @@ const UploadProducts = () => {
     return <EmptyProductsState onAddProduct={handleAddProduct} />;
   }
 
-  // Future: Show products list when hasProducts is true
   return <div>Products List View - Coming Soon</div>;
 };
 

@@ -6,13 +6,14 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import {
   validateLoginForm,
-  validateRegistrationForm, 
-  validateShopDetails, 
-  validateBankDetails, 
-  validatePAN, 
+  validateRegistrationForm,
+  validateShopDetails,
+  validateBankDetails,
+  validatePAN,
   validateGSTIN,
-  validateAadhar, 
-  validateKycDetails } from '../../Validations/registerValidatons'
+  validateAadhar,
+  validateKycDetails
+} from '../../Validations/registerValidatons'
 
 const DigiWarehouseRegistration = () => {
   const navigate = useNavigate();
@@ -78,25 +79,25 @@ const DigiWarehouseRegistration = () => {
     resendCount: 0,
     timer: 0,
   });
-  
+
   const [kycDetails, setKycDetails] = useState({
-  panNumber: "",
-  gstinNumber: "",
-  aadharNumber: "",
-});
+    panNumber: "",
+    gstinNumber: "",
+    aadharNumber: "",
+  });
 
 
   useEffect(() => {
-  let interval = null;
-  if (otpData.timer > 0) {
-    interval = setInterval(() => {
-      setOtpData((prev) => ({ ...prev, timer: prev.timer - 1 }));
-    }, 1000);
-  } else if (interval) {
-    clearInterval(interval);
-  }
-  return () => clearInterval(interval);
-}, [otpData.timer]);
+    let interval = null;
+    if (otpData.timer > 0) {
+      interval = setInterval(() => {
+        setOtpData((prev) => ({ ...prev, timer: prev.timer - 1 }));
+      }, 1000);
+    } else if (interval) {
+      clearInterval(interval);
+    }
+    return () => clearInterval(interval);
+  }, [otpData.timer]);
 
 
   useEffect(() => {
@@ -511,11 +512,10 @@ const DigiWarehouseRegistration = () => {
           value={loginData.email}
           onChange={handleLoginInputChange}
           placeholder="Enter your email"
-          className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-[#800000] focus:border-[#800000] transition-all duration-200 text-slate-700 placeholder-slate-400 ${
-            errors.email
+          className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-[#800000] focus:border-[#800000] transition-all duration-200 text-slate-700 placeholder-slate-400 ${errors.email
               ? "border-red-300 bg-red-50"
               : "border-slate-200 bg-slate-50"
-          }`}
+            }`}
         />
         {errors.email && (
           <p className="text-red-500 text-xs mt-1">{errors.email}</p>
@@ -536,11 +536,10 @@ const DigiWarehouseRegistration = () => {
           value={loginData.password}
           onChange={handleLoginInputChange}
           placeholder="Enter your password"
-          className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-[#800000] focus:border-[#800000] transition-all duration-200 text-slate-700 placeholder-slate-400 ${
-            errors.password
+          className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-[#800000] focus:border-[#800000] transition-all duration-200 text-slate-700 placeholder-slate-400 ${errors.password
               ? "border-red-300 bg-red-50"
               : "border-slate-200 bg-slate-50"
-          }`}
+            }`}
         />
         {errors.password && (
           <p className="text-red-500 text-xs mt-1">{errors.password}</p>
@@ -620,9 +619,8 @@ const DigiWarehouseRegistration = () => {
           value={registerData.username}
           onChange={handleRegisterInputChange}
           placeholder="Enter username"
-          className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-[#800000] focus:border-[#800000] transition-all duration-200 text-slate-700 placeholder-slate-400 bg-slate-50 ${
-            errors.username ? "border-red-300" : "border-slate-200"
-          }`}
+          className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-[#800000] focus:border-[#800000] transition-all duration-200 text-slate-700 placeholder-slate-400 bg-slate-50 ${errors.username ? "border-red-300" : "border-slate-200"
+            }`}
         />
         {errors.username && (
           <p className="text-red-500 text-xs mt-1">{errors.username}</p>
@@ -640,9 +638,8 @@ const DigiWarehouseRegistration = () => {
             value={registerData.firstName}
             onChange={handleRegisterInputChange}
             placeholder="First name"
-            className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-[#800000] focus:border-[#800000] transition-all duration-200 text-slate-700 placeholder-slate-400 bg-slate-50 ${
-              errors.firstName ? "border-red-300" : "border-slate-200"
-            }`}
+            className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-[#800000] focus:border-[#800000] transition-all duration-200 text-slate-700 placeholder-slate-400 bg-slate-50 ${errors.firstName ? "border-red-300" : "border-slate-200"
+              }`}
           />
           {errors.firstName && (
             <p className="text-red-500 text-xs mt-1">{errors.firstName}</p>
@@ -658,9 +655,8 @@ const DigiWarehouseRegistration = () => {
             value={registerData.contactNumber}
             onChange={handleRegisterInputChange}
             placeholder="10-digit number"
-            className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-[#800000] focus:border-[#800000] transition-all duration-200 text-slate-700 placeholder-slate-400 bg-slate-50 ${
-              errors.contactNumber ? "border-red-300" : "border-slate-200"
-            }`}
+            className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-[#800000] focus:border-[#800000] transition-all duration-200 text-slate-700 placeholder-slate-400 bg-slate-50 ${errors.contactNumber ? "border-red-300" : "border-slate-200"
+              }`}
           />
           {errors.contactNumber && (
             <p className="text-red-500 text-xs mt-1">{errors.contactNumber}</p>
@@ -679,9 +675,8 @@ const DigiWarehouseRegistration = () => {
           onChange={handleRegisterInputChange}
           placeholder="Enter your email"
           text-start
-          className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-[#800000] focus:border-[#800000] transition-all duration-200 text-slate-700 placeholder-slate-400 bg-slate-50 ${
-            errors.email ? "border-red-300" : "border-slate-200"
-          }`}
+          className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-[#800000] focus:border-[#800000] transition-all duration-200 text-slate-700 placeholder-slate-400 bg-slate-50 ${errors.email ? "border-red-300" : "border-slate-200"
+            }`}
         />
         {errors.email && (
           <p className="text-red-500 text-xs mt-1">{errors.email}</p>
@@ -699,9 +694,8 @@ const DigiWarehouseRegistration = () => {
             value={registerData.password}
             onChange={handleRegisterInputChange}
             placeholder="Min 6 characters"
-            className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-[#800000] focus:border-[#800000] transition-all duration-200 text-slate-700 placeholder-slate-400 bg-slate-50 ${
-              errors.password ? "border-red-300" : "border-slate-200"
-            }`}
+            className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-[#800000] focus:border-[#800000] transition-all duration-200 text-slate-700 placeholder-slate-400 bg-slate-50 ${errors.password ? "border-red-300" : "border-slate-200"
+              }`}
           />
           {errors.password && (
             <p className="text-red-500 text-xs mt-1">{errors.password}</p>
@@ -717,9 +711,8 @@ const DigiWarehouseRegistration = () => {
             value={registerData.confirmPassword}
             onChange={handleRegisterInputChange}
             placeholder="Re-enter password"
-            className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-[#800000] focus:border-[#800000] transition-all duration-200 text-slate-700 placeholder-slate-400 bg-slate-50 ${
-              errors.confirmPassword ? "border-red-300" : "border-slate-200"
-            }`}
+            className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-[#800000] focus:border-[#800000] transition-all duration-200 text-slate-700 placeholder-slate-400 bg-slate-50 ${errors.confirmPassword ? "border-red-300" : "border-slate-200"
+              }`}
           />
           {errors.confirmPassword && (
             <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>
@@ -753,9 +746,8 @@ const DigiWarehouseRegistration = () => {
           value={shopData.shopName}
           onChange={handleShopInputChange}
           placeholder="Shop Name"
-          className={`w-full border-b py-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#800000] ${
-            errors.shopName ? "border-red-300" : "border-slate-300"
-          }`}
+          className={`w-full border-b py-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#800000] ${errors.shopName ? "border-red-300" : "border-slate-300"
+            }`}
         />
         {errors.shopName && (
           <p className="text-red-500 text-xs mt-1">{errors.shopName}</p>
@@ -769,9 +761,8 @@ const DigiWarehouseRegistration = () => {
           value={shopData.shopAddress}
           onChange={handleShopInputChange}
           placeholder="Shop Address"
-          className={`w-full border-b py-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#800000] ${
-            errors.shopAddress ? "border-red-300" : "border-slate-300"
-          }`}
+          className={`w-full border-b py-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#800000] ${errors.shopAddress ? "border-red-300" : "border-slate-300"
+            }`}
         />
         {errors.shopAddress && (
           <p className="text-red-500 text-xs mt-1">{errors.shopAddress}</p>
@@ -786,9 +777,8 @@ const DigiWarehouseRegistration = () => {
             value={shopData.city}
             onChange={handleShopInputChange}
             placeholder="City"
-            className={`w-full border-b py-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#800000] ${
-              errors.city ? "border-red-300" : "border-slate-300"
-            }`}
+            className={`w-full border-b py-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#800000] ${errors.city ? "border-red-300" : "border-slate-300"
+              }`}
           />
           {errors.city && (
             <p className="text-red-500 text-xs mt-1">{errors.city}</p>
@@ -801,9 +791,8 @@ const DigiWarehouseRegistration = () => {
             value={shopData.state}
             onChange={handleShopInputChange}
             placeholder="State"
-            className={`w-full border-b py-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#800000] ${
-              errors.state ? "border-red-300" : "border-slate-300"
-            }`}
+            className={`w-full border-b py-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#800000] ${errors.state ? "border-red-300" : "border-slate-300"
+              }`}
           />
           {errors.state && (
             <p className="text-red-500 text-xs mt-1">{errors.state}</p>
@@ -818,9 +807,8 @@ const DigiWarehouseRegistration = () => {
           value={shopData.pincode}
           onChange={handleShopInputChange}
           placeholder="Pin Code"
-          className={`w-full border-b py-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#800000] ${
-            errors.pincode ? "border-red-300" : "border-slate-300"
-          }`}
+          className={`w-full border-b py-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#800000] ${errors.pincode ? "border-red-300" : "border-slate-300"
+            }`}
         />
         {errors.pincode && (
           <p className="text-red-500 text-xs mt-1">{errors.pincode}</p>
@@ -845,9 +833,8 @@ const DigiWarehouseRegistration = () => {
           name="bankName"
           value={bankData.bankName}
           onChange={handleBankInputChange}
-          className={`w-full border-b py-3 text-slate-700 focus:outline-none focus:border-[#800000] ${
-            errors.bankName ? "border-red-300" : "border-slate-300"
-          }`}
+          className={`w-full border-b py-3 text-slate-700 focus:outline-none focus:border-[#800000] ${errors.bankName ? "border-red-300" : "border-slate-300"
+            }`}
         >
           <option value="">Select Bank</option>
           <option value="sbi">State Bank of India</option>
@@ -868,9 +855,8 @@ const DigiWarehouseRegistration = () => {
           value={bankData.branchName}
           onChange={handleBankInputChange}
           placeholder="Enter Branch Name"
-          className={`w-full border-b py-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#800000] ${
-            errors.branchName ? "border-red-300" : "border-slate-300"
-          }`}
+          className={`w-full border-b py-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#800000] ${errors.branchName ? "border-red-300" : "border-slate-300"
+            }`}
         />
         {errors.branchName && (
           <p className="text-red-500 text-xs mt-1">{errors.branchName}</p>
@@ -884,9 +870,8 @@ const DigiWarehouseRegistration = () => {
           value={bankData.accountHolder}
           onChange={handleBankInputChange}
           placeholder="Enter Account Holder Name"
-          className={`w-full border-b py-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#800000] ${
-            errors.accountHolder ? "border-red-300" : "border-slate-300"
-          }`}
+          className={`w-full border-b py-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#800000] ${errors.accountHolder ? "border-red-300" : "border-slate-300"
+            }`}
         />
         {errors.accountHolder && (
           <p className="text-red-500 text-xs mt-1">{errors.accountHolder}</p>
@@ -900,9 +885,8 @@ const DigiWarehouseRegistration = () => {
           value={bankData.accountNumber}
           onChange={handleBankInputChange}
           placeholder="Account Number"
-          className={`w-full border-b py-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#800000] ${
-            errors.accountNumber ? "border-red-300" : "border-slate-300"
-          }`}
+          className={`w-full border-b py-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#800000] ${errors.accountNumber ? "border-red-300" : "border-slate-300"
+            }`}
         />
         {errors.accountNumber && (
           <p className="text-red-500 text-xs mt-1">{errors.accountNumber}</p>
@@ -916,9 +900,8 @@ const DigiWarehouseRegistration = () => {
           value={bankData.reAccountNumber}
           onChange={handleBankInputChange}
           placeholder="Re-enter Account No"
-          className={`w-full border-b py-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#800000] ${
-            errors.reAccountNumber ? "border-red-300" : "border-slate-300"
-          }`}
+          className={`w-full border-b py-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#800000] ${errors.reAccountNumber ? "border-red-300" : "border-slate-300"
+            }`}
         />
         {errors.reAccountNumber && (
           <p className="text-red-500 text-xs mt-1">{errors.reAccountNumber}</p>
@@ -932,9 +915,8 @@ const DigiWarehouseRegistration = () => {
           value={bankData.ifscCode}
           onChange={handleBankInputChange}
           placeholder="IFSC Code"
-          className={`w-full border-b py-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#800000] ${
-            errors.ifscCode ? "border-red-300" : "border-slate-300"
-          }`}
+          className={`w-full border-b py-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#800000] ${errors.ifscCode ? "border-red-300" : "border-slate-300"
+            }`}
         />
         {errors.ifscCode && (
           <p className="text-red-500 text-xs mt-1">{errors.ifscCode}</p>
@@ -976,9 +958,8 @@ const DigiWarehouseRegistration = () => {
               onChange={handleKycInputChange}
               placeholder="CBTPT5939C"
               maxLength={10}
-              className={`w-full border-b py-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#800000] ${
-                errors.panNumber ? "border-red-300" : "border-slate-300"
-              }`}
+              className={`w-full border-b py-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#800000] ${errors.panNumber ? "border-red-300" : "border-slate-300"
+                }`}
             />
             {errors.panNumber && (
               <p className="text-red-500 text-xs mt-1">{errors.panNumber}</p>
@@ -996,9 +977,8 @@ const DigiWarehouseRegistration = () => {
               onChange={handleKycInputChange}
               placeholder="27ABCDE1234F1Z5"
               maxLength={15}
-              className={`w-full border-b py-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#800000] ${
-                errors.gstinNumber ? "border-red-300" : "border-slate-300"
-              }`}
+              className={`w-full border-b py-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#800000] ${errors.gstinNumber ? "border-red-300" : "border-slate-300"
+                }`}
             />
             {errors.gstinNumber && (
               <p className="text-red-500 text-xs mt-1">{errors.gstinNumber}</p>
@@ -1017,9 +997,8 @@ const DigiWarehouseRegistration = () => {
               placeholder="9806 4765 5643"
               maxLength={12}
               pattern="[0-9]*"
-              className={`w-full border-b py-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#800000] ${
-                errors.aadharNumber ? "border-red-300" : "border-slate-300"
-              }`}
+              className={`w-full border-b py-3 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#800000] ${errors.aadharNumber ? "border-red-300" : "border-slate-300"
+                }`}
             />
             {errors.aadharNumber && (
               <p className="text-red-500 text-xs mt-1">{errors.aadharNumber}</p>
@@ -1130,9 +1109,8 @@ const DigiWarehouseRegistration = () => {
                   value={digit}
                   onChange={(e) => handleOtpChange(index, e.target.value)}
                   onKeyDown={(e) => handleOtpKeyDown(e, index)}
-                  className={`w-12 h-12 text-center text-xl font-bold border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#800000] ${
-                    errors.otp ? "border-red-300" : "border-slate-300"
-                  }`}
+                  className={`w-12 h-12 text-center text-xl font-bold border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#800000] ${errors.otp ? "border-red-300" : "border-slate-300"
+                    }`}
                 />
               ))}
             </div>
@@ -1244,16 +1222,16 @@ const DigiWarehouseRegistration = () => {
                 currentStep === "bankDetails" ||
                 currentStep === "kyc" ||
                 currentStep === "otpVerification") && (
-                <div className="flex items-center">
-                  <button
-                    onClick={goBack}
-                    className="flex items-center gap-1 text-xs ps-30 cursor-pointer text-slate-500 hover:text-slate-700"
-                  >
-                    <ArrowLeft className="w-4 h-4" />
-                    Back
-                  </button>
-                </div>
-              )}
+                  <div className="flex items-center">
+                    <button
+                      onClick={goBack}
+                      className="flex items-center gap-1 text-xs ps-30 cursor-pointer text-slate-500 hover:text-slate-700"
+                    >
+                      <ArrowLeft className="w-4 h-4" />
+                      Back
+                    </button>
+                  </div>
+                )}
             </div>
           </div>
         </div>

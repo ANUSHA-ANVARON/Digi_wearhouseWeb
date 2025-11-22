@@ -1,8 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { useApp } from "../../context/Context";
 import firebaseService from "../../../SERVICES/firebaseService";
-import { Package, Edit, Trash2, Eye, MoreHorizontal, Plus, ArrowLeft } from "lucide-react";
+import {
+  Package,
+  Edit,
+  Eye,
+  MoreHorizontal,
+  Plus,
+  ArrowLeft,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import ProductViewModal from "../../Components/ProductViewModal.jsx";
 
 export default function UserProductsList() {
   const { currentUser } = useApp();
@@ -10,8 +18,11 @@ export default function UserProductsList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-const navigate=useNavigate()
+  // Removed delete confirmation state
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [viewProduct, setViewProduct] = useState(null);
+  const navigate = useNavigate();
+
   // Fetch user's products
   useEffect(() => {
     const fetchProducts = async () => {
@@ -43,30 +54,6 @@ const navigate=useNavigate()
     fetchProducts();
   }, [currentUser]);
 
-  // Handle product deletion
-  const handleDeleteProduct = async () => {
-    if (!selectedProduct || !currentUser) return;
-
-    try {
-      await firebaseService.deleteUserProduct(
-        currentUser.uid,
-        selectedProduct.id
-      );
-
-      // Remove product from local state
-      setProducts(products.filter((p) => p.id !== selectedProduct.id));
-
-      // Close confirmation dialog
-      setShowDeleteConfirm(false);
-      setSelectedProduct(null);
-
-      alert("Product deleted successfully!");
-    } catch (error) {
-      console.error("Error deleting product:", error);
-      alert(`Failed to delete product: ${error.message}`);
-    }
-  };
-
   // Handle product status toggle
   const handleToggleStatus = async (product) => {
     try {
@@ -89,6 +76,17 @@ const navigate=useNavigate()
       console.error("Error updating product status:", error);
       alert(`Failed to update product status: ${error.message}`);
     }
+  };
+
+  // Handle view product
+  const handleViewProduct = (product) => {
+    setViewProduct(product);
+    setShowViewModal(true);
+  };
+
+  // Handle edit product
+  const handleEditProduct = (product) => {
+    navigate("/upload-products", { state: { editProduct: product } });
   };
 
   // Format date
@@ -142,9 +140,6 @@ const navigate=useNavigate()
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-start gap-3 mb-6">
-              {/* Back Button */}
-             
-
               {/* Title + Subtitle */}
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">
@@ -183,40 +178,26 @@ const navigate=useNavigate()
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          {/* <div>
-            <h1 className="text-2xl font-bold text-gray-900">
+        <div className="flex items-start justify-between mb-8">
+          <div>
+            {/* Title row with back button */}
+            <div className="flex items-center gap-2">
               <button
-          onClick={() => navigate(-1)}
-          className="flex items-center text-gray-600 hover:text-gray-900"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-              My Products</h1>
-            <p className="text-gray-600">
+                onClick={() => navigate(-1)}
+                className="flex items-center text-gray-600 hover:text-gray-900"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+
+              <h1 className="text-2xl font-bold text-gray-900">My Products</h1>
+            </div>
+
+            {/* Subtitle */}
+            <p className="text-gray-600 mt-1">
               {products.length} product{products.length !== 1 ? "s" : ""} •
               User: {currentUser?.email}
             </p>
-          </div> */}
-          <div>
-      {/* Title row with back button */}
-      <div className="flex items-center gap-2">
-        <button
-          onClick={() => navigate(-1)}
-          className="flex items-center text-gray-600 hover:text-gray-900"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-
-        <h1 className="text-2xl font-bold text-gray-900">My Products</h1>
-      </div>
-
-      {/* Subtitle */}
-      <p className="text-gray-600">
-        {products.length} product{products.length !== 1 ? "s" : ""} • User:{" "}
-        {currentUser?.email}
-      </p>
-    </div>
+          </div>
           <button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors">
             <Plus className="w-4 h-4" />
             <span>Add Product</span>
@@ -267,11 +248,17 @@ const navigate=useNavigate()
                     {/* Dropdown Menu */}
                     <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
                       <div className="py-2">
-                        <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2">
+                        <button
+                          onClick={() => handleViewProduct(product)}
+                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
+                        >
                           <Eye className="w-4 h-4" />
                           <span>View</span>
                         </button>
-                        <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2">
+                        <button
+                          onClick={() => handleEditProduct(product)}
+                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
+                        >
                           <Edit className="w-4 h-4" />
                           <span>Edit</span>
                         </button>
@@ -284,17 +271,7 @@ const navigate=useNavigate()
                             {product.isPublished ? "Unpublish" : "Publish"}
                           </span>
                         </button>
-                        <hr className="my-1" />
-                        <button
-                          onClick={() => {
-                            setSelectedProduct(product);
-                            setShowDeleteConfirm(true);
-                          }}
-                          className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                          <span>Delete</span>
-                        </button>
+                        {/* DELETE BUTTON REMOVED HERE */}
                       </div>
                     </div>
                   </div>
@@ -344,38 +321,15 @@ const navigate=useNavigate()
           ))}
         </div>
 
-        {/* Delete Confirmation Dialog */}
-        {showDeleteConfirm && selectedProduct && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 max-w-md w-mx-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Delete Product
-              </h3>
-              <p className="text-gray-600 mb-4">
-                Are you sure you want to delete "{selectedProduct.title}"? This
-                action cannot be undone.
-              </p>
-
-              <div className="flex space-x-3">
-                <button
-                  onClick={() => {
-                    setShowDeleteConfirm(false);
-                    setSelectedProduct(null);
-                  }}
-                  className="flex-1 px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleDeleteProduct}
-                  className="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* View Product Modal */}
+        <ProductViewModal
+          show={showViewModal}
+          onClose={() => {
+            setShowViewModal(false);
+            setViewProduct(null);
+          }}
+          product={viewProduct}
+        />
       </div>
     </div>
   );

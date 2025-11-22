@@ -48,7 +48,7 @@ export const AppProvider = ({ children }) => {
   // Auth state listener
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-   
+
       try {
         // Define public routes
         const publicRoutes = [

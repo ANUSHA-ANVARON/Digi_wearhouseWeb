@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Play, Star } from "lucide-react";
 import heroimg from "../../assets/hero-section-img.jpg";
 import image1 from "../../assets/home_Create1.mp4";
@@ -6,6 +7,7 @@ import image2 from "../../assets/appareldevelopmentsoftware2.mp4";
 import image3 from "../../assets/home_Scale3.mp4";
 
 function SetUp() {
+  const navigate = useNavigate();
   const [scrollProgress, setScrollProgress] = useState(0);
 
   useEffect(() => {
@@ -130,9 +132,20 @@ function SetUp() {
               Get your business online and start earning in minutes with our
               streamlined onboarding process.
             </p>
-            <button className="bg-red-800 mt-4 hover:bg-red-900 text-white px-8 py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105">
-              <a href="/register">LOG IN</a>
-            </button>
+            {/* <div className="flex gap-4 justify-center mt-4">
+              <button
+                onClick={() => navigate("/register?mode=login")}
+                className="bg-red-800 hover:bg-red-900 text-white px-8 py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105"
+              >
+                Login
+              </button>
+              <button
+                onClick={() => navigate("/register?mode=register")}
+                className="bg-white border-2 border-red-800 text-red-800 hover:bg-red-50 px-8 py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105"
+              >
+                Sign Up
+              </button>
+            </div> */}
           </div>
 
           {/* Steps */}

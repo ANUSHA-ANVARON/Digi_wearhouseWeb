@@ -74,9 +74,14 @@ export const INITIAL_FORM_DATA = {
   },
   reviews: [], // array of { id, name, avatar, rating, text, createdAt }
 
-  // Admin notes / supplier info
   supplierCode: "",
   supplierInfoUrl: "",
+
+  // Additional Vendor Details (for Additional Details Modal)
+  note: "",
+  clean: "",
+  components: "",
+  vendorReviews: [], // Array of { id, text, image } - minimum 5 required
 
   // timestamps / temporary metadata
   createdAt: null,
@@ -85,13 +90,6 @@ export const INITIAL_FORM_DATA = {
 
 export const READY_TO_WEAR_DRESS_TYPES = {
   "Ethnic Wear": [
-    "Saree",
-    "Lehenga",
-    "ANARKALIS",
-    "SHARARAS",
-    "PRET",
-    "FUSION",
-    "WEDDING",
     "Saree",
     "Lehenga",
     "ANARKALIS",
@@ -126,11 +124,6 @@ export const READY_TO_WEAR_DRESS_TYPES = {
 // Unstitched Categories
 export const UNSTITCHED_DRESS_TYPES = {
   "Ethnic Wear": [
-    "ANARKALIS",
-    "SHARARAS",
-    "PRET",
-    "FUSION",
-    "WEDDING",
     "ANARKALIS",
     "SHARARAS",
     "PRET",

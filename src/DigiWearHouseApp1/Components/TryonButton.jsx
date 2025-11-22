@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { UPLOAD_CONFIG } from "../constants/productConstants";
 
 export default function TryOnButton({ garmentImage }) {
   const [tryOnImage, setTryOnImage] = useState(null);
@@ -8,13 +9,16 @@ export default function TryOnButton({ garmentImage }) {
   const uploadToCloudinary = async (file) => {
     const data = new FormData();
     data.append("file", file);
-    data.append("upload_preset", "tryon_unsigned"); // Replace with your actual upload preset
-    data.append("cloud_name", "doiezptnn"); // Replace with your actual cloud name
+    data.append("upload_preset", UPLOAD_CONFIG.CLOUDINARY_UPLOAD_PRESET);
+    data.append("cloud_name", UPLOAD_CONFIG.CLOUDINARY_CLOUD_NAME);
 
-    const res = await fetch("https://api.cloudinary.com/v1_1/doiezptnn/image/upload", {
-      method: "POST",
-      body: data,
-    });
+    const res = await fetch(
+      `https://api.cloudinary.com/v1_1/${UPLOAD_CONFIG.CLOUDINARY_CLOUD_NAME}/image/upload`,
+      {
+        method: "POST",
+        body: data,
+      }
+    );
 
     const json = await res.json();
 

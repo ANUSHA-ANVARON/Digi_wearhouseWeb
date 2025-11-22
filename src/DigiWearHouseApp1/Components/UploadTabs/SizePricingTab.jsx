@@ -1,11 +1,15 @@
-// import React from 'react';
+import React, { useState } from 'react';
 import FormInput from "../UploadSectionComponents/FormInput";
 import SizeSelector from "../UploadSectionComponents/SizeandPricingComps/SizeSelector";
 import ColorSelector from "../UploadSectionComponents/SizeandPricingComps/ColorSelector";
 import UnitsSection from "../UploadSectionComponents/SizeandPricingComps/UnitsSection";
+import AdditionalDetailsModal from "../UploadSectionComponents/models/AdditionalDetailsModal";
 import { SIZES } from "../../constants/productConstants";
+import { Info } from "lucide-react";
 
 const SizePricingTab = ({ formData, onChange }) => {
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+
   // Add a guard for formData
   if (!formData) {
     return (
@@ -55,6 +59,26 @@ const SizePricingTab = ({ formData, onChange }) => {
         units={formData.units}
         onChange={(units) => onChange("units", units)}
       />
+
+      {/* Additional Details Modal */}
+      <AdditionalDetailsModal
+        show={showDetailsModal}
+        onClose={() => setShowDetailsModal(false)}
+        formData={formData}
+        onChange={onChange}
+      />
+
+      {/* Additional Details Button */}
+      <div className="flex justify-start">
+        <button
+          type="button"
+          onClick={() => setShowDetailsModal(true)}
+          className="flex cursor-pointer justify-start px-4 py-2 text-sm font-medium text-[#800000] bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
+        >
+          <Info className="w-4 h-4 mr-2 cursor-pointer" />
+          Additional Details
+        </button>
+      </div>
     </div>
   );
 };

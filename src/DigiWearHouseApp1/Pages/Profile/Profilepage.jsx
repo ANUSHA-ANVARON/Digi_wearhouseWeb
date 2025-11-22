@@ -184,8 +184,7 @@ const Profilepage = () => {
       await updateDoc(userDocRef, { [type]: downloadURL });
 
       setSuccessMessage(
-        `${
-          type === "profileImage" ? "Profile" : "Cover"
+        `${type === "profileImage" ? "Profile" : "Cover"
         } image updated successfully!`
       );
     } catch (error) {
@@ -348,9 +347,8 @@ const Profilepage = () => {
                   }
                   placeholder="Your full name"
                   disabled={!isEditing}
-                  className={`w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                    !isEditing ? "bg-gray-50 text-gray-600" : "bg-white"
-                  }`}
+                  className={`w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${!isEditing ? "bg-gray-50 text-gray-600" : "bg-white"
+                    }`}
                 />
               </div>
               <div className="space-y-2">
@@ -365,9 +363,8 @@ const Profilepage = () => {
                   }
                   placeholder="Mobile number"
                   disabled={!isEditing}
-                  className={`w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                    !isEditing ? "bg-gray-50 text-gray-600" : "bg-white"
-                  }`}
+                  className={`w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${!isEditing ? "bg-gray-50 text-gray-600" : "bg-white"
+                    }`}
                 />
               </div>
               <div className="space-y-2">
@@ -425,9 +422,8 @@ const Profilepage = () => {
                   placeholder="Address"
                   rows="3"
                   disabled={!isEditing}
-                  className={`w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                    !isEditing ? "bg-gray-50 text-gray-600" : "bg-white"
-                  }`}
+                  className={`w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${!isEditing ? "bg-gray-50 text-gray-600" : "bg-white"
+                    }`}
                 />
               </div>
             </div>
@@ -471,13 +467,12 @@ const Profilepage = () => {
                         handleArrayFieldChange("sellsFor", option, isSelected)
                       }
                       disabled={!isEditing}
-                      className={`px-6 py-3 rounded-full text-sm cursor-pointer transition-colors ${
-                        isSelected
+                      className={`px-6 py-3 rounded-full text-sm cursor-pointer transition-colors ${isSelected
                           ? "bg-blue-500 text-white"
                           : isEditing
-                          ? "bg-gray-100 text-gray-700 hover:bg-blue-500 hover:text-white"
-                          : "bg-gray-100 text-gray-700"
-                      } ${!isEditing ? "cursor-not-allowed" : ""}`}
+                            ? "bg-gray-100 text-gray-700 hover:bg-blue-500 hover:text-white"
+                            : "bg-gray-100 text-gray-700"
+                        } ${!isEditing ? "cursor-not-allowed" : ""}`}
                     >
                       {option}
                     </button>
@@ -508,13 +503,12 @@ const Profilepage = () => {
                           )
                         }
                         disabled={!isEditing}
-                        className={`w-full px-6 py-4 rounded-lg transition-colors font-medium ${
-                          isSelected
+                        className={`w-full px-6 py-4 rounded-lg transition-colors font-medium ${isSelected
                             ? "bg-blue-500 text-white"
                             : isEditing
-                            ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                            : "bg-gray-50 text-gray-500 cursor-not-allowed"
-                        }`}
+                              ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                              : "bg-gray-50 text-gray-500 cursor-not-allowed"
+                          }`}
                       >
                         {category}
                       </button>
@@ -543,13 +537,12 @@ const Profilepage = () => {
                           )
                         }
                         disabled={!isEditing}
-                        className={`px-4 py-3 rounded-lg transition-colors text-sm font-medium ${
-                          isSelected
+                        className={`px-4 py-3 rounded-lg transition-colors text-sm font-medium ${isSelected
                             ? "bg-blue-500 text-white"
                             : isEditing
-                            ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                            : "bg-gray-50 text-gray-500 cursor-not-allowed"
-                        }`}
+                              ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                              : "bg-gray-50 text-gray-500 cursor-not-allowed"
+                          }`}
                       >
                         {design}
                       </button>
@@ -579,13 +572,12 @@ const Profilepage = () => {
                           )
                         }
                         disabled={!isEditing}
-                        className={`px-4 py-2 rounded-full text-sm transition-colors ${
-                          isSelected
+                        className={`px-4 py-2 rounded-full text-sm transition-colors ${isSelected
                             ? "bg-blue-500 text-white"
                             : isEditing
-                            ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                            : "bg-gray-50 text-gray-500 cursor-not-allowed"
-                        }`}
+                              ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                              : "bg-gray-50 text-gray-500 cursor-not-allowed"
+                          }`}
                       >
                         {material}
                       </button>
@@ -614,13 +606,12 @@ const Profilepage = () => {
                           )
                         }
                         disabled={!isEditing}
-                        className={`px-4 py-2 rounded-full text-sm transition-colors ${
-                          isSelected
+                        className={`px-4 py-2 rounded-full text-sm transition-colors ${isSelected
                             ? "bg-blue-500 text-white"
                             : isEditing
-                            ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                            : "bg-gray-50 text-gray-500 cursor-not-allowed"
-                        }`}
+                              ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                              : "bg-gray-50 text-gray-500 cursor-not-allowed"
+                          }`}
                       >
                         {dress}
                       </button>
@@ -648,9 +639,8 @@ const Profilepage = () => {
                   }
                   placeholder="Your shop name"
                   disabled={!isEditing}
-                  className={`w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                    !isEditing ? "bg-gray-50 text-gray-600" : "bg-white"
-                  }`}
+                  className={`w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${!isEditing ? "bg-gray-50 text-gray-600" : "bg-white"
+                    }`}
                 />
               </div>
               <div className="space-y-2">
@@ -665,9 +655,8 @@ const Profilepage = () => {
                   }
                   placeholder="GST number"
                   disabled={!isEditing}
-                  className={`w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                    !isEditing ? "bg-gray-50 text-gray-600" : "bg-white"
-                  }`}
+                  className={`w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${!isEditing ? "bg-gray-50 text-gray-600" : "bg-white"
+                    }`}
                 />
               </div>
               <div className="space-y-2">
@@ -682,9 +671,8 @@ const Profilepage = () => {
                   }
                   placeholder="First name"
                   disabled={!isEditing}
-                  className={`w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                    !isEditing ? "bg-gray-50 text-gray-600" : "bg-white"
-                  }`}
+                  className={`w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${!isEditing ? "bg-gray-50 text-gray-600" : "bg-white"
+                    }`}
                 />
               </div>
               <div className="space-y-2">
@@ -699,9 +687,8 @@ const Profilepage = () => {
                   }
                   placeholder="Business type"
                   disabled={!isEditing}
-                  className={`w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                    !isEditing ? "bg-gray-50 text-gray-600" : "bg-white"
-                  }`}
+                  className={`w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${!isEditing ? "bg-gray-50 text-gray-600" : "bg-white"
+                    }`}
                 />
               </div>
               <div className="space-y-2 lg:col-span-2 2xl:col-span-3">
@@ -716,9 +703,8 @@ const Profilepage = () => {
                   placeholder="Shop address"
                   rows="3"
                   disabled={!isEditing}
-                  className={`w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                    !isEditing ? "bg-gray-50 text-gray-600" : "bg-white"
-                  }`}
+                  className={`w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${!isEditing ? "bg-gray-50 text-gray-600" : "bg-white"
+                    }`}
                 />
               </div>
             </div>
@@ -741,9 +727,8 @@ const Profilepage = () => {
                   }
                   placeholder="Bank name"
                   disabled={!isEditing}
-                  className={`w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                    !isEditing ? "bg-gray-50 text-gray-600" : "bg-white"
-                  }`}
+                  className={`w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${!isEditing ? "bg-gray-50 text-gray-600" : "bg-white"
+                    }`}
                 />
               </div>
               <div className="space-y-2">
@@ -758,9 +743,8 @@ const Profilepage = () => {
                   }
                   placeholder="Branch name/address"
                   disabled={!isEditing}
-                  className={`w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                    !isEditing ? "bg-gray-50 text-gray-600" : "bg-white"
-                  }`}
+                  className={`w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${!isEditing ? "bg-gray-50 text-gray-600" : "bg-white"
+                    }`}
                 />
               </div>
               <div className="space-y-2">
@@ -775,9 +759,8 @@ const Profilepage = () => {
                   }
                   placeholder="Account holder name"
                   disabled={!isEditing}
-                  className={`w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                    !isEditing ? "bg-gray-50 text-gray-600" : "bg-white"
-                  }`}
+                  className={`w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${!isEditing ? "bg-gray-50 text-gray-600" : "bg-white"
+                    }`}
                 />
               </div>
               <div className="space-y-2">
@@ -792,9 +775,8 @@ const Profilepage = () => {
                   }
                   placeholder="Bank account number"
                   disabled={!isEditing}
-                  className={`w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                    !isEditing ? "bg-gray-50 text-gray-600" : "bg-white"
-                  }`}
+                  className={`w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${!isEditing ? "bg-gray-50 text-gray-600" : "bg-white"
+                    }`}
                 />
               </div>
               <div className="space-y-2">
@@ -809,9 +791,8 @@ const Profilepage = () => {
                   }
                   placeholder="IFSC code"
                   disabled={!isEditing}
-                  className={`w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                    !isEditing ? "bg-gray-50 text-gray-600" : "bg-white"
-                  }`}
+                  className={`w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${!isEditing ? "bg-gray-50 text-gray-600" : "bg-white"
+                    }`}
                 />
               </div>
               <div className="space-y-2">
@@ -824,9 +805,8 @@ const Profilepage = () => {
                   onChange={(e) => handleInputChange("upiId", e.target.value)}
                   placeholder="UPI ID"
                   disabled={!isEditing}
-                  className={`w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                    !isEditing ? "bg-gray-50 text-gray-600" : "bg-white"
-                  }`}
+                  className={`w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${!isEditing ? "bg-gray-50 text-gray-600" : "bg-white"
+                    }`}
                 />
               </div>
             </div>
@@ -1119,11 +1099,10 @@ const Profilepage = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveSection(tab.id)}
-                className={`py-4 px-2 border-b-2 font-medium text-sm lg:text-base whitespace-nowrap transition-colors ${
-                  activeSection === tab.id
+                className={`py-4 px-2 border-b-2 font-medium text-sm lg:text-base whitespace-nowrap transition-colors ${activeSection === tab.id
                     ? "border-blue-500 text-blue-600"
                     : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }`}
+                  }`}
               >
                 {tab.label}
               </button>
@@ -1142,9 +1121,8 @@ const Profilepage = () => {
                 <button
                   onClick={handleEdit}
                   disabled={updateLoading}
-                  className={`w-full sm:w-auto px-8 lg:px-10 py-3 lg:py-4 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition-colors text-base lg:text-lg ${
-                    updateLoading ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
+                  className={`w-full sm:w-auto px-8 lg:px-10 py-3 lg:py-4 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition-colors text-base lg:text-lg ${updateLoading ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
                 >
                   Edit
                 </button>
@@ -1153,18 +1131,16 @@ const Profilepage = () => {
                   <button
                     onClick={handleCancel}
                     disabled={updateLoading}
-                    className={`w-full sm:w-auto px-8 lg:px-10 py-3 lg:py-4 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 transition-colors text-base lg:text-lg ${
-                      updateLoading ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
+                    className={`w-full sm:w-auto px-8 lg:px-10 py-3 lg:py-4 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 transition-colors text-base lg:text-lg ${updateLoading ? "opacity-50 cursor-not-allowed" : ""
+                      }`}
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleSave}
                     disabled={updateLoading}
-                    className={`w-full sm:w-auto px-8 lg:px-10 py-3 lg:py-4 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition-colors text-base lg:text-lg ${
-                      updateLoading ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
+                    className={`w-full sm:w-auto px-8 lg:px-10 py-3 lg:py-4 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition-colors text-base lg:text-lg ${updateLoading ? "opacity-50 cursor-not-allowed" : ""
+                      }`}
                   >
                     {updateLoading ? "Saving..." : "Save Changes"}
                   </button>
