@@ -44,13 +44,13 @@ const SizePricingTab = ({ formData, onChange }) => {
       />
 
       {/* Stock */}
-      <FormInput
+      {/* <FormInput
         label="Total Stock"
         type="number"
         value={formData.stock || 0}
         onChange={(e) => onChange("stock", Number(e.target.value))}
         placeholder="0"
-      />
+      /> */}
 
       {/* UnitsSection already expects units; ensure it supports keys like "M|red" */}
       <UnitsSection

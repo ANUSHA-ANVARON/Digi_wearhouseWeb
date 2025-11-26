@@ -2,15 +2,7 @@ import React, { useState } from "react";
 import { uploadToCloudinary } from "../../utilities/cloudinary";
 import { useNavigate } from "react-router-dom";
 
-const BLOUSE_TYPES = [
-  "Round Neck Blouse",
-  "Boat Neck Blouse",
-  "Halter Neck Blouse",
-  "Collar Blouse",
-  "Backless",
-  "Off-Shoulder Blouse",
-  "Cape Style Blouse",
-];
+
 
 const UPLOAD_SECTIONS = [
   { id: "neckline", label: "Neckline Close-up view" },
@@ -21,7 +13,6 @@ const UPLOAD_SECTIONS = [
 
 const ImageUploader = ({ formData, onChange }) => {
   const [uploading, setUploading] = useState({});
-  const [selectedBlouseType, setSelectedBlouseType] = useState("");
   // const [showInstructions, setShowInstructions] = useState(false);
   const navigate = useNavigate();
   const [uploadedImages, setUploadedImages] = useState({
@@ -91,38 +82,7 @@ const ImageUploader = ({ formData, onChange }) => {
         </button>
       </div>
 
-      {/* Blouse Types Dropdown */}
-      <div className="mb-6">
-        <div className="relative">
-          <select
-            value={selectedBlouseType}
-            onChange={(e) => setSelectedBlouseType(e.target.value)}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg appearance-none bg-white focus:ring-2 focus:ring-[#800000] focus:border-transparent" // <-- Changed
-          >
-            <option value="">Blouse Types</option>
-            {BLOUSE_TYPES.map((type, index) => (
-              <option key={index} value={type}>
-                {type}
-              </option>
-            ))}
-          </select>
-          <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-            <svg
-              className="w-5 h-5 text-gray-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
-          </div>
-        </div>
-      </div>
+
 
       {/* Upload Grid */}
       <div className="grid grid-cols-2 gap-4 mb-8">

@@ -1,23 +1,23 @@
 
 
 // services/firebaseService.js
-import { 
-  collection, 
-  addDoc, 
-  getDocs, 
-  doc, 
-  updateDoc, 
-  deleteDoc, 
-  query, 
+import {
+  collection,
+  addDoc,
+  getDocs,
+  doc,
+  updateDoc,
+  deleteDoc,
+  query,
   orderBy,
   serverTimestamp,
-  getDoc 
+  getDoc
 } from 'firebase/firestore';
-import { 
-  ref, 
-  uploadBytes, 
-  getDownloadURL, 
-  deleteObject 
+import {
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  deleteObject
 } from 'firebase/storage';
 import { db, storage } from '../../firebaseConfig';
 
@@ -33,20 +33,20 @@ class FirebaseService {
       .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
   }
 
- // Upload multiple images to Firebase Storage
+  // Upload multiple images to Firebase Storage
   async uploadImages(imageFiles) {
     try {
       const uploadPromises = imageFiles.map(async (file, index) => {
         const fileName = `${Date.now()}_${index}_${file.name}`;
         const storageRef = ref(storage, `product_images/${fileName}`);
-        
+
         const snapshot = await uploadBytes(storageRef, file);
         const downloadURL = await getDownloadURL(snapshot.ref);
-        
+
         return downloadURL;
       });
 
-    const downloadURLs = await Promise.all(uploadPromises);
+      const downloadURLs = await Promise.all(uploadPromises);
       return downloadURLs;
     } catch (error) {
       console.error('Error uploading images:', error);
@@ -74,7 +74,7 @@ class FirebaseService {
       category: formData.chooseType || '',
       productType: formData.productType || 'Ready to Wear',
       dressType: formData.dressType || '',
-      subDressType:productData.dressSubCategory,
+      subDressType: productData.dressSubCategory,
       material: formData.materialType || '',
       design: formData.designType || '',
       price: parseFloat(formData.price) || 0,
@@ -105,9 +105,9 @@ class FirebaseService {
         weave: formData.weave || '',
         material: formData.materialType || formData.material || '',
       },
-      
+
       // Status and visibility
-     metrics: {
+      metrics: {
         ratingAvg: 0,
         ratingCount: 0,
         soldCount: 0,
@@ -136,16 +136,20 @@ class FirebaseService {
     }
     try {
       const productRef = await addDoc(collection(db, 'users', userId, 'products'), {
-        
+
         title: productData.title || 'Untitled Product',
         name: productData.title || 'Untitled Product',
         description: productData.description || '',
         category: productData.category?.toUpperCase() || '',
         productType: productData.productType || '',
         dressType: productData.dressType || '',
-        subDressType:productData.dressSubCategory,
+        subDressType: productData.dressSubCategory,
         fabric: productData.fabric || '',
         craft: productData.craft || '',
+        craft: productData.craft || '',
+        premium: productData.premium, // Added
+        linkedBlouseType: productData.linkedBlouseType || '', // Added
+        isVirtualTryOnEnabled: !!productData.isVirtualTryOnEnabled, // Added
         price: parseFloat(productData.price) || 0,
         selectedSizes: Array.isArray(productData.selectedSizes) ? productData.selectedSizes : [],
         selectedColors: Array.isArray(productData.selectedColors) ? productData.selectedColors : [],
@@ -187,7 +191,7 @@ class FirebaseService {
           updatedAt: serverTimestamp(),
         },
       });
-      console.log(`Product saved: ${productRef,"1234567890"}`);
+      console.log(`Product saved: ${productRef, "1234567890"}`);
       return { success: true, productId: productRef.id };
     } catch (error) {
       console.error('Error saving product:', error);
@@ -195,7 +199,7 @@ class FirebaseService {
     }
   }
 
- // Toggle product status in user's subcollection
+  // Toggle product status in user's subcollection
   async toggleUserProductStatus(userId, productId, isPublished) {
     try {
       const productRef = doc(db, 'users', userId, 'products', productId);
@@ -235,7 +239,7 @@ class FirebaseService {
 
       const docRef = doc(db, 'users', userId, 'products', productId);
       const docSnap = await getDoc(docRef);
-      
+
       if (docSnap.exists()) {
         return {
           id: docSnap.id,
@@ -255,7 +259,7 @@ class FirebaseService {
     try {
       const productRef = doc(db, 'users', userId, 'products', productId);
       const productSnap = await getDoc(productRef);
-      
+
       if (!productSnap.exists()) {
         throw new Error('Product not found');
       }

@@ -19,7 +19,7 @@ const AddProductForm = ({ onBack, initialData }) => {
   const [errors, setErrors] = React.useState({});
 
   // Initialize hook with context data (default)
-  const { formData, updateField } = useProductForm(productData);
+  const { formData, updateField, resetForm } = useProductForm(productData);
 
   const {
     activeTab,
@@ -60,6 +60,8 @@ const AddProductForm = ({ onBack, initialData }) => {
 
   const handleBack = () => {
     if (!goToPreviousTab()) {
+      // If we are on the first tab and going back, reset the form
+      resetForm();
       onBack();
     }
   };

@@ -8,6 +8,7 @@ export const INITIAL_FORM_DATA = {
   dressCategory: "", // e.g. "Ethnic Wear"
   dressType: "", // e.g. "Saree" or "Lehenga"
   dressSubCategory: "", // e.g. "Banarasi Saree" (optional deeper level)
+  linkedBlouseType: "", // NEW: Specific blouse type for Saree/Lehenga
 
   // Pricing & stock
   price: "", // selling price (string or number)

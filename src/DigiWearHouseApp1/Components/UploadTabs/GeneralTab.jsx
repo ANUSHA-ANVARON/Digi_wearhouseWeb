@@ -28,9 +28,9 @@ const normalizeOptions = (opts) => {
       o.value
         ? o
         : {
-            value: o.label || JSON.stringify(o),
-            label: o.label || o.value || JSON.stringify(o),
-          }
+          value: o.label || JSON.stringify(o),
+          label: o.label || o.value || JSON.stringify(o),
+        }
     );
   }
   // If it's an array of strings
@@ -102,6 +102,15 @@ const GeneralTab = ({ formData, onChange, errors, clearError }) => {
       formData.dressType ? getSubSubOptionsForType(formData.dressType) : [],
     [formData.dressType]
   );
+
+  // NEW: Blouse options for Saree/Lehenga
+  const blouseOptions = useMemo(() => {
+    const dressType = formData.dressType?.toLowerCase() || "";
+    if (dressType.includes("saree") || dressType.includes("lehenga")) {
+      return getSubSubOptionsForType("Blouses");
+    }
+    return [];
+  }, [formData.dressType]);
 
   return (
     <div className="space-y-6 md:space-y-8">
@@ -189,6 +198,17 @@ const GeneralTab = ({ formData, onChange, errors, clearError }) => {
             }
             disabled={!formData.dressType || subSubCategoryOptions.length === 0}
           />
+
+          {/* NEW: Conditional Blouse Type Dropdown */}
+          {blouseOptions.length > 0 && (
+            <FormSelect
+              label="Blouse Type"
+              value={formData.linkedBlouseType || ""}
+              onChange={(e) => onChange("linkedBlouseType", e.target.value)}
+              options={blouseOptions}
+              placeholder="Select Blouse Type"
+            />
+          )}
 
           <FormSelect
             label="Fabric"

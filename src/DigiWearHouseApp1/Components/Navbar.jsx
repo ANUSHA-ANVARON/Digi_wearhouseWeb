@@ -139,9 +139,10 @@ const Navbar = () => {
       { name: "About", type: "link", path: "/who-we-are" },
       { name: "FAQ", type: "custom", action: handleFAQClick },
       { name: "Contact Us", type: "link", path: "/contact-us" },
+      { name: "Dashboard", type: "link", path: "/dashboard" },
     ]
     : [
-      { name: "Dashboard", type: "link", path: "/dashboard" },
+      // { name: "Dashboard", type: "link", path: "/dashboard" },
       { name: "Orders", type: "link", path: "/orders" },
       { name: "Add Product", type: "link", path: "/upload-products" },
     ];
