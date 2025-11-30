@@ -19,6 +19,37 @@ export const DRESS_SUB_CATEGORIES = {
     "Festive Lehenga",
     "Indo-Western Lehenga",
   ],
+  "SHARARAS": [
+    "Printed Sharara Set",
+    "Embroidered Sharara Set",
+    "Mirror Work Sharara Set",
+    "Sequinned Sharara Set",
+    "Layered Sharara Set",
+    "Jacket Sharara Set",
+    "Silk Sharara Set",
+    "Georgette Sharara Set",
+    "Cotton Sharara Set",
+    "Festive Sharara Set",
+  ],
+  "Gowns": [
+    "Printed Gown",
+    "Embroidered Gown",
+    "Sequinned Gown",
+    "Mirror Work Gown",
+    "Zardosi Gown",
+    "Handwoven Gown",
+    "Layered Gown",
+    "Panelled Gown",
+    "Ruffled Gown",
+    "Silk Gown",
+    "Velvet Gown",
+    "Net Gown",
+    "Organza Gown",
+    "Georgette Gown",
+    "Bridal Gown",
+    "Festive Gown",
+    "Indo-Western Gown",
+  ],
 
   "Saree": [
     "Printed Saree",
@@ -68,7 +99,7 @@ export const DRESS_SUB_CATEGORIES = {
     "Festive Sharara Set",
   ],
 
-  "Kurta Sets": [
+  "Kurta-Sets": [
     "Printed Kurta Set",
     "Embroidered Kurta Set",
     "Anarkali Kurta Set",

@@ -99,7 +99,7 @@ export const READY_TO_WEAR_DRESS_TYPES = {
     "FUSION",
     "WEDDING",
     "Salwar Suit Sets (Top, Bottom & Dupatta)",
-    "Kurta & Dupatta Sets",
+    "Kurta-Sets",
   ],
   "Top Wear": ["Blouses"],
   "Bottom Wear": ["Skirts"],
