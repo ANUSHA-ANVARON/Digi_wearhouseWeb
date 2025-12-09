@@ -190,6 +190,8 @@ class FirebaseService {
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
         },
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
       });
       console.log(`Product saved: ${productRef, "1234567890"}`);
       return { success: true, productId: productRef.id };
