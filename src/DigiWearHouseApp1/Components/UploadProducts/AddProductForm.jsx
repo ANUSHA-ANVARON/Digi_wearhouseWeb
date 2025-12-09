@@ -1,9 +1,10 @@
-import React, { useEffect } from "react"; // Added useEffect
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useRef, useCallback } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useApp } from "../../context/Context";
 import { useProductForm } from "../../CustomHooks/useProductForm";
+import { useProductDrafts } from "../../CustomHooks/useProductDrafts";
 import { useTabNavigation } from "../../CustomHooks/useTabNavigation";
-import { TABS } from "../../constants/productConstants";
+import { TABS, INITIAL_FORM_DATA } from "../../constants/productConstants";
 
 import TabNavigation from "../UploadSectionComponents/TabNavigation";
 import NavigationButtons from "../UploadSectionComponents/NavigationButtons";
@@ -15,8 +16,19 @@ import { ArrowLeft } from "lucide-react";
 // 1. Accept initialData as a prop
 const AddProductForm = ({ onBack, initialData }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { productData, updateProductData } = useApp();
   const [errors, setErrors] = React.useState({});
+
+  // Draft management
+  const { saveDraft, deleteDraft, createNewDraft } = useProductDrafts();
+  const draftIdRef = useRef(null);
+  const saveTimeoutRef = useRef(null);
+  const isFormDirtyRef = useRef(false);
+
+  // Check if we're loading from a draft
+  const draftData = location.state?.draftData;
+  const existingDraftId = location.state?.draftId;
 
   // Initialize hook with context data (default)
   const { formData, updateField, resetForm } = useProductForm(productData);
@@ -30,7 +42,7 @@ const AddProductForm = ({ onBack, initialData }) => {
     isLastTab,
   } = useTabNavigation(TABS, "general");
 
-  // 2. Add useEffect to populate form when editing
+  // 2. Add useEffect to populate form when editing (from edit mode)
   useEffect(() => {
     if (initialData) {
       console.log("Pre-filling form for Edit mode:", initialData);
@@ -57,6 +69,93 @@ const AddProductForm = ({ onBack, initialData }) => {
       }
     }
   }, [initialData]); // Run once when initialData is provided
+
+  // 3. Initialize draft: load from draft or create new
+  useEffect(() => {
+    if (draftData && existingDraftId) {
+      // Loading from an existing draft
+      console.log("Loading draft:", existingDraftId);
+      draftIdRef.current = existingDraftId;
+
+      // Pre-fill form from draft data
+      Object.keys(draftData).forEach((key) => {
+        if (
+          key === "id" ||
+          key === "userId" ||
+          key === "createdAt" ||
+          key === "updatedAt"
+        )
+          return;
+        updateField(key, draftData[key]);
+      });
+
+      if (draftData.imageUrls) {
+        updateField("images", draftData.imageUrls);
+        updateField("imageUrls", draftData.imageUrls);
+      }
+    } else if (!initialData) {
+      // New product - create a new draft ID
+      draftIdRef.current = createNewDraft();
+      console.log("Created new draft ID:", draftIdRef.current);
+    }
+  }, []); // Run once on mount
+
+  // 4. Auto-save form data to localStorage (debounced)
+  useEffect(() => {
+    // Skip if editing an existing product (not a new draft)
+    if (initialData) return;
+
+    // Check if form has any data worth saving
+    const hasContent = formData.title ||
+      formData.category ||
+      formData.dressType ||
+      formData.price ||
+      (formData.imageUrls && formData.imageUrls.length > 0);
+
+    if (!hasContent) return;
+
+    isFormDirtyRef.current = true;
+
+    // Clear previous timeout
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+
+    // Save after 1 second of inactivity
+    saveTimeoutRef.current = setTimeout(() => {
+      if (draftIdRef.current && isFormDirtyRef.current) {
+        console.log("Auto-saving draft:", draftIdRef.current);
+        saveDraft(draftIdRef.current, formData);
+      }
+    }, 1000);
+
+    // Cleanup timeout on unmount or when formData changes
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, [formData, initialData, saveDraft]);
+
+  // 5. Cleanup on unmount - save any pending changes
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+      // Save final state if form is dirty
+      if (draftIdRef.current && isFormDirtyRef.current && !initialData) {
+        const hasContent = formData.title ||
+          formData.category ||
+          formData.dressType ||
+          formData.price ||
+          (formData.imageUrls && formData.imageUrls.length > 0);
+        if (hasContent) {
+          saveDraft(draftIdRef.current, formData);
+        }
+      }
+    };
+  }, []);
 
   const handleBack = () => {
     if (!goToPreviousTab()) {
@@ -101,6 +200,14 @@ const AddProductForm = ({ onBack, initialData }) => {
         "Please wait until the AI has finished generating your saree views before proceeding."
       );
       return;
+    }
+
+    // Delete draft when proceeding to preview (will be published)
+    if (draftIdRef.current) {
+      console.log("Deleting draft before preview:", draftIdRef.current);
+      deleteDraft(draftIdRef.current);
+      draftIdRef.current = null;
+      isFormDirtyRef.current = false;
     }
 
     updateProductData(formData);

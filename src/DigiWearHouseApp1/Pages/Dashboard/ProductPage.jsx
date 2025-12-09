@@ -448,8 +448,9 @@
 import React, { useState, useEffect } from "react";
 import { useApp } from "../../context/Context";
 import firebaseService from "../../../SERVICES/firebaseService";
-import { Plus, ArrowRight, Package, ArrowLeft } from "lucide-react";
+import { Plus, ArrowRight, Package, ArrowLeft, Edit3 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { useProductDrafts } from "../../CustomHooks/useProductDrafts";
 
 const ProductsPage = () => {
   const { currentUser } = useApp();
@@ -457,6 +458,7 @@ const ProductsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const { drafts } = useProductDrafts(); // Drafts hook
   const [productStats, setProductStats] = useState({
     totalProducts: 0,
     lastAdded: null,
@@ -529,10 +531,10 @@ const ProductsPage = () => {
     );
     const lastAdded = sortedByDate[0]?.createdAt
       ? new Date(sortedByDate[0].createdAt).toLocaleDateString("en-US", {
-          month: "2-digit",
-          day: "2-digit",
-          year: "numeric",
-        })
+        month: "2-digit",
+        day: "2-digit",
+        year: "numeric",
+      })
       : "Unknown";
 
     // Calculate category breakdown
@@ -672,30 +674,52 @@ const ProductsPage = () => {
       <div className="max-w-7xl mx-auto">
         {/* Top Cards Grid - CHANGED to lg:grid-cols-2 */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8">
-          {/* Total Products Card - CHANGED to include Add Product button */}
+          {/* Total Products Card */}
           <div className="bg-gradient-to-br from-[#800000] to-[#600000] rounded-2xl p-6 text-white relative overflow-hidden flex flex-col justify-between">
-            {/* Stats Section */}
-            <Link to={"/recenltyproducts"} className="block">
-              <div className="relative z-10">
-                <h2 className="text-lg md:text-xl font-semibold mb-2">
-                  Total Products{" "}
-                </h2>
-                <div className="mb-4">
-                  <p className="text-sm opacity-90">Last added</p>
-                  <p className="text-sm opacity-90">
-                    {productStats.lastAdded || "No products yet"}
-                  </p>
-                </div>
-                <div className="text-5xl md:text-6xl font-bold mb-4">
+            <div className="flex flex-col items-center z-10">
+              <h2 className="text-lg md:text-xl font-semibold mb-2">
+                Total Products
+              </h2>
+
+              <Link to={"/recenltyproducts"} className="block mb-6">
+                <div className="text-5xl md:text-6xl font-bold text-center hover:scale-105 transition-transform">
                   {productStats.totalProducts}
                 </div>
+              </Link>
+
+              <div className="flex items-center justify-center gap-8 w-full">
+                {/* Last Added Section */}
+                <div className="text-center">
+                  <p className="text-sm opacity-90 mb-1">Last added</p>
+                  <p className="font-medium text-base">
+                    {productStats.lastAdded || "No products"}
+                  </p>
+                </div>
+
+                <div className="w-px h-10 bg-white/20"></div>
+
+                {/* Drafts Section */}
+                <Link to="/drafts" className="text-center group block">
+                  <div className="flex items-center justify-center gap-1.5 mb-1 group-hover:text-amber-200 transition-colors">
+                    <p className="text-sm opacity-90">Drafts</p>
+                    <Edit3 className="w-3.5 h-3.5" />
+                  </div>
+                  <div className="font-medium text-base flex items-center justify-center gap-2">
+                    {drafts.length}
+                    {drafts.length > 0 && (
+                      <span className="text-xs text-amber-300 font-normal animate-pulse">
+                        Resume
+                      </span>
+                    )}
+                  </div>
+                </Link>
               </div>
-            </Link>
+            </div>
 
             {/* Add Product Button Section */}
             <Link
               to={"/upload-products"}
-              className="mt-4 bg-white/20 hover:bg-white/30 text-white rounded-lg p-4 flex items-center justify-center text-center transition-colors duration-200"
+              className="mt-6 bg-white/20 hover:bg-white/30 text-white rounded-lg p-4 flex items-center justify-center text-center transition-colors duration-200"
             >
               <Plus className="w-5 h-6 md:w-6 md:h-6 mr-2 flex-shrink-0" />
               <span className="font-semibold text-base md:text-lg">
@@ -773,7 +797,7 @@ const ProductsPage = () => {
                     <div className="flex items-center space-x-4">
                       <div className="w-12 h-12 md:w-14 md:h-14 bg-gradient-to-br from-[#FEC601] to-[#eab308] rounded-lg flex-shrink-0 flex items-center justify-center overflow-hidden">
                         {product.image &&
-                        product.image !== "/api/placeholder/60/60" ? (
+                          product.image !== "/api/placeholder/60/60" ? (
                           <img
                             src={product.image}
                             alt={product.name}

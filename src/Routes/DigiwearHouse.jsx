@@ -13,6 +13,7 @@ import TotalRevenueController from "../DigiWearHouseApp1/Pages/Dashboard/Revenue
 import RecentlyAddedProductsPage from '../DigiWearHouseApp1/Pages/Dashboard/RecentlyAddedProductsPage.jsx';
 import ProductsPage from '../DigiWearHouseApp1/Pages/Dashboard/ProductPage.jsx';
 import UploadProducts from '../DigiWearHouseApp1/Pages/Products/Uploadproducts.jsx';
+import DraftsPage from '../DigiWearHouseApp1/Pages/Products/DraftsPage.jsx';
 import TryonPreview from '../DigiWearHouseApp1/Pages/Products/TryonPreviewpage.jsx';
 import { AppProvider } from "../DigiWearHouseApp1/context/Context.jsx"
 import UserProductsList from '../DigiWearHouseApp1/Pages/Products/productList.jsx';
@@ -76,6 +77,7 @@ function DigiwearHouse() {
             element={<RecentlyAddedProductsPage />}
           />
           <Route path="/upload-products" element={<UploadProducts />} />
+          <Route path="/drafts" element={<DraftsPage />} />
           <Route path="/tryon-preview" element={<TryonPreview />} />
           <Route path="/size-chart" element={<SizeChart />} />
           <Route path="/instructions" element={<ViewInstructionsPage />} />
