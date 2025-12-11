@@ -29,8 +29,8 @@ class FirebaseService {
       .toString()
       .toLowerCase()
       .trim()
-      .replace(/[\s\W-]+/g, '-') // Replace spaces and non-word chars with hyphens
-      .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
+      .replace(/[\s\W-]+/g, '-') 
+      .replace(/^-+|-+$/g, ''); 
   }
 
   // Upload multiple images to Firebase Storage

@@ -96,6 +96,22 @@ export default function UserProductsList() {
     }
   };
 
+  // Safe check: is this product controlled by Super Admin?
+  const isControlledBySuperAdmin = (product) => {
+  if (!product) return true;
+
+  // Check top-level isAdminPublished
+  const topLevelExists = product.hasOwnProperty('isAdminPublished');
+  const topLevelIsTrue = topLevelExists && product.isAdminPublished === true;
+
+  // Check inside availability
+  const nestedExists = product.availability?.hasOwnProperty('isAdminPublished');
+  const nestedIsTrue = nestedExists && product.availability.isAdminPublished === true;
+
+  // Final: true if field is missing OR explicitly set to true
+  return (!topLevelExists || topLevelIsTrue) && (!nestedExists || nestedIsTrue);
+};
+
   // Handle view product
   const handleViewProduct = (product) => {
     setViewProduct(product);
@@ -195,9 +211,11 @@ export default function UserProductsList() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-6xl mx-auto px-4 py-8">
+
         {/* Header */}
         <div className="flex items-start justify-between mb-8">
           <div>
+
             {/* Title row with back button */}
             <div className="flex items-center gap-2">
               <button
@@ -262,20 +280,26 @@ export default function UserProductsList() {
                   )}
 
                   {/* Status Badge */}
-                  <div className="absolute top-3 left-3">
+                  <div className="absolute top-3 left-3 flex gap-1">
                     <span
                       className={`px-2 py-1 text-xs rounded-full font-medium ${product.isPublished
                         ? "bg-green-100 text-green-800"
                         : "bg-yellow-100 text-yellow-800"
                         }`}
                     >
-                      {product.isPublished ? "Published" : "Draft"}
+                      {product.isPublished ? "Published" : "Unpublished"}
                     </span>
+                    {!isControlledBySuperAdmin(product) && (
+                      <span className="inline-block px-2.5 py-1 text-[10px] font-bold text-red-800 bg-red-100 rounded-full border border-red-300">
+                        Unpublished by Super Admin
+                      </span>
+                    )}
                   </div>
 
-                  {/* Actions Menu */}
+                  {/* Actions Menu - This is the 3-dot menu */}
                   <div className="absolute top-3 right-3">
                     <div className="relative group">
+
                       <button className="p-2 bg-white bg-opacity-80 rounded-full hover:bg-opacity-100 transition-all">
                         <MoreHorizontal className="w-4 h-4 text-gray-600" />
                       </button>
@@ -297,15 +321,19 @@ export default function UserProductsList() {
                             <Edit className="w-4 h-4" />
                             <span>Edit</span>
                           </button>
-                          <button
-                            onClick={() => handleToggleStatus(product)}
-                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
-                          >
-                            <Package className="w-4 h-4" />
-                            <span>
-                              {product.isPublished ? "Unpublish" : "Publish"}
-                            </span>
-                          </button>
+
+                          {/* Hide Publish/Unpublish if Super Admin controls it */}
+                          {isControlledBySuperAdmin(product) && (
+                            <button
+                              onClick={() => handleToggleStatus(product)}
+                              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
+                            >
+                              <Package className="w-4 h-4" />
+                              <span>{product.isPublished ? "Unpublish" : "Publish"}</span>
+                            </button>
+                          )}
+
+
                           {/* DELETE BUTTON REMOVED HERE */}
                         </div>
                       </div>
