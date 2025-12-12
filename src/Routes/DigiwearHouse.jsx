@@ -27,6 +27,7 @@ import SizeChart from '../DigiWearHouseApp1/Components/SizeChart.jsx';
 import ScrolltoTop from '../DigiWearHouseApp1/Components/ScrolltoTop.jsx'
 import ViewInstructionsPage from '../DigiWearHouseApp1/Pages/ViewInstructionsPage.jsx';
 import RequireRegistration from '../RequireRegistration.jsx';
+import PendingApproval from '../DigiWearHouseApp1/Pages/PendingApproval.jsx';
 
 function DigiwearHouse() {
   const location = useLocation();
@@ -63,6 +64,7 @@ function DigiwearHouse() {
               </RequireRegistration>
             }
           />
+          <Route path="/pending-approval" element={<PendingApproval />} />
           <Route path="/login" element={<DigiWarehouseRegistration />} />
           <Route path="/profile" element={<Profilepage />} />
           <Route path="/recenltyproducts" element={<UserProductsList />} />

@@ -146,7 +146,6 @@ class FirebaseService {
         subDressType: productData.dressSubCategory,
         fabric: productData.fabric || '',
         craft: productData.craft || '',
-        craft: productData.craft || '',
         premium: productData.premium, // Added
         linkedBlouseType: productData.linkedBlouseType || '', // Added
         isVirtualTryOnEnabled: !!productData.isVirtualTryOnEnabled, // Added

@@ -167,7 +167,8 @@ export const AppProvider = ({ children }) => {
         emailVerified: user.emailVerified,
         phoneVerified: userData.phoneVerified || false,
         registrationCompleted: userData.registrationCompleted || false,
-        isActive: true,
+        isActive: false,
+        status: 'pending',
       };
 
       await setDoc(doc(db, "vendor_registrations", user.uid), userDocData);
