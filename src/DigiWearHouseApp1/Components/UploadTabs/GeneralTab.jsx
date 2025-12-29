@@ -200,7 +200,7 @@ const GeneralTab = ({ formData, onChange, errors, clearError }) => {
           />
 
           {/* NEW: Conditional Blouse Type Dropdown */}
-          {blouseOptions.length > 0 && (
+          {/* {blouseOptions.length > 0 && (
             <FormSelect
               label="Blouse Type"
               value={formData.linkedBlouseType || ""}
@@ -208,9 +208,9 @@ const GeneralTab = ({ formData, onChange, errors, clearError }) => {
               options={blouseOptions}
               placeholder="Select Blouse Type"
             />
-          )}
+          )} */}
 
-          <FormSelect
+          {/* <FormSelect
             label="Fabric"
             value={formData.fabric || ""}
             onChange={(e) => onChange("fabric", e.target.value)}
@@ -224,7 +224,7 @@ const GeneralTab = ({ formData, onChange, errors, clearError }) => {
             onChange={(e) => onChange("craft", e.target.value)}
             options={normalizeOptions(DESIGN_TYPES)}
             placeholder="Select Craft"
-          />
+          /> */}
           {/* Sell Price & MRP */}
 
           <div className="flex items-center space-x-3 mt-2">

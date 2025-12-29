@@ -293,7 +293,7 @@ const handleAutoGenerateCompleteSaree = async () => {
         sareeParts.shoulder?.url,
       ];
 
-      const updatedImageUrls = [...generatedUrls, ...partUrls];
+      const updatedImageUrls = [...generatedUrls, ...partUrls].filter(url => url);
       onChange("imageUrls", updatedImageUrls);
 
       if (data.uploadedParts) {
@@ -490,11 +490,11 @@ const handleAutoGenerateCompleteSaree = async () => {
       <div className="flex flex-col items-center justify-center p-6 animate-pulse">
         <div className="w-20 h-20 rounded-full border-4 border-t-transparent border-pink-400 animate-spin mb-4"></div>
         <p className="text-pink-600 font-medium text-sm tracking-wide">
-          Generating 4 stunning saree views...
+          Generating stunning saree view...
         </p>
         <p className="text-gray-500 text-xs mt-1">
-          AI is creating multiple angles <br />
-          It Takes around 2 minutes to display images 
+          AI is assembling your saree parts <br />
+          It Takes around 30 seconds... 
         </p>
       </div>
     );
@@ -660,7 +660,7 @@ const handleAutoGenerateCompleteSaree = async () => {
         <div className="bg-gradient-to-br   rounded-xl p-6">
           <h4 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
             {/* <CheckCircle className="text-green-600" /> */}
-            AI Generated Saree Views ({getGeneratedViewsCount()}/4)
+            AI Generated Saree View ({getGeneratedViewsCount()})
             {/* <span className="text-xs text-green-600 font-normal">
               (Front set as Primary)
             </span> */}

@@ -7,8 +7,10 @@ import handler from "./api/drape-saree-parts.js"; // import your function
 import dotenv from "dotenv";
 dotenv.config();
 
-console.log("Cloudinary Name:", process.env.CLOUDINARY_CLOUD_NAME);
-console.log("Gemini Key:", process.env.GEMINI_API_KEY);
+const GEMINI_API_KEY=process.env.GEMINI_API_KEY;
+const CLOUDINARY_CLOUD_NAME=process.env.CLOUDINARY_CLOUD_NAME;
+console.log("Cloudinary Name:", CLOUDINARY_CLOUD_NAME);
+console.log("Gemini Key:", GEMINI_API_KEY);
 
 const app = express();
 

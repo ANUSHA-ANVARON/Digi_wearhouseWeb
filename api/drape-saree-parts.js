@@ -21,7 +21,7 @@ const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/
 const storage = multer.memoryStorage();
 const upload = multer({
   storage,
-  limits: { fileSize: 5 * 1024 * 1024, files: 4 },
+  limits: { fileSize: 20 * 1024 * 1024, files: 4 },
   fileFilter: (req, file, cb) => {
     if (file.mimetype && file.mimetype.startsWith('image/')) cb(null, true);
     else cb(new Error('Only image files are allowed!'), false);
@@ -106,17 +106,37 @@ async function downloadImageAsBase64(imageUrl) {
 
 
 // Generate a single view — now using image URLs (not inline base64)
-async function generateSareeViewUsingUrls(imageUrlResults, viewType) {
-  const viewPrompts = {
-    front: `Generate a beautiful and photorealistic FRONT VIEW image of the SAME Indian model, standing, and facing forward. The model is elegantly wearing the exact saree and blouse shown in the provided image. Ensure all visual details, including the blouse style, fit, pallu design, and borders, are precisely replicated and perfectly consistent with the reference photo.`,
-    back: `Generate a beautiful and photorealistic BACK VIEW image of the SAME Indian model, standing, viewed from behind. The model is elegantly wearing the exact saree and blouse shown in the provided image. Focus on the back draping and ensure the blouse style, fit, pallu design, and all garment details are perfectly consistent with the reference photo.`,
-    side: `Generate a beautiful and photorealistic SIDE VIEW image of the SAME Indian model in a graceful side profile pose. The model is elegantly wearing the exact saree and blouse from the provided image. All details of the saree and blouse, including their fit and the pallu design, must remain perfectly consistent with the reference photo.`,
-    sitting: `Generate a beautiful and photorealistic FRONT SITTING VIEW image of the SAME Indian model, sitting gracefully and naturally. The model is wearing the exact saree and blouse from the provided image. Critically, ensure the blouse style, fit, pallu design, and all garment details appear identically consistent with the standing views from the reference photo, despite the seated posture.`
-  };
+async function generateSareeViewUsingUrls(imageUrlResults, viewType, masterReferenceUrl) {
+  const viewName = viewType === 'front' ? 'FRONT VIEW' : 'BACK VIEW';
+  const viewInstruction = viewType === 'front' ? 'Front View' : 'Back View';
 
   const parts = [
-    { text: `${viewPrompts[viewType]} I'm providing you with 4 separate parts of a saree:\n\n1. BLOUSE\n2. PLEATS\n3. PALLU\n4. SHOULDER\n\nPlease create a cohesive, professional fashion photograph showing all these parts combined into one beautiful saree. The 4 parts are provided below in order:` }
+    { text: `ROLE: Virtual Saree Assembler.
+TASK: Assemble the 4 provided garment parts (BLOUSE, PLEATS, PALLU, SHOULDER) into a single COHESIVE ${viewName} saree image on a realistic Indian model.
+
+INSTRUCTIONS:
+1. BLOUSE: Use the provided 'BLOUSE' image for the top garment.
+2. PLEATS: Use the 'PLEATS' image for the central lower drape.
+3. PALLU: Drap the 'PALLU' image over the left shoulder.
+4. SHOULDER: Connect the pleats and pallu using the 'SHOULDER' image.
+
+CRITICAL RULES:
+- OUTPUT: Generate ONLY a ${viewInstruction}.
+- STITCHING: The parts must blend seamlessly. No visible cut lines.
+- FIDELITY: Keep the colors and patterns exactly as they are in the source images.
+- STYLE: Simple, clean, realistic catalog shot. No dramatic lighting or extra effects.` }
   ];
+
+  if (masterReferenceUrl) {
+    const { data: refBase64, mimeType: refMime } = await downloadImageAsBase64(masterReferenceUrl);
+    parts.push({ text: "MASTER REFERENCE IMAGE (STRICTLY MATCH THIS MODEL AND LIGHTING):" });
+    parts.push({
+      inline_data: {
+        mime_type: refMime,
+        data: refBase64
+      }
+    });
+  }
 
   for (const { partName, secure_url } of imageUrlResults) {
     const { data: base64Data, mimeType } = await downloadImageAsBase64(secure_url);
@@ -132,8 +152,7 @@ async function generateSareeViewUsingUrls(imageUrlResults, viewType) {
 const requestPayload = {
   contents: [{ parts }],
   generationConfig: {
-    // responseModalities removed - not needed for this model
-    temperature: 0.3,
+    temperature: 0.2, // Lower temperature for maximum literal adherence to prompt
     topP: 0.8,
     topK: 40,
     maxOutputTokens: 8192
@@ -174,7 +193,6 @@ const requestPayload = {
 
   return { generatedImageData, responseText };
 }
-
 // Main handler
 export default async function handler(req, res) {
   // CORS
@@ -198,8 +216,10 @@ export default async function handler(req, res) {
     { name: 'blouse', maxCount: 1 },
     { name: 'pleats', maxCount: 1 },
     { name: 'pallu', maxCount: 1 },
-    { name: 'shoulder', maxCount: 1 }
+    { name: 'shoulder', maxCount: 1 },
   ]);
+  
+  console.log("--> API HANDLER LOADED. FORCE FRONT VIEW ONLY.");
 
   let cloudinaryResults = {};
   try {
@@ -226,22 +246,25 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Server configuration error: Missing environment variables', missing: missingEnvs });
     }
 
+
+
+    // FALLBACK TO ORIGINAL 4-PART WORKFLOW
     const requiredParts = ['blouse','pleats','pallu','shoulder'];
     const missingParts = requiredParts.filter(p => !files[p] || files[p].length === 0);
     if (missingParts.length > 0) {
-      return res.status(400).json({ error: `Missing saree parts: ${missingParts.join(', ')}`, missingParts });
+      return res.status(400).json({ error: `Missing saree parts (or mannequin_image): ${missingParts.join(', ')}`, missingParts });
     }
 
     // Upload each part to Cloudinary and collect secure URLs (small payload)
-    const uploadPromises = requiredParts.map(async (partName) => {
+    // Upload each part to Cloudinary SEQUENTIALLY to avoid timeouts
+    const uploadResults = [];
+    for (const partName of requiredParts) {
+      console.log(`Uploading ${partName} to Cloudinary...`);
       const file = files[partName][0];
       const result = await uploadToCloudinary(file.buffer, partName);
-      return { partName, result };
-    });
-    const uploadResults = await Promise.all(uploadPromises);
-    uploadResults.forEach(({ partName, result }) => {
+      uploadResults.push({ partName, result });
       cloudinaryResults[partName] = result;
-    });
+    }
 
     // Build array of { partName, secure_url } to pass to Gemini
     const imageUrlResults = uploadResults.map(({ partName, result }) => ({
@@ -250,13 +273,16 @@ export default async function handler(req, res) {
     }));
 
     // Generate views sequentially to be safe
-    const viewTypes = ['front','back','side','sitting'];
+    // USER REQUEST: Generate ONLY Front View for the 4-part workflow
+    const viewTypes = ['front', 'back']; // ['front','back','side','sitting'];
     const generatedViews = {};
     const generatedUrls = {};
 
+    let masterReferenceUrl = null;
+
     for (const viewType of viewTypes) {
       try {
-        const { generatedImageData, responseText } = await generateSareeViewUsingUrls(imageUrlResults, viewType);
+        const { generatedImageData, responseText } = await generateSareeViewUsingUrls(imageUrlResults, viewType, masterReferenceUrl);
 
         if (!generatedImageData) {
           console.warn(`No inline image returned for ${viewType}, skipping upload.`);
@@ -267,6 +293,11 @@ export default async function handler(req, res) {
         const base64Data = generatedImageData.data;
         const cloudUrl = await uploadGeneratedImageToCloudinary(base64Data, viewType);
 
+        // Update master reference for subsequent views
+        if (viewType === 'front') {
+          masterReferenceUrl = cloudUrl;
+        }
+
         generatedViews[viewType] = {
           data: base64Data,
           mimeType: generatedImageData.mime_type || generatedImageData.mimeType || 'image/png',
@@ -275,7 +306,7 @@ export default async function handler(req, res) {
         generatedUrls[viewType] = cloudUrl;
 
         // small delay
-        await new Promise(r => setTimeout(r, 800));
+        await new Promise(r => setTimeout(r, 1000));
       } catch (err) {
         console.error(`Failed to generate ${viewType}:`, err.message || err);
         // continue to next view

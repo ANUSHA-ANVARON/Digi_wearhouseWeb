@@ -101,7 +101,7 @@ export const READY_TO_WEAR_DRESS_TYPES = {
     "Salwar Suit Sets (Top, Bottom & Dupatta)",
     "Kurta-Sets",
   ],
-  "Top Wear": ["Blouses"],
+  // "Top Wear": ["Blouses"],
   "Bottom Wear": ["Skirts"],
   // You can add these later if needed:
   // "Dresses & Jumpsuits": [

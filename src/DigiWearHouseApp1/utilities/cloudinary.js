@@ -1,5 +1,6 @@
 // utils/cloudinary.js
 import { UPLOAD_CONFIG } from '../constants/productConstants';
+import { compressImage } from './imageCompression';
 
 export const validateFile = (file) => {
   if (!file) {
@@ -16,12 +17,22 @@ export const validateFile = (file) => {
 };
 
 export const uploadToCloudinary = async (file) => {
-  validateFile(file);
+  // Auto-compress if exceeds limit
+  let fileToUpload = file;
+  if (file.size > UPLOAD_CONFIG.MAX_FILE_SIZE) {
+    try {
+      fileToUpload = await compressImage(file, 10);
+    } catch (err) {
+      console.error("Compression failed, attempting original upload:", err);
+    }
+  }
+
+  validateFile(fileToUpload);
 
   console.log("Starting upload for file:", file.name, "Size:", file.size, "bytes");
 
   const data = new FormData();
-  data.append("file", file);
+  data.append("file", fileToUpload);
   data.append("upload_preset", UPLOAD_CONFIG.CLOUDINARY_UPLOAD_PRESET);
   data.append("cloud_name", UPLOAD_CONFIG.CLOUDINARY_CLOUD_NAME);
 

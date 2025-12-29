@@ -28,6 +28,9 @@ import ScrolltoTop from '../DigiWearHouseApp1/Components/ScrolltoTop.jsx'
 import ViewInstructionsPage from '../DigiWearHouseApp1/Pages/ViewInstructionsPage.jsx';
 import RequireRegistration from '../RequireRegistration.jsx';
 import PendingApproval from '../DigiWearHouseApp1/Pages/PendingApproval.jsx';
+import BulkUploadPage from "../DigiWearHouseApp1/Pages/buluploadpage.jsx";
+
+
 
 function DigiwearHouse() {
   const location = useLocation();
@@ -52,7 +55,7 @@ function DigiwearHouse() {
 
           {/* <Route path="/digiwearhouse" element={<DigiwearHouse/>} /> */}
           <Route path="/privacy-policy" element={<PrivacyAndPolicy />} />
-
+  <Route path='/bulk-upload' element={<BulkUploadPage/> } />
           <Route path="/who-we-are" element={<Whoweare />} />
           <Route path="/orders" element={<OrdersManagementSystem />} />
           {/* <Route path="/dashboard" element={} /> */}

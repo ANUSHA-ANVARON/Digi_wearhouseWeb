@@ -41,6 +41,12 @@ export const useProductSubmission = () => {
         cleanedData.generatedSareeImage = "BASE64_REMOVED";
       }
       
+      
+      // Ensure no undefined values in imageUrls
+      if (Array.isArray(cleanedData.imageUrls)) {
+        cleanedData.imageUrls = cleanedData.imageUrls.filter(url => url);
+      }
+      
       console.log("Saree imageUrls being saved:", cleanedData.imageUrls);
     }
     
