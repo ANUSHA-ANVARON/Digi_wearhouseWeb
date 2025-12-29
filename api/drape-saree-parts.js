@@ -15,7 +15,7 @@ cloudinary.config({
 
 // Gemini API configuration (model name you showed access for)
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 
 // Multer config
 const storage = multer.memoryStorage();
