@@ -124,7 +124,8 @@ CRITICAL RULES:
 - OUTPUT: Generate ONLY a ${viewInstruction}.
 - STITCHING: The parts must blend seamlessly. No visible cut lines.
 - FIDELITY: Keep the colors and patterns exactly as they are in the source images.
-- STYLE: Simple, clean, realistic catalog shot. No dramatic lighting or extra effects.` }
+- STYLE: Simple, clean, realistic catalog shot. No dramatic lighting or extra effects.
+- NO WATERMARKS: Do not include any watermarks, logos, text overlaid on image, or signature of any kind.` }
   ];
 
   if (masterReferenceUrl) {
