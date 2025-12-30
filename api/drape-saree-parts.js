@@ -15,7 +15,7 @@ cloudinary.config({
 
 // Gemini API configuration (model name you showed access for)
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent';
 
 // Multer config
 const storage = multer.memoryStorage();
@@ -181,7 +181,11 @@ const requestPayload = {
     throw error;
   }
 
-  const content = geminiResponse.data.candidates[0]?.content?.parts || [];
+
+
+
+
+  const content = geminiResponse.data.candidates?.[0]?.content?.parts || [];
   let generatedImageData = null;
   let responseText = "";
 
@@ -281,12 +285,14 @@ export default async function handler(req, res) {
 
     let masterReferenceUrl = null;
 
+    const errors = [];
     for (const viewType of viewTypes) {
       try {
         const { generatedImageData, responseText } = await generateSareeViewUsingUrls(imageUrlResults, viewType, masterReferenceUrl);
 
         if (!generatedImageData) {
           console.warn(`No inline image returned for ${viewType}, skipping upload.`);
+          errors.push(`${viewType}: No inline image returned`);
           continue;
         }
 
@@ -310,12 +316,16 @@ export default async function handler(req, res) {
         await new Promise(r => setTimeout(r, 1000));
       } catch (err) {
         console.error(`Failed to generate ${viewType}:`, err.message || err);
+        errors.push(`${viewType}: ${err.message || err.toString()}`);
+        if(err.response?.data) {
+            errors.push(`API Detail: ${JSON.stringify(err.response.data)}`);
+        }
         // continue to next view
       }
     }
 
     if (Object.keys(generatedViews).length === 0) {
-      throw new Error('Failed to generate any saree views');
+      throw new Error(`Failed to generate any saree views. Errors: ${errors.join('; ')}`);
     }
 
     const uploadedParts = {};
