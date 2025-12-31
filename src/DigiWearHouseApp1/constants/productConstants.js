@@ -10,6 +10,12 @@ export const INITIAL_FORM_DATA = {
   dressSubCategory: "", // e.g. "Banarasi Saree" (optional deeper level)
   linkedBlouseType: "", // NEW: Specific blouse type for Saree/Lehenga
 
+  // NEW: Filter fields (appear after dressType selection)
+  occasion: "", // single selection (mandatory): wedding, bridal, festive, party, office, daily
+  primaryFabric: "", // single selection: silk, cotton, etc.
+  fabricSubcategory: "", // single selection: based on primaryFabric
+  weaveType: "", // single selection (optional): banarasi, kanjivaram, etc.
+
   // Pricing & stock
   price: "", // selling price (string or number)
   mrp: "", // original MRP

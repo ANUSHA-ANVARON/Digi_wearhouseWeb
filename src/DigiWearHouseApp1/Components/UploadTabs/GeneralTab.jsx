@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 import FormInput from "../UploadSectionComponents/FormInput";
 import FormSelect from "../UploadSectionComponents/FormSelect";
 import ProductTypeToggle from "../UploadSectionComponents/SizeandPricingComps/ProductTypeToggle";
+import ProductFilters from "../UploadSectionComponents/Filters/ProductFilters";
 import {
   READY_TO_WEAR_DRESS_TYPES,
   UNSTITCHED_DRESS_TYPES,
@@ -171,8 +172,17 @@ const GeneralTab = ({ formData, onChange, errors, clearError }) => {
             label="Dress Type"
             value={formData.dressType || ""}
             onChange={(e) => {
-              onChange("dressType", e.target.value);
+              const newDressType = e.target.value;
+              onChange("dressType", newDressType);
               onChange("dressSubCategory", ""); // reset subcategory
+              
+              // Clear occasion - vendor will select manually
+              onChange("occasion", "");
+              
+              // Reset other filters when dress type changes
+              onChange("primaryFabric", "");
+              onChange("fabricSubcategory", "");
+              onChange("weaveType", "");
             }}
             options={subCategoryOptions}
             placeholder={
@@ -185,19 +195,37 @@ const GeneralTab = ({ formData, onChange, errors, clearError }) => {
             }
           />
 
-          {/* NEW: Dress Sub-Category Dropdown */}
-          <FormSelect
-            label="Dress Sub-Category"
-            value={formData.dressSubCategory || ""}
-            onChange={(e) => onChange("dressSubCategory", e.target.value)}
-            options={subSubCategoryOptions}
-            placeholder={
-              formData.dressType
-                ? "Select Dress Sub-Category"
-                : "Choose Dress Type first"
-            }
-            disabled={!formData.dressType || subSubCategoryOptions.length === 0}
+          {/* ========== OCCASION & FILTERS (Always visible, adapt based on dress type) ========== */}
+          <ProductFilters
+            dressType={formData.dressType}
+            selectedFilters={{
+              occasion: formData.occasion || "",
+              primaryFabric: formData.primaryFabric || "",
+              fabricSubcategory: formData.fabricSubcategory || "",
+              weaveType: formData.weaveType || "",
+            }}
+            onFilterChange={(filterType, value) => {
+              onChange(filterType, value);
+            }}
           />
+
+          {/* Dress Sub-Category (Always visible, hidden for Saree, disabled when no dress type) */}
+          {(!formData.dressType || 
+            (!formData.dressType.toLowerCase().includes("saree") && 
+             !formData.dressType.toLowerCase().includes("sari"))) && (
+            <FormSelect
+              label="Dress Sub-Category"
+              value={formData.dressSubCategory || ""}
+              onChange={(e) => onChange("dressSubCategory", e.target.value)}
+              options={subSubCategoryOptions}
+              placeholder={
+                formData.dressType && subSubCategoryOptions.length > 0
+                  ? "Select Dress Sub-Category"
+                  : "Choose Dress Type first"
+              }
+              disabled={!formData.dressType || subSubCategoryOptions.length === 0}
+            />
+          )}
 
           {/* NEW: Conditional Blouse Type Dropdown */}
           {/* {blouseOptions.length > 0 && (
