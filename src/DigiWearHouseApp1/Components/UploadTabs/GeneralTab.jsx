@@ -135,12 +135,14 @@ const GeneralTab = ({ formData, onChange, errors, clearError }) => {
             placeholder="A stylish, beautiful pink floral lehenga..."
           />
 
+          {/* Category (Fixed to WOMEN) */}
           <FormSelect
             label="Category"
-            value={formData.category || ""}
+            value={formData.category || "WOMEN"}
             onChange={(e) => onChange("category", e.target.value)}
             options={normalizeOptions(CATEGORIES)}
-            placeholder="Choose Category"
+            placeholder="WOMEN"
+            disabled={true}
           />
 
           <ProductTypeToggle
@@ -148,26 +150,28 @@ const GeneralTab = ({ formData, onChange, errors, clearError }) => {
             onChange={(value) => {
               const normalized = (value || "").trim();
               onChange("productType", normalized);
-              onChange("dressCategory", ""); // reset
+              // Auto-set to Ethnic Wear (fixed)
+              onChange("dressCategory", "Ethnic Wear");
               onChange("dressType", "");
               onChange("dressSubCategory", "");
             }}
           />
 
-          {/* Dress Category (parent) */}
+          {/* Dress Category (Fixed to Ethnic Wear) */}
           <FormSelect
             label="Dress Category"
-            value={formData.dressCategory || ""}
+            value={formData.dressCategory || "Ethnic Wear"}
             onChange={(e) => {
               onChange("dressCategory", e.target.value);
               onChange("dressType", ""); // Reset subcategory when category changes
               onChange("dressSubCategory", ""); // reset deeper level
             }}
             options={categoryOptions}
-            placeholder="Select Dress Category"
+            placeholder="Ethnic Wear"
+            disabled={true}
           />
 
-          {/* Dress Type (sub-category) */}
+          {/* Dress Type */}
           <FormSelect
             label="Dress Type"
             value={formData.dressType || ""}
@@ -185,14 +189,7 @@ const GeneralTab = ({ formData, onChange, errors, clearError }) => {
               onChange("weaveType", "");
             }}
             options={subCategoryOptions}
-            placeholder={
-              formData.dressCategory
-                ? "Select Sub Category"
-                : "Choose category first"
-            }
-            disabled={
-              !formData.dressCategory || subCategoryOptions.length === 0
-            }
+            placeholder="Select Dress Type"
           />
 
           {/* ========== OCCASION & FILTERS (Always visible, adapt based on dress type) ========== */}

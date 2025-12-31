@@ -101,14 +101,10 @@ export const READY_TO_WEAR_DRESS_TYPES = {
     "Lehenga",
     "ANARKALIS",
     "SHARARAS",
-    "PRET",
-    "FUSION",
     "WEDDING",
     "Salwar Suit Sets (Top, Bottom & Dupatta)",
     "Kurta-Sets",
   ],
-  // "Top Wear": ["Blouses"],
-  "Bottom Wear": ["Skirts"],
   // You can add these later if needed:
   // "Dresses & Jumpsuits": [
   //   "Maxi Dresses",
@@ -133,8 +129,6 @@ export const UNSTITCHED_DRESS_TYPES = {
   "Ethnic Wear": [
     "ANARKALIS",
     "SHARARAS",
-    "PRET",
-    "FUSION",
     "WEDDING",
     "Salwar Suit Sets (Top, Bottom & Dupatta)",
     "Kurta & Dupatta Sets",

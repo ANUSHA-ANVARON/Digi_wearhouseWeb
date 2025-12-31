@@ -358,8 +358,6 @@ export const DRESS_TYPE_OCCASION_MAP = {
   "Anarkalis": "festive",
   "Sharara Sets": "festive",
   "Gowns": "festive",
-  "PRET": "festive",
-  "FUSION": "festive",
   "Kaftans": "festive",
   
   // Party occasions

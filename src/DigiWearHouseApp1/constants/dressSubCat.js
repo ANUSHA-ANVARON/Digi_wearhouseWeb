@@ -190,11 +190,10 @@ export const DRESS_SUB_CATEGORIES = {
     "Printed Skirt",
   ],
 
+
   // ----------------- UNSTITCHED -----------------
   "ANARKALIS": ["Unstitched Anarkali Fabric", "Cotton Set", "Festive Fabric"],
   "SHARARAS": ["Unstitched Sharara Fabric", "Silk Sharara Fabric"],
-  "PRET": ["Printed Pret Fabric", "Designer Pret Fabric"],
-  "FUSION": ["Fusion Fabric", "Layered Fusion Material"],
   "WEDDING": ["Bridal Fabric", "Zardosi Fabric", "Sequinned Fabric"],
 
   "Saree Fabrics": [
