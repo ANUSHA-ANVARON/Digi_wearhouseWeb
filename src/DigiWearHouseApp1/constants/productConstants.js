@@ -3,9 +3,9 @@ export const INITIAL_FORM_DATA = {
   title: "",
   description: "",
   productType: "Ready to Wear", // "Ready to Wear" | "Unstitched"
-  category: "", // WOMEN / MEN / KIDS
+  category: "WOMEN", // WOMEN / MEN / KIDS
   // Dress category -> dress type -> dress sub-category chain
-  dressCategory: "", // e.g. "Ethnic Wear"
+  dressCategory: "Ethnic Wear", // e.g. "Ethnic Wear"
   dressType: "", // e.g. "Saree" or "Lehenga"
   dressSubCategory: "", // e.g. "Banarasi Saree" (optional deeper level)
   linkedBlouseType: "", // NEW: Specific blouse type for Saree/Lehenga

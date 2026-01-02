@@ -93,7 +93,7 @@ const GeneralTab = ({ formData, onChange, errors, clearError }) => {
   );
 
   const subCategoryOptions = useMemo(
-    () => (formData.dressCategory ? getSubOptions(formData.dressCategory) : []),
+    () => getSubOptions(formData.dressCategory || "Ethnic Wear"),
     [formData.dressCategory, getSubOptions]
   );
 
@@ -235,7 +235,7 @@ const GeneralTab = ({ formData, onChange, errors, clearError }) => {
             />
           )} */}
 
-          {/* <FormSelect
+          <FormSelect
             label="Fabric"
             value={formData.fabric || ""}
             onChange={(e) => onChange("fabric", e.target.value)}
@@ -249,7 +249,7 @@ const GeneralTab = ({ formData, onChange, errors, clearError }) => {
             onChange={(e) => onChange("craft", e.target.value)}
             options={normalizeOptions(DESIGN_TYPES)}
             placeholder="Select Craft"
-          /> */}
+          />
           {/* Sell Price & MRP */}
 
           <div className="flex items-center space-x-3 mt-2">
@@ -267,7 +267,7 @@ const GeneralTab = ({ formData, onChange, errors, clearError }) => {
 
       <div>
         <label className="block text-start text-sm md:text-base font-medium text-gray-700 mb-2">
-          Is this product premium?
+          Is this product Boutique?
         </label>
         <div className="flex space-x-6">
           <label className="inline-flex items-center">

@@ -144,7 +144,7 @@ class FirebaseService {
         subDressType: productData.dressSubCategory || '',
         fabric: productData.fabric || '',
         craft: productData.craft || '',
-        premium: productData.premium, 
+        boutique: !!(productData.boutique || productData.premium), 
         linkedBlouseType: productData.linkedBlouseType || '',
         isVirtualTryOnEnabled: !!productData.isVirtualTryOnEnabled,
         price: parseFloat(productData.price) || 0,
@@ -227,10 +227,7 @@ class FirebaseService {
         subDressType: productData.subDressType || '',
         fabric: productData.fabric || '',
         craft: productData.craft || '',
-        
-        // Additional attributes
-        isPublished : productData.isPublished ,  
-        premium: !!productData.premium,
+        boutique: !!(productData.boutique || productData.premium), 
         linkedBlouseType: productData.linkedBlouseType || '',
         isVirtualTryOnEnabled: !!productData.isVirtualTryOnEnabled,
         
