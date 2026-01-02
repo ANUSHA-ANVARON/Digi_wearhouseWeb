@@ -83,51 +83,49 @@ const ProductFilters = ({
         />
       </div>
 
-      {/* ========== FABRIC & WEAVE FILTERS (Only for Saree) ========== */}
-      {isSareeType && (
-        <>
-          {/* ========== PRIMARY FABRIC FILTER ========== */}
+      {/* ========== FABRIC & WEAVE FILTERS (For ALL Types) ========== */}
+      <>
+        {/* ========== PRIMARY FABRIC FILTER ========== */}
+        <FormSelect
+          label="Primary Fabric"
+          value={primaryFabric}
+          onChange={(e) => {
+            onFilterChange?.("primaryFabric", e.target.value);
+            // Reset dependent fields when fabric changes
+            onFilterChange?.("fabricSubcategory", "");
+            onFilterChange?.("weaveType", "");
+          }}
+          options={primaryFabricOptions}
+          placeholder="Select Primary Fabric"
+        />
+
+        {/* ========== FABRIC SUBCATEGORY (Conditional) ========== */}
+        {primaryFabric && fabricSubcategoryOptions.length > 0 && (
           <FormSelect
-            label="Primary Fabric"
-            value={primaryFabric}
-            onChange={(e) => {
-              onFilterChange?.("primaryFabric", e.target.value);
-              // Reset dependent fields when fabric changes
-              onFilterChange?.("fabricSubcategory", "");
-              onFilterChange?.("weaveType", "");
-            }}
-            options={primaryFabricOptions}
-            placeholder="Select Primary Fabric"
+            label="Fabric Sub-Category"
+            value={fabricSubcategory}
+            onChange={(e) => onFilterChange?.("fabricSubcategory", e.target.value)}
+            options={fabricSubcategoryOptions}
+            placeholder={
+              primaryFabric
+                ? "Select Fabric Sub-Category"
+                : "Choose primary fabric first"
+            }
+            disabled={!primaryFabric}
           />
+        )}
 
-          {/* ========== FABRIC SUBCATEGORY (Conditional) ========== */}
-          {primaryFabric && fabricSubcategoryOptions.length > 0 && (
-            <FormSelect
-              label="Fabric Sub-Category"
-              value={fabricSubcategory}
-              onChange={(e) => onFilterChange?.("fabricSubcategory", e.target.value)}
-              options={fabricSubcategoryOptions}
-              placeholder={
-                primaryFabric
-                  ? "Select Fabric Sub-Category"
-                  : "Choose primary fabric first"
-              }
-              disabled={!primaryFabric}
-            />
-          )}
-
-          {/* ========== WEAVE TYPE FILTER (Conditional) ========== */}
-          {showWeaveFilter && (
-            <FormSelect
-              label="Weave Type"
-              value={weaveType}
-              onChange={(e) => onFilterChange?.("weaveType", e.target.value)}
-              options={weaveTypeOptions}
-              placeholder="Select Weave Type"
-            />
-          )}
-        </>
-      )}
+        {/* ========== WEAVE TYPE FILTER (Conditional) ========== */}
+        {showWeaveFilter && (
+          <FormSelect
+            label="Weave Type"
+            value={weaveType}
+            onChange={(e) => onFilterChange?.("weaveType", e.target.value)}
+            options={weaveTypeOptions}
+            placeholder="Select Weave Type"
+          />
+        )}
+      </>
     </div>
   );
 };

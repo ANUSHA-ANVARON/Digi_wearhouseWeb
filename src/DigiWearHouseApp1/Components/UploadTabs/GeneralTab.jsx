@@ -203,6 +203,10 @@ const GeneralTab = ({ formData, onChange, errors, clearError }) => {
             }}
             onFilterChange={(filterType, value) => {
               onChange(filterType, value);
+              // Sync 'primaryFabric' to main 'fabric' field for backward compatibility
+              if (filterType === "primaryFabric") {
+                onChange("fabric", value);
+              }
             }}
           />
 
@@ -235,13 +239,7 @@ const GeneralTab = ({ formData, onChange, errors, clearError }) => {
             />
           )} */}
 
-          <FormSelect
-            label="Fabric"
-            value={formData.fabric || ""}
-            onChange={(e) => onChange("fabric", e.target.value)}
-            options={normalizeOptions(MATERIAL_TYPES)}
-            placeholder="Select Fabric"
-          />
+
 
           <FormSelect
             label="Craft"
@@ -266,45 +264,20 @@ const GeneralTab = ({ formData, onChange, errors, clearError }) => {
       </div>
 
       <div>
-        <label className="block text-start text-sm md:text-base font-medium text-gray-700 mb-2">
-          Is this product Boutique?
-        </label>
-        <div className="flex space-x-6">
-          <label className="inline-flex items-center">
-            <input
-              type="radio"
-              name="premium"
-              value="yes"
-              checked={formData.premium === true}
-              onChange={() => {
-                onChange("premium", true);
-                clearError && clearError("premium");
-              }}
-              className="form-radio text-blue-600"
-            />
-            <span className="ml-2">Yes</span>
-          </label>
-          <label className="inline-flex items-center">
-            <input
-              type="radio"
-              name="premium"
-              value="no"
-              checked={formData.premium === false}
-              onChange={() => {
-                onChange("premium", false);
-                clearError && clearError("premium");
-              }}
-              className="form-radio text-blue-600"
-            />
-            <span className="ml-2">No</span>
-          </label>
-        </div>
-
-        {errors?.premium && (
-          <p className="text-red-500  text-start text-sm mt-2">
-            {errors.premium}
-          </p>
-        )}
+        <FormInput
+          label="Boutique Name / Shop Name"
+          value={formData.shopName || ""}
+          onChange={(e) => {
+            const val = e.target.value;
+            onChange("shopName", val);
+            // Auto-set premium/boutique flag based on if shop name exists
+            onChange("premium", !!val && val.trim().length > 0);
+          }}
+          placeholder="Enter Shop Name (e.g. My Saree Shop)"
+        />
+        <p className="text-xs text-gray-500 mt-1">
+          Entering a shop name automatically marks this as a Boutique Product.
+        </p>
       </div>
     </div>
   );

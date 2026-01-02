@@ -59,6 +59,7 @@ export const INITIAL_FORM_DATA = {
 
   // Flags / UI features
   premium: null, // true/false
+  shopName: "", // NEW: Store/Boutique Name
   isFeatured: false,
   isVirtualTryOnEnabled: false, // yellow "VIRTUAL TRY ON" CTA in UI
   enableLivePreview: false, // live product preview
