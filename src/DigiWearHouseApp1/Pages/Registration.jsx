@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useApp } from "../context/Context";
 import digiLogoPoster from "../../assets/Digiware_logoPoster.png";
-import digi_logo from "../../assets/logo.png";
+import digi_logo from "../../assets/Logo.png";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import {
