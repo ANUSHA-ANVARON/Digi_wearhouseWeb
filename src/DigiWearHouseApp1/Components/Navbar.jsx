@@ -4,7 +4,7 @@ import menImage from "../../assets/men.png";
 import womenImage from "../../assets/women.png";
 import kidsImage from "../../assets/kids.png";
 import accessoriesImage from "../../assets/accessories.png";
-import logo from "../../assets/Logo.png";
+import logo from "../../assets/Logo2.png";
 import notificationIcon from "../../assets/notification-icon.svg";
 import user_icon from "../../assets/user-circle.svg";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -159,10 +159,10 @@ const Navbar = () => {
                   src={logo}
                   alt="DVYB Logo"
                   style={{
-                    width: '39.56782531738281px',
-                    height: '33.48046875px',
+                    width: '59.35px',  // Increased from 39.57px
+                    height: '45.22px',
                     position: 'absolute',
-                    top: '24.26px',
+                    top: '10.26px',
                     left: '175px',
                     opacity: 1
                   }}
