@@ -24,7 +24,7 @@ const FeatureSection = () => {
   const features = [
     {
       icon: <UsersRound size={36} strokeWidth={1.5} />,
-      title: "Customer Management",
+      title: "Customer Management ",
       description:
         "Build lasting relationships with customer profiles, purchase history.",
     },
@@ -73,7 +73,7 @@ const FeatureSection = () => {
     <>
       <div>
         <div className="text-center my-8">
-          <h2 className="text-4xl md:text-5xl font-bold text-red-900 mb-3">
+          <h2 className="text-4xl md:text-5xl font-bold text-[#284F5E] mb-3">
             Powerful Features for Indian Businesses
           </h2>
           <p className="text-gray-500 text-base md:text-lg leading-relaxed">

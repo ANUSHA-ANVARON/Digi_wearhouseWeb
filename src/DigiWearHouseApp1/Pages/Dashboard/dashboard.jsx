@@ -108,7 +108,7 @@ const VendorDashboard = () => {
     {
       month: "Dec",
       value: dashboardData.totalRevenue,
-      color: "bg-[#459EBB]",
+      color: "bg-[#284F5E]",
       height: "h-20",
     }, // Maroon Primary
     { month: "Jan", value: 0, color: "bg-gray-200" },

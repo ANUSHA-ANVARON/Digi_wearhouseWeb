@@ -171,7 +171,7 @@ function SetUp() {
               {/* Text */}
               <div className="order-1 lg:order-2">
                 <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 bg-red-800 text-white rounded-full flex items-center justify-center font-bold text-lg">
+                  <div className="w-12 h-12 bg-[#7DBBD1] text-white rounded-full flex items-center justify-center font-bold text-lg">
                     1
                   </div>
                   <h3 className="text-3xl font-bold text-gray-900">Setup</h3>
@@ -188,7 +188,7 @@ function SetUp() {
               {/* Text */}
               <div>
                 <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 bg-red-800 text-white rounded-full flex items-center justify-center font-bold text-lg">
+                  <div className="w-12 h-12 bg-[#7DBBD1] text-white rounded-full flex items-center justify-center font-bold text-lg">
                     2
                   </div>
                   <h3 className="text-3xl font-bold text-gray-900">
@@ -233,7 +233,7 @@ function SetUp() {
               {/* Text */}
               <div className="order-1 lg:order-2">
                 <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 bg-red-800 text-white rounded-full flex items-center justify-center font-bold text-lg">
+                  <div className="w-12 h-12 bg-[#7DBBD1] text-white rounded-full flex items-center justify-center font-bold text-lg">
                     3
                   </div>
                   <h3 className="text-3xl font-bold text-gray-900">
