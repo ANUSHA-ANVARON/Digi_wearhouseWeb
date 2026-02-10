@@ -33,9 +33,13 @@ function Whoweare() {
             />
           </div>
           <div className="w-1/2 text-left">
-            <h1 className="text-base sm:text-xl lg:text-4xl text-red-800 font-bold mb-2 lg:mb-4">
+            <h1
+              className="text-base sm:text-xl lg:text-4xl font-bold mb-2 lg:mb-4"
+              style={{ color: "#4F9EBB" }}
+            >
               Who We Are
             </h1>
+
             <div className="space-y-2 lg:space-y-4">
               <p className="text-xs sm:text-sm lg:text-base leading-relaxed text-gray-700">
                 DVYB Vendor App is built for small and medium-sized store
@@ -86,7 +90,9 @@ function Whoweare() {
           <div className="w-1/2 lg:w-1/2 sm:px-4 lg:px-12 px-3 space-y-4 sm:space-y-4 lg:space-y-6">
             {/* Why Us */}
             <div className="text-left">
-              <h2 className="text-sm sm:text-xl lg:text-4xl text-red-800 font-bold mb-2 sm:mb-3 lg:mb-6">
+              <h2 className="text-sm sm:text-xl lg:text-4xl font-bold mb-2 sm:mb-3 lg:mb-6"
+              style={{ color: "#4F9EBB" }}
+              >
                 Why Us
               </h2>
               <ul className="space-y-1 sm:space-y-1 lg:space-y-2 text-xs sm:text-xs lg:text-base text-gray-700">
@@ -121,7 +127,8 @@ function Whoweare() {
             {/* // Replace your mission section with this: */}
 
             <div className="">
-              <h2 className="text-sm text-start sm:text-lg lg:text-3xl text-red-800 font-bold mb-2 sm:mb-2 lg:mb-4">
+              <h2 className="text-sm text-start sm:text-lg lg:text-3xl font-bold mb-2 sm:mb-2 lg:mb-4"
+              style={{ color: "#4F9EBB" }}>
                 Mission
               </h2>
 
@@ -203,7 +210,7 @@ function Whoweare() {
                 className="w-full h-auto object-contain mb-3"
                 alt="Digital Inventory"
               />
-              <h3 className="font-semibold text-lg text-red-800 mb-2">
+              <h3 className="font-semibold text-lg mb-2" style={{ color: "#4F9EBB" }}>
                 Digital Inventory
               </h3>
               <p className="text-sm text-gray-600 leading-relaxed">
@@ -222,7 +229,7 @@ function Whoweare() {
                 className="w-full h-auto object-contain mb-3"
                 alt="Sales Analytics"
               />
-              <h3 className="font-semibold text-lg text-red-800 mb-2">
+              <h3 className="font-semibold text-lg mb-2" style={{ color: "#4F9EBB" }}>
                 Sales Analytics
               </h3>
               <p className="text-sm text-gray-600 leading-relaxed">
@@ -241,7 +248,7 @@ function Whoweare() {
                 className="w-full h-auto object-contain mb-3"
                 alt="Dashboards"
               />
-              <h3 className="font-semibold text-lg text-red-800 mb-2">
+              <h3 className="font-semibold text-lg mb-2" style={{ color: "#4F9EBB" }}>
                 Dashboards
               </h3>
               <p className="text-sm text-gray-600 leading-relaxed">
