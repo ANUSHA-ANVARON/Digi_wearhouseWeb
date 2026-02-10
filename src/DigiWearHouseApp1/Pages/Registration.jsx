@@ -1217,7 +1217,7 @@ const DigiWarehouseRegistration = () => {
                   Already have an account?
                   <button
                     onClick={navigateToLogin}
-                    className="text-[#800000] cursor-pointer hover:text-[#a00000] font-medium ml-1"
+                    className="text-[#6397A9] cursor-pointer hover:text-[#4F9EBB] font-medium ml-1"
                   >
                     Log in
                   </button>

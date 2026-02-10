@@ -108,7 +108,7 @@ const VendorDashboard = () => {
     {
       month: "Dec",
       value: dashboardData.totalRevenue,
-      color: "bg-[#800000]",
+      color: "bg-[#459EBB]",
       height: "h-20",
     }, // Maroon Primary
     { month: "Jan", value: 0, color: "bg-gray-200" },
@@ -310,11 +310,10 @@ const VendorDashboard = () => {
                           ₹{product.price || "0"}
                         </span>
                         <span
-                          className={`px-2 py-1 text-xs rounded-full font-medium ${
-                            product.isPublished
+                          className={`px-2 py-1 text-xs rounded-full font-medium ${product.isPublished
                               ? "bg-green-100 text-green-800" // Kept semantic colors
                               : "bg-yellow-100 text-yellow-800"
-                          }`}
+                            }`}
                         >
                           {product.isPublished ? "Live" : "Draft"}
                         </span>
@@ -356,11 +355,10 @@ const VendorDashboard = () => {
                 <button
                   key={period}
                   onClick={() => setSelectedPeriod(period)}
-                  className={`flex-1  px-4 py-2 text-sm md:text-base lg:w-72 sm:w-56  w-auto  font-medium rounded-md transition-colors ${
-                    selectedPeriod === period
-                      ? "bg-[#800000] text-white" // Maroon active
+                  className={`flex-1 px-4 py-2 text-sm md:text-base lg:w-72 sm:w-56 w-auto font-medium rounded-md transition-colors ${selectedPeriod === period
+                      ? "bg-[var(--Color-B2B-500,#4F9EBB)] text-white" 
                       : "text-gray-600 hover:text-gray-800"
-                  }`}
+                    }`}
                 >
                   {period}
                 </button>
@@ -393,12 +391,10 @@ const VendorDashboard = () => {
                     </span>
                   </div>
                   <div
-                    className={`w-full max-w-8 md:max-w-12 rounded-t ${
-                      item.color
-                    } ${
-                      item.height ||
+                    className={`w-full max-w-8 md:max-w-12 rounded-t ${item.color
+                      } ${item.height ||
                       (item.value > 0 ? "h-12 md:h-16" : "h-2 md:h-4")
-                    } transition-all duration-300`}
+                      } transition-all duration-300`}
                   ></div>
                   <div className="mt-2 md:mt-3">
                     <span className="text-xs md:text-sm text-gray-600 font-medium">
