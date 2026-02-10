@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useApp } from "../context/Context";
 import digiLogoPoster from "../../assets/Digiware_logoPoster.png";
-import digi_logo from "../../assets/Logo.png";
+import digi_logo from "../../assets/Logo2.png";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import {
@@ -1167,11 +1167,11 @@ const DigiWarehouseRegistration = () => {
               src={digi_logo}
               alt="DIGI WAREHOUSE Logo"
               style={{
-                width: '39.56782531738281px',
-                height: '33.48046875px',
+                width: '50.56782531738281px',
+                height: '45.48046875px',
                 position: 'absolute',
                 top: '24.26px',
-                left: '145px',
+                left: '185px',
                 opacity: 1
               }}
             />
