@@ -179,10 +179,14 @@ export default function ContactUs() {
 
                 <button
                   onClick={handleSubmit}
-                  className="w-full bg-red-800 hover:bg-red-900 text-white font-medium py-3 px-6 rounded-md transition-colors duration-200"
+                  className="w-full text-white font-medium py-3 px-6 rounded-md transition-colors duration-200"
+                  style={{
+                    background: "var(--Color-B2B-500, #4F9EBB)",
+                  }}
                 >
                   Send
                 </button>
+
               </div>
             </div>
           </div>
