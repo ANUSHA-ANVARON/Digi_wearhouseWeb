@@ -313,7 +313,7 @@ const Navbar = () => {
                 <div className="hidden lg:flex items-center gap-4">
                   <button
                     onClick={() => navigate("/register?mode=login", { state: { mode: "login" } })}
-                    className="bg-red-800 hover:bg-red-900 text-white px-7 py-2 font-semibold transition-all duration-200 transform hover:scale-105"
+                    className="bg-[var(--Color-B2B-500,#4F9EBB)] hover:bg-[var(--Color-B2B-500,#4F9EBB)] text-white px-7 py-2 font-semibold transition-all duration-200 transform hover:scale-105"
                   >
                     Login / Register
                   </button>

@@ -723,7 +723,7 @@ const DigiWarehouseRegistration = () => {
       <button
         onClick={handleRegisterSubmit}
         disabled={isLoading}
-        className="w-full bg-[#800000] hover:bg-[#a00000] text-white font-semibold py-3 px-4 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full bg-[var(--Color-B2B-500,#4F9EBB)] hover:bg-[var(--Color-B2B-600,#3D8BA7)] text-white font-semibold py-3 px-4 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {isLoading ? (
           <div className="flex items-center justify-center">
@@ -1205,7 +1205,7 @@ const DigiWarehouseRegistration = () => {
                   Don't have an account?
                   <button
                     onClick={navigateToRegister}
-                    className="cursor-pointer text-[#800000] hover:text-[#a00000] font-medium ml-1"
+                    className="cursor-pointer text-[#6397A9] hover:text-[#4F9EBB] font-medium ml-1"
                   >
                     Register
                   </button>
