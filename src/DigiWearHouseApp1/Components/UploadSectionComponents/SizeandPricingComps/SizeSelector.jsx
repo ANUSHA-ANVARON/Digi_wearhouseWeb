@@ -28,7 +28,7 @@ const SizeSelector = ({ sizes, selectedSizes, onChange }) => (
           }}
           className={`w-12 h-12 rounded-lg font-medium transition-colors ${
             selectedSizes.includes(size)
-              ? "bg-[#800000] text-white" // <-- Changed this line
+              ? "bg-[#7DBBD1] text-white" // <-- Changed this line
               : "bg-gray-100 text-gray-700 hover:bg-gray-200"
           }`}
         >
