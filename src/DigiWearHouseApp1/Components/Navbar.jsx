@@ -4,7 +4,7 @@ import menImage from "../../assets/men.png";
 import womenImage from "../../assets/women.png";
 import kidsImage from "../../assets/kids.png";
 import accessoriesImage from "../../assets/accessories.png";
-import logo from "../../assets/digi_logo.png";
+import logo from "../../assets/logo.png";
 import notificationIcon from "../../assets/notification-icon.svg";
 import user_icon from "../../assets/user-circle.svg";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -155,7 +155,18 @@ const Navbar = () => {
             {/* Logo */}
             <Link to={"/"}>
               <div className="flex items-center justify-center pt-2">
-                <img src={logo} alt="DVYB Logo" className="h-30" />
+                <img
+                  src={logo}
+                  alt="DVYB Logo"
+                  style={{
+                    width: '39.56782531738281px',
+                    height: '33.48046875px',
+                    position: 'absolute',
+                    top: '24.26px',
+                    left: '175px',
+                    opacity: 1
+                  }}
+                />
               </div>
             </Link>
 

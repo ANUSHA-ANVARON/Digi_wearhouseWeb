@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useApp } from "../context/Context";
 import digiLogoPoster from "../../assets/Digiware_logoPoster.png";
-import digi_logo from "../../assets/digi_logo.png";
+import digi_logo from "../../assets/logo.png";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import {
@@ -513,8 +513,8 @@ const DigiWarehouseRegistration = () => {
           onChange={handleLoginInputChange}
           placeholder="Enter your email"
           className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-[#800000] focus:border-[#800000] transition-all duration-200 text-slate-700 placeholder-slate-400 ${errors.email
-              ? "border-red-300 bg-red-50"
-              : "border-slate-200 bg-slate-50"
+            ? "border-red-300 bg-red-50"
+            : "border-slate-200 bg-slate-50"
             }`}
         />
         {errors.email && (
@@ -537,8 +537,8 @@ const DigiWarehouseRegistration = () => {
           onChange={handleLoginInputChange}
           placeholder="Enter your password"
           className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-[#800000] focus:border-[#800000] transition-all duration-200 text-slate-700 placeholder-slate-400 ${errors.password
-              ? "border-red-300 bg-red-50"
-              : "border-slate-200 bg-slate-50"
+            ? "border-red-300 bg-red-50"
+            : "border-slate-200 bg-slate-50"
             }`}
         />
         {errors.password && (
@@ -549,7 +549,7 @@ const DigiWarehouseRegistration = () => {
       <button
         onClick={handleLogin}
         disabled={isLoading}
-        className="w-full cursor-pointer bg-[#800000] hover:bg-[#a00000] text-white font-semibold py-3 px-4 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full cursor-pointer bg-[#4F9EBB] hover:bg-[#3d8cab] text-white font-semibold py-3 px-4 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {isLoading ? (
           <div className="flex items-center justify-center">
@@ -1162,14 +1162,20 @@ const DigiWarehouseRegistration = () => {
               className="mx-auto h-18 sm:h-20  object-contain"
             />
           </div> */}
-          <div className="text-center h-18 sm:h-32 lg:h-36 flex items-center justify-center">
+          <div className="text-center h-18 sm:h-32 lg:h-36 flex items-center justify-center relative">
             <img
               src={digi_logo}
               alt="DIGI WAREHOUSE Logo"
-              className="mx-auto h-24 sm:h-28 object-contain"
+              style={{
+                width: '39.56782531738281px',
+                height: '33.48046875px',
+                position: 'absolute',
+                top: '24.26px',
+                left: '145px',
+                opacity: 1
+              }}
             />
           </div>
-
           <div className="bg-white rounded-2xl shadow-xl p-8 border border-slate-100 min-h-[500px] flex flex-col justify-between">
             <div>
               <h2 className="text-2xl font-bold text-slate-800 mb-6">

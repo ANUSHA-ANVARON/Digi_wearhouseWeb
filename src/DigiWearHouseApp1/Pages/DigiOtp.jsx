@@ -60,7 +60,7 @@ export default function otpPage() {
           </p>
 
           {/* Continue Button */}
-          <button className="w-full bg-[#800000] text-white py-3 rounded-lg hover:bg-blue-600 transition mb-4">
+          <button className="w-full cursor-pointer bg-[#4F9EBB] hover:bg-[#3d8cab] text-white font-semibold py-3 px-4 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed">
             Continue
           </button>
 
@@ -72,7 +72,7 @@ export default function otpPage() {
           {/* Register Link */}
           <p className="text-center text-sm text-gray-600">
             Don’t have an Account?{" "}
-            <a href="/register" className="text-[#800000] hover:underline">
+            <a href="/register" className="text-[#6397A9] hover:underline">
               Register
             </a>
           </p>
