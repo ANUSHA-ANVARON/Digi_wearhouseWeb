@@ -46,9 +46,13 @@ const FAQSection = () => {
       <div className="max-w-7xl mx-auto grid md:grid-cols-3 gap-8">
         {/* Left Side - FAQ */}
         <div className="md:col-span-2">
-          <h2 className="text-3xl font-bold text-center md:text-left text-red-900">
+          <h2
+            className="text-3xl font-bold text-center md:text-left"
+            style={{ color: "#4F8396" }}
+          >
             FAQ & Support
           </h2>
+
           <p className="text-gray-600 text-center md:text-left mt-2">
             Got questions? We’ve got answers. Plus 24/7 support in your
             language.
