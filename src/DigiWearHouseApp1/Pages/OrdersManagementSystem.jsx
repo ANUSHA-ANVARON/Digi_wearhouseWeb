@@ -272,14 +272,14 @@ const OrdersManagementSystem = () => {
     activeTab === "All"
       ? orders
       : orders.filter((order) => {
-          const statusMap = {
-            Shipped: "shipped",
-            Delivered: "delivered",
-            Pending: "pending",
-            Cancelled: "cancelled",
-          };
-          return order.status === statusMap[activeTab];
-        });
+        const statusMap = {
+          Shipped: "shipped",
+          Delivered: "delivered",
+          Pending: "pending",
+          Cancelled: "cancelled",
+        };
+        return order.status === statusMap[activeTab];
+      });
 
   const tabs = ["All", "Shipped", "Delivered", "Pending", "Cancelled"];
 
@@ -316,12 +316,12 @@ const OrdersManagementSystem = () => {
                     {selectedOrder.status === "delivered"
                       ? "Delivered"
                       : selectedOrder.status === "shipped"
-                      ? "Shipped"
-                      : selectedOrder.status === "cancelled"
-                      ? "Pending"
-                      : selectedOrder.status === "Pending"
-                      ? "Cancelled"
-                      : "Placed"}
+                        ? "Shipped"
+                        : selectedOrder.status === "cancelled"
+                          ? "Pending"
+                          : selectedOrder.status === "Pending"
+                            ? "Cancelled"
+                            : "Placed"}
                   </h2>
                 </div>
 
@@ -331,9 +331,8 @@ const OrdersManagementSystem = () => {
                     {selectedOrder.timeline.map((step, index) => (
                       <div key={index} className="flex flex-col items-center">
                         <div
-                          className={`w-3 h-3 rounded-full ${
-                            step.active ? "bg-red-700" : "bg-gray-300"
-                          }`}
+                          className={`w-3 h-3 rounded-full ${step.active ? "bg-red-700" : "bg-gray-300"
+                            }`}
                         ></div>
                         <div className="text-xs text-gray-500 mt-1 text-center max-w-20">
                           {step.status}
@@ -470,15 +469,20 @@ const OrdersManagementSystem = () => {
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-4 py-2 text-sm font-medium rounded-t-lg border-b-2 transition-colors ${
-                  activeTab === tab
-                    ? "text-red-700 border-red-700 bg-red-50"
+                className={`px-4 py-2 text-sm font-medium rounded-t-lg border-b-2 transition-colors ${activeTab === tab
+                    ? "text-white border-transparent"
                     : "text-gray-600 border-transparent hover:text-gray-900 hover:border-gray-300"
-                }`}
+                  }`}
+                style={
+                  activeTab === tab
+                    ? { background: "#4F8396" }
+                    : {}
+                }
               >
                 {tab}
               </button>
             ))}
+
           </div>
         </div>
 
@@ -527,12 +531,7 @@ const OrdersManagementSystem = () => {
                 {/* Product Images */}
                 <div className="flex flex-wrap space-x-2 mb-4 sm:mb-0">
                   {order.itemsData.slice(0, 6).map((item, index) => (
-                    // <div
-                    //   key={index}
-                    //   className="w-12 h-12 bg-pink-200 rounded-lg flex items-center justify-center flex-shrink-0"
-                    // >
-                    //   <div className="w-8 h-8 bg-pink-400 rounded"></div>
-                    // </div>
+
                     <div key={index}>
                       <img src={item.image} alt="" className="w-20 h-14" />
                     </div>
