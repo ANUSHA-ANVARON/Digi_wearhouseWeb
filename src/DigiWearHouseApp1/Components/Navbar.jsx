@@ -4,7 +4,7 @@ import menImage from "../../assets/men.png";
 import womenImage from "../../assets/women.png";
 import kidsImage from "../../assets/kids.png";
 import accessoriesImage from "../../assets/accessories.png";
-import logo from "../../assets/logo.png";
+import logo from "../../assets/Logo.png";
 import notificationIcon from "../../assets/notification-icon.svg";
 import user_icon from "../../assets/user-circle.svg";
 import { Link, useLocation, useNavigate } from "react-router-dom";
