@@ -34,7 +34,7 @@ const NavigationButtons = ({
     <button
       onClick={isLastTab ? onSubmit : onNext}
       disabled={isLastTab && disableSubmit}
-      className="flex items-center space-x-2 bg-[#800000] hover:bg-[#800000] text-white px-6 py-3 rounded-lg font-medium transition-colors ml-auto"
+      className="flex items-center space-x-2 bg-[#7DBBD1] hover:bg-[#800000] text-white px-6 py-3 rounded-lg font-medium transition-colors ml-auto"
     >
       <span>{isLastTab ? "Submit" : "Next"}</span>
       {!isLastTab && (
