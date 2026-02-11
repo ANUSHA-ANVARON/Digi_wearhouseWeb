@@ -12,7 +12,7 @@ const TestimonialCard = ({
   className,
 }) => (
   <div
-    className={`bg-red-50 rounded-lg p-6 shadow-md max-w-md mx-auto mb-17 transition-transform duration-300 ${className}`}
+    className={`bg-sky-50 rounded-lg p-6 shadow-md max-w-md mx-auto mb-17 transition-transform duration-300 ${className}`}
   >
     <div className="flex items-center mb-4">
       <img src={image} alt={name} className="w-12 h-12 rounded-full mr-4" />

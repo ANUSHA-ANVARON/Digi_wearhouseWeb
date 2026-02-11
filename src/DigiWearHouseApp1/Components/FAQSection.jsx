@@ -40,7 +40,7 @@ const FAQSection = () => {
 
   return (
     <section
-      className="w-full bg-gradient-to-b from-white to-red-50 py-12 px-6 md:px-16"
+      className="w-full bg-gradient-to-b from-white to-sky-50 py-12 px-6 md:px-16"
       id="faq"
     >
       <div className="max-w-7xl mx-auto grid md:grid-cols-3 gap-8">

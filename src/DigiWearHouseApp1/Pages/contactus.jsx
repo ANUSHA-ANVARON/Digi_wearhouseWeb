@@ -108,7 +108,7 @@ export default function ContactUs() {
       </div>
 
       {/* Bottom Section - Contact Form */}
-      <div className="bg-red-100 py-16">
+      <div className="bg-sky-100 py-16">
         <div className="max-w-6xl mx-auto px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             {/* Left Side - Large Text */}
