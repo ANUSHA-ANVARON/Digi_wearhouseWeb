@@ -5,7 +5,7 @@ import { UsersRound, BarChartBig, Upload } from "lucide-react";
 // This is a reusable component for the card's visual style.
 const FeatureCard = ({ icon, title, description }) => {
   return (
-    <div className="flex h-[300px] w-full flex-col items-start bg-gradient-to-br from-red-100 to-red-200 p-8 text-start rounded-2xl shadow-lg border border-white/40">
+    <div className="flex h-[300px] w-full flex-col items-start bg-gradient-to-br from-sky-50 to-blue-100 p-8 text-start rounded-2xl shadow-lg border border-white/40">
       <div className="mb-4 text-black bg-[#FEC601] p-2 text-start rounded-2xl">
         {icon}
       </div>

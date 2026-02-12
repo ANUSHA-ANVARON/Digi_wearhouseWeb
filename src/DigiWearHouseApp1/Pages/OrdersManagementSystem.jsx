@@ -280,6 +280,14 @@ const OrdersManagementSystem = () => {
         };
         return order.status === statusMap[activeTab];
       });
+        const statusMap = {
+          Shipped: "shipped",
+          Delivered: "delivered",
+          Pending: "pending",
+          Cancelled: "cancelled",
+        };
+        return order.status === statusMap[activeTab];
+      });
 
   const tabs = ["All", "Shipped", "Delivered", "Pending", "Cancelled"];
 
@@ -322,6 +330,12 @@ const OrdersManagementSystem = () => {
                           : selectedOrder.status === "Pending"
                             ? "Cancelled"
                             : "Placed"}
+                        ? "Shipped"
+                        : selectedOrder.status === "cancelled"
+                          ? "Pending"
+                          : selectedOrder.status === "Pending"
+                            ? "Cancelled"
+                            : "Placed"}
                   </h2>
                 </div>
 
@@ -331,6 +345,8 @@ const OrdersManagementSystem = () => {
                     {selectedOrder.timeline.map((step, index) => (
                       <div key={index} className="flex flex-col items-center">
                         <div
+                          className={`w-3 h-3 rounded-full ${step.active ? "bg-red-700" : "bg-gray-300"
+                            }`}
                           className={`w-3 h-3 rounded-full ${step.active ? "bg-red-700" : "bg-gray-300"
                             }`}
                         ></div>
