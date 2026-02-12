@@ -14,6 +14,7 @@ import {
 import orderImage from "../../assets/order.png";
 import emptyOrderImg from "../../assets/receipt-item.png";
 import { useNavigate } from "react-router-dom";
+
 const OrdersManagementSystem = () => {
   const [activeTab, setActiveTab] = useState("All");
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -82,54 +83,6 @@ const OrdersManagementSystem = () => {
         },
       ],
     },
-    // {
-    //   id: 2,
-    //   status: "cancelled",
-    //   date: "Apr 8, 2024, 9:07 AM",
-    //   total: 840,
-    //   paymentMethod: "From your card",
-    //   items: 6,
-    //   itemsData: [
-    //     {
-    //       name: "Pink Ethnic lehanga",
-    //       price: 140,
-    //       quantity: 1,
-    //       image: orderImage,
-    //     },
-    //     {
-    //       name: "Pink Ethnic lehanga",
-    //       price: 140,
-    //       quantity: 1,
-    //       image: orderImage,
-    //     },
-    //     {
-    //       name: "Pink Ethnic lehanga",
-    //       price: 140,
-    //       quantity: 1,
-    //       image: orderImage,
-    //     },
-    //     {
-    //       name: "Pink Ethnic lehanga",
-    //       price: 140,
-    //       quantity: 1,
-    //       image: orderImage,
-    //     },
-    //     {
-    //       name: "Pink Ethnic lehanga",
-    //       price: 140,
-    //       quantity: 1,
-    //       image: orderImage,
-    //     },
-    //     {
-    //       name: "Pink Ethnic lehanga",
-    //       price: 140,
-    //   _       quantity: 1,
-    //       image: orderImage,
-    //     },
-    //   ],
-    //   deliveryAddress:
-    //     "📍 Shop No-07, Top Floor, Rangpur Electronics Bazar-800001",
-    // },
     {
       id: 3,
       status: "pending",
@@ -243,11 +196,11 @@ const OrdersManagementSystem = () => {
       case "delivered":
         return "text-green-600 bg-green-50 border-green-200";
       case "shipped":
-        return "text-red-700 bg-red-50 border-red-200"; // Changed from blue to maroon
+        return "text-red-700 bg-red-50 border-red-200";
       case "pending":
-        return "text-amber-600 bg-amber-50 border-amber-200"; // Changed from orange to amber (gold)
+        return "text-amber-600 bg-amber-50 border-amber-200";
       case "cancelled":
-        return "text-red-600 bg-red-50 border-red-200"; // Kept as red, slightly different from shipped
+        return "text-red-600 bg-red-50 border-red-200";
       default:
         return "text-gray-600 bg-gray-50 border-gray-200";
     }
@@ -268,28 +221,37 @@ const OrdersManagementSystem = () => {
     }
   };
 
+  // Fixed filteredOrders - removed duplicate code
   const filteredOrders =
     activeTab === "All"
       ? orders
       : orders.filter((order) => {
-        const statusMap = {
-          Shipped: "shipped",
-          Delivered: "delivered",
-          Pending: "pending",
-          Cancelled: "cancelled",
-        };
-        return order.status === statusMap[activeTab];
-      });
-        const statusMap = {
-          Shipped: "shipped",
-          Delivered: "delivered",
-          Pending: "pending",
-          Cancelled: "cancelled",
-        };
-        return order.status === statusMap[activeTab];
-      });
+          const statusMap = {
+            Shipped: "shipped",
+            Delivered: "delivered",
+            Pending: "pending",
+            Cancelled: "cancelled",
+          };
+          return order.status === statusMap[activeTab];
+        });
 
   const tabs = ["All", "Shipped", "Delivered", "Pending", "Cancelled"];
+
+  // Fixed getStatusText function to avoid duplicate ternary
+  const getStatusText = (status) => {
+    switch (status) {
+      case "delivered":
+        return "Delivered";
+      case "shipped":
+        return "Shipped";
+      case "pending":
+        return "Pending";
+      case "cancelled":
+        return "Cancelled";
+      default:
+        return "Placed";
+    }
+  };
 
   if (selectedOrder) {
     return (
@@ -320,22 +282,7 @@ const OrdersManagementSystem = () => {
                     <CheckCircle className="w-8 h-8 text-green-600" />
                   </div>
                   <h2 className="text-xl font-semibold text-gray-900">
-                    Order is{" "}
-                    {selectedOrder.status === "delivered"
-                      ? "Delivered"
-                      : selectedOrder.status === "shipped"
-                        ? "Shipped"
-                        : selectedOrder.status === "cancelled"
-                          ? "Pending"
-                          : selectedOrder.status === "Pending"
-                            ? "Cancelled"
-                            : "Placed"}
-                        ? "Shipped"
-                        : selectedOrder.status === "cancelled"
-                          ? "Pending"
-                          : selectedOrder.status === "Pending"
-                            ? "Cancelled"
-                            : "Placed"}
+                    Order is {getStatusText(selectedOrder.status)}
                   </h2>
                 </div>
 
@@ -345,10 +292,9 @@ const OrdersManagementSystem = () => {
                     {selectedOrder.timeline.map((step, index) => (
                       <div key={index} className="flex flex-col items-center">
                         <div
-                          className={`w-3 h-3 rounded-full ${step.active ? "bg-red-700" : "bg-gray-300"
-                            }`}
-                          className={`w-3 h-3 rounded-full ${step.active ? "bg-red-700" : "bg-gray-300"
-                            }`}
+                          className={`w-3 h-3 rounded-full ${
+                            step.active ? "bg-red-700" : "bg-gray-300"
+                          }`}
                         ></div>
                         <div className="text-xs text-gray-500 mt-1 text-center max-w-20">
                           {step.status}
@@ -370,9 +316,6 @@ const OrdersManagementSystem = () => {
                       className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0"
                     >
                       <div className="flex items-center">
-                        {/* <div className="w-12 h-12 bg-pink-200 rounded-lg mr-3 flex items-center justify-center">
-                          <div className="w-8 h-8 bg-pink-400 rounded"></div>
-                        </div> */}
                         <div>
                           <img
                             src={item.image}
@@ -380,7 +323,7 @@ const OrdersManagementSystem = () => {
                             className="w-18 h-14"
                           />
                         </div>
-                        <div>
+                        <div className="ml-3">
                           <p className="font-medium text-gray-900">
                             {item.name}
                           </p>
@@ -399,16 +342,18 @@ const OrdersManagementSystem = () => {
                 <div className="mt-6 pt-4 border-t">
                   <p className="text-sm text-gray-600">
                     {selectedOrder.status === "cancelled"
-                      ? "You can cancel your order before it starts being prepared."
+                      ? "Your order has been cancelled."
                       : "You can cancel your order before it starts being prepared."}
                   </p>
                 </div>
 
-                <div className="mt-4">
-                  <button className="w-full cursor-pointer sm:w-auto px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
-                    Cancel Order
-                  </button>
-                </div>
+                {selectedOrder.status !== "cancelled" && selectedOrder.status !== "delivered" && (
+                  <div className="mt-4">
+                    <button className="w-full cursor-pointer sm:w-auto px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                      Cancel Order
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -485,10 +430,11 @@ const OrdersManagementSystem = () => {
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-4 py-2 text-sm font-medium rounded-t-lg border-b-2 transition-colors ${activeTab === tab
+                className={`px-4 py-2 text-sm font-medium rounded-t-lg border-b-2 transition-colors ${
+                  activeTab === tab
                     ? "text-white border-transparent"
                     : "text-gray-600 border-transparent hover:text-gray-900 hover:border-gray-300"
-                  }`}
+                }`}
                 style={
                   activeTab === tab
                     ? { background: "#4F8396" }
@@ -498,7 +444,6 @@ const OrdersManagementSystem = () => {
                 {tab}
               </button>
             ))}
-
           </div>
         </div>
 
@@ -514,9 +459,7 @@ const OrdersManagementSystem = () => {
                   >
                     {getStatusIcon(order.status)}
                     <span className="text-red-700 font-medium">
-                      Order{" "}
-                      {order.status.charAt(0).toUpperCase() +
-                        order.status.slice(1)}
+                      Order {getStatusText(order.status)}
                     </span>
                   </div>
                   <span
@@ -547,8 +490,7 @@ const OrdersManagementSystem = () => {
                 {/* Product Images */}
                 <div className="flex flex-wrap space-x-2 mb-4 sm:mb-0">
                   {order.itemsData.slice(0, 6).map((item, index) => (
-
-                    <div key={index}>
+                    <div key={index} className="mr-2">
                       <img src={item.image} alt="" className="w-20 h-14" />
                     </div>
                   ))}
@@ -565,10 +507,7 @@ const OrdersManagementSystem = () => {
                 >
                   <Eye className="w-4 h-4" />
                   <span className="font-medium">
-                    View{" "}
-                    {order.status.charAt(0).toUpperCase() +
-                      order.status.slice(1)}{" "}
-                    Details
+                    View {getStatusText(order.status)} Details
                   </span>
                 </button>
               </div>
@@ -578,7 +517,6 @@ const OrdersManagementSystem = () => {
         {/* Empty State for filtered tab */}
         {filteredOrders.length === 0 && (
           <div className="bg-white rounded-lg shadow-sm p-12 text-center">
-            {/* <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" /> */}
             <img
               src={emptyOrderImg}
               alt="No orders"
