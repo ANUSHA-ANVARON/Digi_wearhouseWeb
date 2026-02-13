@@ -18,6 +18,12 @@ const app = express();
 
 app.use(cors());
 
+// Logging Middleware
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
+  next();
+});
+
 app.post("/api/drape-saree-parts", (req, res) => {
   handler(req, res);
 });
