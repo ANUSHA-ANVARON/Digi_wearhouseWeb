@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect } from "react";
 import {
   Upload,
@@ -12,17 +10,7 @@ import {
 import { uploadToCloudinary } from "../../utilities/cloudinary";
 import { useNavigate } from "react-router-dom";
 
-const SareePartsUploader = ({ formData = {}, onChange = () => {} }) => {
-
-
-
-   if (!formData || !formData.sareeParts) {
-    return (
-      <div className="text-center p-10 text-gray-500">
-        Loading saree uploader...
-      </div>
-    );
-  }
+const SareePartsUploader = ({ formData = {}, onChange = () => { } }) => {
 
   const [uploading, setUploading] = useState(false);
   const [draggedPart, setDraggedPart] = useState(null);
@@ -30,30 +18,46 @@ const SareePartsUploader = ({ formData = {}, onChange = () => {} }) => {
   const [generatingComplete, setGeneratingComplete] = useState(false);
   const navigate = useNavigate();
   const [hasGeneratedOnce, setHasGeneratedOnce] = useState(false);
-const originalFilesRef = React.useRef({});
+  const originalFilesRef = React.useRef({});
+
+  const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
+  const [feedbackText, setFeedbackText] = useState("");
+  const [feedbackSaving, setFeedbackSaving] = useState(false);
+  const [feedbackStatus, setFeedbackStatus] = useState(null); // { type: 'success'|'error', message }
+  const [fixTarget, setFixTarget] = useState('saree-border');
 
 
 
   const partLabels = {
-    blouse: {
-      name: "Blouse",
-      description: "The fitted upper garment/top part",
+    'saree-border': {
+      name: "Saree Border",
+      description: "Borders at pleats edge, pallu bottom, and shoulder",
+      icon: "✨",
+    },
+    'blouse-border': {
+      name: "Blouse Border",
+      description: "Border below shoulder, almost above elbow",
+      icon: "💫",
+    },
+    'saree-body': {
+      name: "Saree Body",
+      description: "Main saree fabric pattern",
+      icon: "🧵",
+    },
+    'blouse-body': {
+      name: "Blouse Body",
+      description: "Main blouse fabric pattern",
       icon: "👚",
     },
-    pleats: {
-      name: "pleates",
-      description: "The folded front portion of the saree",
-      icon: "📏",
-    },
-    pallu: {
-      name: "pallu",
-      description: "The decorative end piece over shoulder",
+    'saree-pallu': {
+      name: "Saree Pallu",
+      description: "Decorative shoulder drape",
       icon: "🎨",
     },
-    shoulder: {
-      name: "shoulder",
-      description: "The shoulder draping portion",
-      icon: "💫",
+    'saree-pleats': {
+      name: "Saree Pleats",
+      description: "Folded front portion",
+      icon: "📏",
     },
   };
 
@@ -65,45 +69,43 @@ const originalFilesRef = React.useRef({});
       icon: "👗",
     },
     back: { name: "Back View", description: "Back draping view", icon: "🔄" },
-    side: { name: "Side View", description: "Side profile pose", icon: "↔️" },
-    sitting: {
-      name: "Sitting View",
-      description: "Front sitting pose",
-      icon: "🪑",
-    },
   };
 
 
-const sareeParts = {
-  blouse: formData.sareeParts?.blouse || { file: null, preview: null, url: null },
-  pleats: formData.sareeParts?.pleats || { file: null, preview: null, url: null },
-  pallu: formData.sareeParts?.pallu || { file: null, preview: null, url: null },
-  shoulder: formData.sareeParts?.shoulder || { file: null, preview: null, url: null },
-};
+  const sareeParts = {
+    'saree-border': formData.sareeParts?.['saree-border'] || { file: null, preview: null, url: null },
+    'blouse-border': formData.sareeParts?.['blouse-border'] || { file: null, preview: null, url: null },
+    'saree-body': formData.sareeParts?.['saree-body'] || { file: null, preview: null, url: null },
+    'blouse-body': formData.sareeParts?.['blouse-body'] || { file: null, preview: null, url: null },
+    'saree-pallu': formData.sareeParts?.['saree-pallu'] || { file: null, preview: null, url: null },
+    'saree-pleats': formData.sareeParts?.['saree-pleats'] || { file: null, preview: null, url: null },
+  };
 
 
- useEffect(() => {
+  useEffect(() => {
 
-if (formData.hasGeneratedSaree) return;
+    if (formData.hasGeneratedSaree) return;
 
-  if (formData.generatedSareeViews) return;
+    if (formData.generatedSareeViews) return;
 
 
-  const allPartsUploaded = Object.values(sareeParts).every(part => part.file);
+    const allPartsUploaded = Object.values(sareeParts).every(part => part.file);
 
-  if (
-    allPartsUploaded &&
-    !formData.generatedSareeViews &&
-    !hasGeneratedOnce &&
-    !generatingComplete
-  ) {
-    setHasGeneratedOnce(true);  // prevent re-triggering
-    handleAutoGenerateCompleteSaree();
-  }
-}, [sareeParts.blouse.file,
-  sareeParts.pleats.file,
-  sareeParts.pallu.file,
-  sareeParts.shoulder.file]);
+    if (
+      allPartsUploaded &&
+      !formData.generatedSareeViews &&
+      !hasGeneratedOnce &&
+      !generatingComplete
+    ) {
+      setHasGeneratedOnce(true);  // prevent re-triggering
+      handleAutoGenerateCompleteSaree();
+    }
+  }, [sareeParts['saree-border'].file,
+  sareeParts['blouse-border'].file,
+  sareeParts['saree-body'].file,
+  sareeParts['blouse-body'].file,
+  sareeParts['saree-pallu'].file,
+  sareeParts['saree-pleats'].file]);
 
   const handleDrag = (e, partName) => {
     e.preventDefault();
@@ -177,142 +179,268 @@ if (formData.hasGeneratedSaree) return;
 
 
   const handleFile = async (file, partName) => {
-  if (!file.type.startsWith("image/")) {
-    setError(
-      `Please select a valid image file for ${partLabels[partName].name}`
-    );
-    return;
-  }
+    if (!file.type.startsWith("image/")) {
+      setError(
+        `Please select a valid image file for ${partLabels[partName].name}`
+      );
+      return;
+    }
 
-  setUploading(true);
-  setError(null);
+    setUploading(true);
+    setError(null);
 
-  try {
-    // ✅ Store original file in ref
-    originalFilesRef.current[partName] = file;
-    
-    const previewUrl = URL.createObjectURL(file);
-    console.log(`Uploading ${partName} to Cloudinary...`);
-    const cloudinaryUrl = await uploadToCloudinary(file);
-    console.log(`${partName} uploaded:`, cloudinaryUrl);
+    try {
+      // ✅ Store original file in ref
+      originalFilesRef.current[partName] = file;
 
-    const updatedParts = {
-      ...sareeParts,
-      [partName]: {
-        file,
-        preview: previewUrl,
-        url: cloudinaryUrl,
-      },
+      const previewUrl = URL.createObjectURL(file);
+      console.log(`Uploading ${partName} to Cloudinary...`);
+      const cloudinaryUrl = await uploadToCloudinary(file);
+      console.log(`${partName} uploaded:`, cloudinaryUrl);
+
+      const updatedParts = {
+        ...sareeParts,
+        [partName]: {
+          file,
+          preview: previewUrl,
+          url: cloudinaryUrl,
+        },
+      };
+
+      onChange("sareeParts", updatedParts);
+
+      const currentImageUrls = formData.imageUrls || [];
+      const partIndex = Object.keys(partLabels).indexOf(partName);
+      const newImageUrls = [...currentImageUrls];
+      newImageUrls[partIndex + 1] = cloudinaryUrl;
+      onChange("imageUrls", newImageUrls);
+
+      console.log(
+        `Updated imageUrls[${partIndex + 1}] with ${partName}:`,
+        cloudinaryUrl
+      );
+      setError(null);
+    } catch (err) {
+      console.error(`Upload failed for ${partName}:`, err);
+      setError(
+        `Upload failed for ${partLabels[partName].name}: ${err.message}`
+      );
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // Then in handleAutoGenerateCompleteSaree
+  const handleAutoGenerateCompleteSaree = async (userFeedback = "") => {
+    if (!getAllPartsUploaded()) {
+      console.log("Not all parts uploaded yet");
+      return;
+    }
+
+    setGeneratingComplete(true);
+    setError(null);
+    console.log("Starting AI saree generation for front and back views...");
+
+    try {
+      const formDataToSend = new FormData();
+
+      // ✅ Use files from ref
+      Object.entries(originalFilesRef.current).forEach(([partName, file]) => {
+        if (file) {
+          formDataToSend.append(partName, file);
+          console.log(`Added ${partName} to FormData`);
+        }
+      });
+
+      if (userFeedback && String(userFeedback).trim()) {
+        formDataToSend.append("userFeedback", String(userFeedback).trim());
+
+        const masterRef = formData?.generatedSareeViews?.front;
+        if (masterRef) {
+          formDataToSend.append("masterReferenceUrl", masterRef);
+        }
+      }
+
+      console.log("Sending 6 saree parts to AI backend...");
+
+      const response = await fetch("/api/drape-saree-parts", {
+        method: "POST",
+        body: formDataToSend,
+      });
+
+      console.log("Response status:", response.status);
+      console.log("Response ok:", response.ok);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          errorData.error || `HTTP ${response.status}: ${response.statusText}`
+        );
+      }
+
+      const data = await response.json();
+      console.log("Response data:", data);
+
+      if (data.success) {
+        console.log("AI generation successful!");
+        console.log(`Model used: ${data.model || 'Unknown'}`);
+
+        // Store generated views (single URLs, not arrays)
+        onChange("generatedSareeViews", {
+          front: data.frontView,
+          back: data.backView
+        });
+        onChange("generatedSareeUrls", data.generatedUrls);
+        onChange("hasGeneratedSaree", true);
+
+        // For imageUrls, use the generated views as primary
+        const generatedUrls = [
+          data.frontView,
+          data.backView,
+        ].filter(url => url);
+
+        const partUrls = [
+          sareeParts['saree-border']?.url,
+          sareeParts['blouse-border']?.url,
+          sareeParts['saree-body']?.url,
+          sareeParts['blouse-body']?.url,
+          sareeParts['saree-pallu']?.url,
+          sareeParts['saree-pleats']?.url,
+        ];
+
+        const updatedImageUrls = [...generatedUrls, ...partUrls].filter(url => url);
+        onChange("imageUrls", updatedImageUrls);
+
+        if (data.uploadedParts) {
+          onChange("uploadedParts", data.uploadedParts);
+        }
+
+        console.log("Complete saree generation finished!");
+        console.log("Generated views:", Object.keys(data.generatedUrls));
+      } else {
+        setError(data.error || "Failed to generate complete saree from parts");
+        console.error("AI Backend error:", data);
+      }
+    } catch (err) {
+      console.error("Network/API error:", err);
+      setError(`API Error: ${err.message || "Failed to connect to AI service"}`);
+    } finally {
+      setGeneratingComplete(false);
+    }
+  };
+
+  const buildTrainingPayload = () => {
+    const inputs = {};
+    Object.keys(partLabels).forEach((k) => {
+      const url = sareeParts?.[k]?.url;
+      if (url) inputs[k] = url;
+    });
+
+    const outputs = {
+      front: formData.generatedSareeViews?.front || null,
+      back: formData.generatedSareeViews?.back || null,
     };
 
-    onChange("sareeParts", updatedParts);
+    return {
+      verdict: 'good',
+      note: '',
+      inputs,
+      outputs,
+      meta: {
+        app: 'DigiWearHouse',
+        createdFrom: 'SareePartsUploader',
+      }
+    };
+  };
 
-    const currentImageUrls = formData.imageUrls || [];
-    const partIndex = Object.keys(partLabels).indexOf(partName);
-    const newImageUrls = [...currentImageUrls];
-    newImageUrls[partIndex + 1] = cloudinaryUrl;
-    onChange("imageUrls", newImageUrls);
+  const handleMarkGood = async () => {
+    if (!formData.generatedSareeViews?.front || !formData.generatedSareeViews?.back) {
+      setFeedbackStatus({ type: 'error', message: 'Generate both front and back views first.' });
+      return;
+    }
+    setFeedbackSaving(true);
+    setFeedbackStatus(null);
+    try {
+      const payload = buildTrainingPayload();
+      const resp = await fetch('/api/training-feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok || !data.success) {
+        throw new Error(data.error || `HTTP ${resp.status}`);
+      }
+      setFeedbackStatus({ type: 'success', message: 'Thanks for the feedback.' });
+    } catch (e) {
+      setFeedbackStatus({ type: 'error', message: `Failed to save: ${e.message}` });
+    } finally {
+      setFeedbackSaving(false);
+    }
+  };
 
-    console.log(
-      `Updated imageUrls[${partIndex + 1}] with ${partName}:`,
-      cloudinaryUrl
-    );
+  const handleOpenBadModal = () => {
+    setFeedbackText('');
+    setFeedbackStatus(null);
+    setFixTarget('saree-border');
+    setFeedbackModalOpen(true);
+  };
+
+  const handleRetryWithFeedback = async () => {
+    const msg = String(feedbackText || '').trim();
+    if (!msg) {
+      setFeedbackStatus({ type: 'error', message: 'Please describe what went wrong before retrying.' });
+      return;
+    }
+    if (!formData.generatedSareeViews?.front && !formData.generatedSareeViews?.back) {
+      setFeedbackStatus({ type: 'error', message: 'Generate an image first, then use Fix.' });
+      return;
+    }
+
+    setFeedbackModalOpen(false);
+    setGeneratingComplete(true);
     setError(null);
-  } catch (err) {
-    console.error(`Upload failed for ${partName}:`, err);
-    setError(
-      `Upload failed for ${partLabels[partName].name}: ${err.message}`
-    );
-  } finally {
-    setUploading(false);
-  }
-};
+    setFeedbackStatus(null);
 
-// Then in handleAutoGenerateCompleteSaree
-const handleAutoGenerateCompleteSaree = async () => {
-  if (!getAllPartsUploaded()) {
-    console.log("Not all parts uploaded yet");
-    return;
-  }
+    try {
+      const inputs = {};
+      Object.keys(partLabels).forEach((k) => {
+        const url = sareeParts?.[k]?.url;
+        if (url) inputs[k] = url;
+      });
 
-  setGeneratingComplete(true);
-  setError(null);
-  console.log("Starting AI saree generation for all 4 views...");
+      const payload = {
+        fixTarget,
+        feedbackText: msg,
+        inputs,
+        outputs: {
+          front: formData.generatedSareeViews?.front || null,
+          back: formData.generatedSareeViews?.back || null,
+        }
+      };
 
-  try {
-    const formDataToSend = new FormData();
-
-    // ✅ Use files from ref
-    Object.entries(originalFilesRef.current).forEach(([partName, file]) => {
-      if (file) {
-        formDataToSend.append(partName, file);
-        console.log(`Added ${partName} to FormData`);
-      }
-    });
-
-    console.log("Sending 4 saree parts to AI backend...");
-
-    const response = await fetch("/api/drape-saree-parts", {
-      method: "POST",
-      body: formDataToSend,
-    });
-
-    console.log("Response status:", response.status);
-    console.log("Response ok:", response.ok);
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(
-        errorData.error || `HTTP ${response.status}: ${response.statusText}`
-      );
-    }
-
-    const data = await response.json();
-    console.log("Response data:", data);
-
-    if (data.success) {
-      console.log("AI generation successful for all views!");
-
-      // Store all generated views and URLs
-      onChange("generatedSareeViews", data.generatedViews);
-      onChange("generatedSareeUrls", data.generatedUrls);
-      onChange("hasGeneratedSaree", true);
-
-      // Set up imageUrls array with generated views first, then part URLs
-      const generatedUrls = [
-        data.generatedUrls.front,
-        data.generatedUrls.back,
-        data.generatedUrls.side,
-        data.generatedUrls.sitting,
-      ];
-
-      const partUrls = [
-        sareeParts.blouse?.url,
-        sareeParts.pleats?.url,
-        sareeParts.pallu?.url,
-        sareeParts.shoulder?.url,
-      ];
-
-      const updatedImageUrls = [...generatedUrls, ...partUrls].filter(url => url);
-      onChange("imageUrls", updatedImageUrls);
-
-      if (data.uploadedParts) {
-        onChange("uploadedParts", data.uploadedParts);
+      const resp = await fetch('/api/retouch-saree', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok || !data.success) {
+        throw new Error(data.error || `HTTP ${resp.status}`);
       }
 
-      console.log("Complete saree generation process finished!");
-      console.log("Generated views:", Object.keys(data.generatedViews));
-    } else {
-      setError(data.error || "Failed to generate complete saree from parts");
-      console.error("AI Backend error:", data);
+      const nextFront = data.updated?.front || formData.generatedSareeViews?.front;
+      const nextBack = data.updated?.back || formData.generatedSareeViews?.back;
+
+      onChange('generatedSareeViews', { front: nextFront, back: nextBack });
+      onChange('generatedSareeUrls', { ...(formData.generatedSareeUrls || {}), ...(data.updated || {}) });
+      setFeedbackStatus({ type: 'success', message: 'Updated the image. Thanks for the feedback.' });
+    } catch (e) {
+      setError(`Fix failed: ${e.message}`);
+    } finally {
+      setGeneratingComplete(false);
     }
-  } catch (err) {
-    console.error("Network/API error:", err);
-    setError(`API Error: ${err.message || "Failed to connect to AI service"}`);
-  } finally {
-    setGeneratingComplete(false);
-  }
-};
+  };
 
 
 
@@ -323,95 +451,96 @@ const handleAutoGenerateCompleteSaree = async () => {
     }
   };
 
-//   const handleAutoGenerateCompleteSaree = async () => {
-//     if (!getAllPartsUploaded()) {
-//       console.log("Not all parts uploaded yet");
-//       return;
-//     }
+  //   const handleAutoGenerateCompleteSaree = async () => {
+  //     if (!getAllPartsUploaded()) {
+  //       console.log("Not all parts uploaded yet");
+  //       return;
+  //     }
 
-//     setGeneratingComplete(true);
-//     setError(null);
-//     console.log("Starting AI saree generation for all 4 views...");
+  //     setGeneratingComplete(true);
+  //     setError(null);
+  //     console.log("Starting AI saree generation for all 4 views...");
 
-//     try {
-//       const formDataToSend = new FormData();
+  //     try {
+  //       const formDataToSend = new FormData();
 
-//       Object.entries(sareeParts).forEach(([partName, partData]) => {
-//         if (partData.file) {
-//           formDataToSend.append(partName, partData.file);
-//         }
-//       });
+  //       Object.entries(sareeParts).forEach(([partName, partData]) => {
+  //         if (partData.file) {
+  //           formDataToSend.append(partName, partData.file);
+  //         }
+  //       });
 
-//       console.log("Sending 4 saree parts to AI backend...");
+  //       console.log("Sending 4 saree parts to AI backend...");
 
-//       const response = await fetch("/api/drape-saree-parts", {
-//         method: "POST",
-//         body: formDataToSend,
-//       });
+  //       const response = await fetch("/api/drape-saree-parts", {
+  //         method: "POST",
+  //         body: formDataToSend,
+  //       });
 
-//       if (!response.ok) {
-//         const errorData = await response.json().catch(() => ({}));
-//         throw new Error(
-//           errorData.error || `HTTP ${response.status}: ${response.statusText}`
-//         );
-//       }
+  //       if (!response.ok) {
+  //         const errorData = await response.json().catch(() => ({}));
+  //         throw new Error(
+  //           errorData.error || `HTTP ${response.status}: ${response.statusText}`
+  //         );
+  //       }
 
-//       const data = await response.json();
+  //       const data = await response.json();
 
-//       if (data.success) {
-//         console.log("AI generation successful for all views!");
+  //       if (data.success) {
+  //         console.log("AI generation successful for all views!");
 
-//         // Store all generated views and URLs
-//         onChange("generatedSareeViews", data.generatedViews);
-//         onChange("generatedSareeUrls", data.generatedUrls);
-// onChange("hasGeneratedSaree", true);
+  //         // Store all generated views and URLs
+  //         onChange("generatedSareeViews", data.generatedViews);
+  //         onChange("generatedSareeUrls", data.generatedUrls);
+  // onChange("hasGeneratedSaree", true);
 
-//         // Set the front view as the primary image (index 0)
-//         // const frontViewUrl = data.generatedUrls.front;
-//         // if (frontViewUrl) {
-//         //   const currentImageUrls = formData.imageUrls || [];
-//         //   const updatedImageUrls = [frontViewUrl, ...currentImageUrls.slice(1)];
-//         //   onChange('imageUrls', updatedImageUrls);
-//         // }
+  //         // Set the front view as the primary image (index 0)
+  //         // const frontViewUrl = data.generatedUrls.front;
+  //         // if (frontViewUrl) {
+  //         //   const currentImageUrls = formData.imageUrls || [];
+  //         //   const updatedImageUrls = [frontViewUrl, ...currentImageUrls.slice(1)];
+  //         //   onChange('imageUrls', updatedImageUrls);
+  //         // }
 
-//         const generatedUrls = [
-//           data.generatedUrls.front,
-//           data.generatedUrls.back,
-//           data.generatedUrls.side,
-//           data.generatedUrls.sitting,
-//         ];
+  //         const generatedUrls = [
+  //           data.generatedUrls.front,
+  //           data.generatedUrls.back,
+  //           data.generatedUrls.side,
+  //           data.generatedUrls.sitting,
+  //         ];
 
-//         const partUrls = [
-//           sareeParts.blouse?.url,
-//           sareeParts.pleats?.url,
-//           sareeParts.pallu?.url,
-//           sareeParts.shoulder?.url,
-//         ];
+  //         const partUrls = [
+  //           sareeParts.body?.url,
+  //           sareeParts.pleats?.url,
+  //           sareeParts.border?.url,
+  //           sareeParts.blouse?.url,
+  //           sareeParts.pallu?.url,
+  //         ];
 
-//         const updatedImageUrls = [...generatedUrls, ...partUrls];
-//         onChange("imageUrls", updatedImageUrls);
+  //         const updatedImageUrls = [...generatedUrls, ...partUrls];
+  //         onChange("imageUrls", updatedImageUrls);
 
-//         if (data.uploadedParts) {
-//           onChange("uploadedParts", data.uploadedParts);
-//         }
+  //         if (data.uploadedParts) {
+  //           onChange("uploadedParts", data.uploadedParts);
+  //         }
 
-//         console.log("Complete saree generation process finished!");
-//         console.log("Generated views:", Object.keys(data.generatedViews));
-//       } else {
-//         setError(data.error || "Failed to generate complete saree from parts");
-//         console.error("AI Backend error:", data);
-//       }
-//     } catch (err) {
-//       console.error("Network/API error:", err);
-//       setError(
-//         `API Error: ${err.message || "Failed to connect to AI service"}`
-//       );
-//     } finally {
-//       setGeneratingComplete("done");
-//       // setGeneratingComplete(false);
-      
-//     }
-//   };
+  //         console.log("Complete saree generation process finished!");
+  //         console.log("Generated views:", Object.keys(data.generatedViews));
+  //       } else {
+  //         setError(data.error || "Failed to generate complete saree from parts");
+  //         console.error("AI Backend error:", data);
+  //       }
+  //     } catch (err) {
+  //       console.error("Network/API error:", err);
+  //       setError(
+  //         `API Error: ${err.message || "Failed to connect to AI service"}`
+  //       );
+  //     } finally {
+  //       setGeneratingComplete("done");
+  //       // setGeneratingComplete(false);
+
+  //     }
+  //   };
 
   const clearPart = (partName) => {
     if (sareeParts[partName].preview) {
@@ -440,10 +569,12 @@ const handleAutoGenerateCompleteSaree = async () => {
     });
 
     const clearedParts = {
-      blouse: { file: null, preview: null, url: null },
-      pleats: { file: null, preview: null, url: null },
-      pallu: { file: null, preview: null, url: null },
-      shoulder: { file: null, preview: null, url: null },
+      'saree-border': { file: null, preview: null, url: null },
+      'blouse-border': { file: null, preview: null, url: null },
+      'saree-body': { file: null, preview: null, url: null },
+      'blouse-body': { file: null, preview: null, url: null },
+      'saree-pallu': { file: null, preview: null, url: null },
+      'saree-pleats': { file: null, preview: null, url: null },
     };
 
     onChange("sareeParts", clearedParts);
@@ -452,6 +583,11 @@ const handleAutoGenerateCompleteSaree = async () => {
     onChange("imageUrls", []);
     onChange("uploadedParts", null);
     setError(null);
+    setFeedbackStatus(null);
+    setFeedbackModalOpen(false);
+    setFeedbackText('');
+    setHasGeneratedOnce(false);
+    originalFilesRef.current = {};
   };
 
   const getUploadedPartsCount = () => {
@@ -463,9 +599,8 @@ const handleAutoGenerateCompleteSaree = async () => {
   };
 
   const getGeneratedViewsCount = () => {
-    return formData.generatedSareeViews
-      ? Object.keys(formData.generatedSareeViews).length
-      : 0;
+    if (!formData.generatedSareeViews) return 0;
+    return Object.values(formData.generatedSareeViews).filter(url => url).length;
   };
 
   // const base64ToBlob = async (base64String) => {
@@ -494,11 +629,19 @@ const handleAutoGenerateCompleteSaree = async () => {
         </p>
         <p className="text-gray-500 text-xs mt-1">
           AI is assembling your saree parts <br />
-          It Takes around 30 seconds... 
+          It Takes around 30 seconds...
         </p>
       </div>
     );
   };
+
+  if (!formData || !formData.sareeParts) {
+    return (
+      <div className="text-center p-10 text-gray-500">
+        Loading saree uploader...
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-6xl mx-auto p-6 bg-gray-50">
@@ -538,11 +681,10 @@ const handleAutoGenerateCompleteSaree = async () => {
           >
             {!sareeParts[partName].file ? (
               <div
-                className={`p-8 text-center transition-all duration-200 ${
-                  draggedPart === partName
+                className={`p-8 text-center transition-all duration-200 ${draggedPart === partName
                     ? "border-blue-400 bg-blue-50"
                     : "hover:bg-gray-50"
-                }`}
+                  }`}
                 onDragEnter={(e) => handleDrag(e, partName)}
                 onDragLeave={(e) => handleDrag(e, partName)}
                 onDragOver={(e) => handleDrag(e, partName)}
@@ -614,12 +756,12 @@ const handleAutoGenerateCompleteSaree = async () => {
       <div className="bg-white rounded-xl border border-gray-200 p-4 mb-6">
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm font-medium text-gray-700">
-            Progress: {getUploadedPartsCount()}/4 parts uploaded
+            Uploaded: {getUploadedPartsCount()}/6 parts
             {formData.generatedSareeViews && (
               <span className="ml-2 text-green-600">
                 {generatingComplete
                   ? "(Generating...)"
-                  : `(+ ${getGeneratedViewsCount()} AI Side Views )`}
+                  : `(Generated: ${getGeneratedViewsCount()}/2 views)`}
               </span>
             )}
           </span>
@@ -635,7 +777,7 @@ const handleAutoGenerateCompleteSaree = async () => {
         <div className="w-full bg-gray-200 rounded-full h-2">
           <div
             className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-300"
-            style={{ width: `${(getUploadedPartsCount() / 4) * 100}%` }}
+            style={{ width: `${(getUploadedPartsCount() / 6) * 100}%` }}
           />
         </div>
       </div>
@@ -655,91 +797,127 @@ const handleAutoGenerateCompleteSaree = async () => {
         </div>
       )}
 
-      {/* Generated Saree Views Display */}
+      {/* Generated Saree Views Display - Single Image per View */}
       {formData.generatedSareeViews && (
-        <div className="bg-gradient-to-br   rounded-xl p-6">
+        <div className="bg-gradient-to-br rounded-xl p-6">
           <h4 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            {/* <CheckCircle className="text-green-600" /> */}
-            AI Generated Saree View ({getGeneratedViewsCount()})
-            {/* <span className="text-xs text-green-600 font-normal">
-              (Front set as Primary)
-            </span> */}
+            <Sparkles className="text-purple-600" />
+            AI Generated Saree Views
           </h4>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {Object.entries(formData.generatedSareeViews).map(
-              ([viewType, viewData]) => {
-                const viewUrl = formData.generatedSareeUrls?.[viewType];
-                const viewLabel = viewLabels[viewType];
+              ([viewType, imageUrl]) => {
+                const viewLabel = viewLabels[viewType] || { name: viewType, description: '', icon: '👗' };
+
+                if (!imageUrl) return null;
 
                 return (
-                  <div
-                    key={viewType}
-                    className="bg-white  border border-gray-200 p-2"
-                  >
-                    <div className="relative  overflow-hidden mb-3">
+                  <div key={viewType} className="bg-white border-2 border-gray-200 rounded-lg p-4">
+                    <h5 className="text-md font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                      <span className="text-2xl">{viewLabel.icon}</span>
+                      {viewLabel.name}
+                    </h5>
+
+                    <div className="relative overflow-hidden rounded-md w-full">
                       <img
-                        src={
-                          viewUrl ||
-                          `data:${viewData.mimeType};base64,${viewData.data}`
-                        }
-                        alt={`AI generated ${
-                          viewLabel?.name || viewType
-                        } saree`}
-                        className="w-full h-48 object-contain"
+                        src={imageUrl}
+                        alt={`${viewLabel.name}`}
+                        className="w-full h-[520px] object-contain bg-white rounded-md"
                       />
-                      {/* {viewType === "front" && (
-                        <div className="absolute top-2 left-2 bg-green-600 text-white px-2 py-1 rounded text-xs font-medium">
-                          Primary
-                        </div>
-                      )} */}
                     </div>
 
-                    <div className="flex items-center  justify-between">
-                      <div className=" ml-20">
-                        <h5 className="font-medium  text-gray-800">
-                          {viewLabel?.name || viewType}
-                        </h5>
-                        <p className="text-xs text-gray-500">
-                          {viewLabel?.description || ""}
-                        </p>
-                      </div>
-
-                      {/* <button
-                        onClick={() => downloadView(viewType)}
-                        className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                        title={`Download ${viewLabel?.name || viewType}`}
-                      >
-                        <Download size={16} />
-                      </button> */}
-                    </div>
+                    <p className="text-xs text-gray-600 mt-2">
+                      {viewLabel.description}
+                    </p>
                   </div>
                 );
               }
             )}
           </div>
 
-          {/* <div className="flex gap-3 items-center">
-            <button
-              onClick={() => {
-                // Download all views as a zip would be ideal, but for now just download front view
-                const frontUrl = formData.generatedSareeUrls?.front;
-                if (frontUrl) {
-                  const link = document.createElement("a");
-                  link.href = frontUrl;
-                  link.download = "ai-generated-saree-front-view.png";
-                  link.click();
-                }
-              }}
-              className="flex-1 py-2 px-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
-            >
-              <Download className="w-5 h-5" />
-              Download Primary View
-            </button>
-            <div className="text-xs text-gray-600 flex items-center px-3 bg-white rounded-lg py-2">
-              📊 Total Generated: {getGeneratedViewsCount()} views
+          <div className="mt-6 flex flex-col gap-3">
+            <div className="flex flex-wrap gap-3">
+              <button
+                onClick={handleMarkGood}
+                disabled={feedbackSaving || generatingComplete}
+                className="px-4 py-2 rounded-lg bg-black text-white font-medium disabled:opacity-60"
+              >
+                {feedbackSaving ? 'Saving…' : 'Good'}
+              </button>
+              <button
+                onClick={handleOpenBadModal}
+                disabled={generatingComplete}
+                className="px-4 py-2 rounded-lg border border-gray-300 text-gray-800 font-medium disabled:opacity-60"
+              >
+                Bad
+              </button>
             </div>
-          </div> */}
+
+            {feedbackStatus && (
+              <div className={`p-3 rounded-lg border ${feedbackStatus.type === 'success' ? 'bg-green-50 border-green-200 text-green-800' : 'bg-red-50 border-red-200 text-red-800'}`}>
+                {feedbackStatus.message}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {feedbackModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-lg rounded-xl bg-white p-5 border border-gray-200">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-semibold text-gray-900">What went wrong?</h3>
+              <button
+                onClick={() => setFeedbackModalOpen(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <p className="text-sm text-gray-600 mb-3">
+              Example: “Front view has fabric panel in background” or “Two women side-by-side collage”.
+            </p>
+
+            <label className="block text-sm font-medium text-gray-700 mb-2">What should be fixed?</label>
+            <select
+              value={fixTarget}
+              onChange={(e) => setFixTarget(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg p-2 text-sm mb-3"
+              disabled={generatingComplete}
+            >
+              <option value="saree-border">Saree border</option>
+              <option value="blouse-border">Blouse border</option>
+              <option value="saree-pallu">Saree pallu</option>
+              <option value="saree-pleats">Saree pleats</option>
+              <option value="saree-body">Saree body color/pattern</option>
+              <option value="blouse-body">Blouse body color/pattern</option>
+            </select>
+
+            <textarea
+              value={feedbackText}
+              onChange={(e) => setFeedbackText(e.target.value)}
+              className="w-full min-h-[110px] border border-gray-300 rounded-lg p-3 text-sm focus:outline-none"
+              placeholder="Describe the issue…"
+              disabled={generatingComplete}
+            />
+
+            <div className="mt-4 flex gap-3 justify-end">
+              <button
+                onClick={() => setFeedbackModalOpen(false)}
+                className="px-4 py-2 rounded-lg border border-gray-300 text-gray-800 font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleRetryWithFeedback}
+                disabled={generatingComplete}
+                className="px-4 py-2 rounded-lg bg-black text-white font-medium disabled:opacity-60"
+              >
+                Fix
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
