@@ -13,6 +13,11 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const CLOUDINARY_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME;
 console.log("Cloudinary Name:", CLOUDINARY_CLOUD_NAME);
 console.log("Gemini Key:", GEMINI_API_KEY);
+console.log("GOOGLE_PROJECT_ID:", process.env.GOOGLE_PROJECT_ID || "(missing)");
+console.log(
+  "GOOGLE_APPLICATION_CREDENTIALS:",
+  process.env.GOOGLE_APPLICATION_CREDENTIALS ? "(set)" : "(missing)"
+);
 
 const app = express();
 
@@ -24,16 +29,37 @@ app.use((req, res, next) => {
   next();
 });
 
-app.post("/api/drape-saree-parts", (req, res) => {
-  handler(req, res);
+app.post("/api/drape-saree-parts", async (req, res) => {
+  try {
+    await handler(req, res);
+  } catch (e) {
+    console.error('❌ /api/drape-saree-parts failed:', e);
+    if (!res.headersSent) {
+      res.status(500).json({ error: 'Internal server error', message: e?.message || String(e) });
+    }
+  }
 });
 
-app.post("/api/training-feedback", (req, res) => {
-  trainingFeedbackHandler(req, res);
+app.post("/api/training-feedback", async (req, res) => {
+  try {
+    await trainingFeedbackHandler(req, res);
+  } catch (e) {
+    console.error('❌ /api/training-feedback failed:', e);
+    if (!res.headersSent) {
+      res.status(500).json({ error: 'Internal server error', message: e?.message || String(e) });
+    }
+  }
 });
 
-app.post("/api/retouch-saree", (req, res) => {
-  retouchSareeHandler(req, res);
+app.post("/api/retouch-saree", async (req, res) => {
+  try {
+    await retouchSareeHandler(req, res);
+  } catch (e) {
+    console.error('❌ /api/retouch-saree failed:', e);
+    if (!res.headersSent) {
+      res.status(500).json({ error: 'Internal server error', message: e?.message || String(e) });
+    }
+  }
 });
 
 const PORT = 5000;

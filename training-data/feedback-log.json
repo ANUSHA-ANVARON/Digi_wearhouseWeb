@@ -1,0 +1,48 @@
+[
+  {
+    "timestamp": "2026-02-14T11:52:14.492Z",
+    "imageUrl": "https://res.cloudinary.com/doiezptnn/image/upload/v1771069659/saree-retouch/front_saree-border_1771069655037.jpg",
+    "verdict": "good",
+    "feedback": "Good quality",
+    "rating": 5,
+    "metadata": {
+      "app": "DigiWearHouse",
+      "createdFrom": "SareePartsUploader"
+    },
+    "inputs": {
+      "saree-border": "https://res.cloudinary.com/doiezptnn/image/upload/v1771069344/byjntxkz6pqlncz59bm7.jpg",
+      "blouse-border": "https://res.cloudinary.com/doiezptnn/image/upload/v1771069354/behq4vtktgm6xcwybza3.jpg",
+      "saree-body": "https://res.cloudinary.com/doiezptnn/image/upload/v1771069365/ngerwq9tsc6fintplqop.jpg",
+      "blouse-body": "https://res.cloudinary.com/doiezptnn/image/upload/v1771069377/hogtdigkjia95ze4bqmr.jpg",
+      "saree-pallu": "https://res.cloudinary.com/doiezptnn/image/upload/v1771069388/rg9tgscktzwtbzawfubm.jpg",
+      "saree-pleats": "https://res.cloudinary.com/doiezptnn/image/upload/v1771069399/dewieskvkkh08tgltwzk.jpg"
+    },
+    "outputs": {
+      "front": "https://res.cloudinary.com/doiezptnn/image/upload/v1771069659/saree-retouch/front_saree-border_1771069655037.jpg",
+      "back": "https://res.cloudinary.com/doiezptnn/image/upload/v1771069678/saree-retouch/back_saree-border_1771069675582.jpg"
+    }
+  },
+  {
+    "timestamp": "2026-02-14T11:52:14.492Z",
+    "imageUrl": "https://res.cloudinary.com/doiezptnn/image/upload/v1771069678/saree-retouch/back_saree-border_1771069675582.jpg",
+    "verdict": "good",
+    "feedback": "Good quality",
+    "rating": 5,
+    "metadata": {
+      "app": "DigiWearHouse",
+      "createdFrom": "SareePartsUploader"
+    },
+    "inputs": {
+      "saree-border": "https://res.cloudinary.com/doiezptnn/image/upload/v1771069344/byjntxkz6pqlncz59bm7.jpg",
+      "blouse-border": "https://res.cloudinary.com/doiezptnn/image/upload/v1771069354/behq4vtktgm6xcwybza3.jpg",
+      "saree-body": "https://res.cloudinary.com/doiezptnn/image/upload/v1771069365/ngerwq9tsc6fintplqop.jpg",
+      "blouse-body": "https://res.cloudinary.com/doiezptnn/image/upload/v1771069377/hogtdigkjia95ze4bqmr.jpg",
+      "saree-pallu": "https://res.cloudinary.com/doiezptnn/image/upload/v1771069388/rg9tgscktzwtbzawfubm.jpg",
+      "saree-pleats": "https://res.cloudinary.com/doiezptnn/image/upload/v1771069399/dewieskvkkh08tgltwzk.jpg"
+    },
+    "outputs": {
+      "front": "https://res.cloudinary.com/doiezptnn/image/upload/v1771069659/saree-retouch/front_saree-border_1771069655037.jpg",
+      "back": "https://res.cloudinary.com/doiezptnn/image/upload/v1771069678/saree-retouch/back_saree-border_1771069675582.jpg"
+    }
+  }
+]

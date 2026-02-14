@@ -26,6 +26,17 @@ async function getGoogleAccessToken() {
     if (isGcloudMissing || isSpawnMissing) {
       try {
         console.warn('gcloud CLI not available; falling back to GoogleAuth (ADC/service account)');
+
+        const credsPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+        console.log('🔐 GOOGLE_APPLICATION_CREDENTIALS:', credsPath || '(missing)');
+        if (credsPath) {
+          const exists = await fs
+            .access(credsPath)
+            .then(() => true)
+            .catch(() => false);
+          console.log('🔐 Creds file exists:', exists);
+        }
+
         const auth = new GoogleAuth({
           scopes: ['https://www.googleapis.com/auth/cloud-platform']
         });
@@ -112,7 +123,7 @@ async function applyVirtualTryOn(sareeImageUrl, modelImageUrl) {
     // Return the first generated image
     const tryonImageBase64 = response.data.predictions[0].bytesBase64Encoded;
     return {
-      data: Buffer.from(tryonImageBase64, 'base64'),
+      data: String(tryonImageBase64),
       mimeType: 'image/png'
     };
     
@@ -120,6 +131,177 @@ async function applyVirtualTryOn(sareeImageUrl, modelImageUrl) {
     console.error('❌ Virtual Try-On failed:', error.response?.data || error.message);
     // Don't throw - return null so the main flow can continue without try-on
     return null;
+  }
+}
+
+// Google Imagen 3 (capability) image edit (Vertex AI publisher model)
+async function editImageWithImagenCapability({
+  rawImageBase64,
+  prompt,
+  negativePrompt = '',
+  maskImageBase64 = null,
+  extraRawImagesBase64 = []
+}) {
+  try {
+    if (!GOOGLE_PROJECT_ID) {
+      throw new Error('GOOGLE_PROJECT_ID not set');
+    }
+    if (!rawImageBase64) {
+      throw new Error('Missing rawImageBase64');
+    }
+    if (!prompt || !String(prompt).trim()) {
+      throw new Error('Missing prompt');
+    }
+
+    console.log('🖌️ Starting Imagen edit...');
+    const token = await getGoogleAccessToken();
+
+    const url = `https://${LOCATION}-aiplatform.googleapis.com/v1/projects/${GOOGLE_PROJECT_ID}/locations/${LOCATION}/publishers/google/models/imagen-3.0-capability-001:predict`;
+
+    const buildRequestBody = ({ includeExtraRefs }) => {
+      const referenceImages = [
+        {
+          referenceType: 'REFERENCE_TYPE_RAW',
+          referenceId: 1,
+          referenceImage: {
+            bytesBase64Encoded: rawImageBase64
+          }
+        }
+      ];
+
+      // Vertex Imagen edit has a strict constraint:
+      // - Mask-free editing expects EXACTLY 1 RAW image.
+      // - Mask editing expects EXACTLY 1 RAW + 1 MASK image.
+      // So we cannot pass additional RAW reference images here.
+      // Keep the parameter for callers, but ignore it.
+      if (includeExtraRefs && Array.isArray(extraRawImagesBase64) && extraRawImagesBase64.filter(Boolean).length > 0) {
+        console.warn('⚠️ Imagen edit: extraRawImagesBase64 ignored (API expects exactly 1 RAW image for mask-free edits)');
+      }
+
+      if (maskImageBase64) {
+        if (Array.isArray(extraRawImagesBase64) && extraRawImagesBase64.filter(Boolean).length > 0) {
+          console.warn('⚠️ Imagen mask edit: ignoring extra reference images (API requires exactly RAW+MASK)');
+        }
+
+        referenceImages.push({
+          referenceType: 'REFERENCE_TYPE_MASK',
+          referenceImage: {
+            bytesBase64Encoded: maskImageBase64
+          },
+          maskImageConfig: {
+            maskMode: 'MASK_MODE_USER_PROVIDED',
+            dilation: 0.01
+          }
+        });
+      }
+
+      const parameters = {
+        addWatermark: false,
+        sampleCount: 1,
+        outputOptions: {
+          mimeType: 'image/jpeg',
+          compressionQuality: 95
+        },
+        // The edit API expects sampling steps under editConfig.
+        editConfig: {
+          baseSteps: 40
+        },
+        // guidanceScale is an integer (0-500). Keep conservative defaults.
+        guidanceScale: 60
+      };
+
+      // editMode is required for mask-based editing only.
+      if (maskImageBase64) {
+        parameters.editMode = 'EDIT_MODE_INPAINT_INSERTION';
+      }
+
+      const cleanedNegative = String(negativePrompt || '').trim();
+      if (cleanedNegative) {
+        parameters.negativePrompt = cleanedNegative;
+      }
+
+      return {
+        instances: [
+          {
+            referenceImages,
+            prompt: String(prompt).trim()
+          }
+        ],
+        parameters
+      };
+    };
+
+    const post = async (requestBody) =>
+      axios.post(url, requestBody, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        timeout: 180000
+      });
+
+    const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+    let response;
+    const requestBody = buildRequestBody({ includeExtraRefs: true });
+
+    // Retry transient internal errors (500/503/504) a couple times.
+    const maxAttempts = 3;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        response = await post(requestBody);
+        break;
+      } catch (err) {
+        const status = err?.response?.status;
+        const data = err?.response?.data;
+
+        console.error('❌ Imagen edit request failed', {
+          attempt,
+          status,
+          message: err?.message,
+          apiMessage: data?.error?.message,
+          apiStatus: data?.error?.status,
+          apiDetails: data?.error?.details
+        });
+
+        const isTransient = status === 500 || status === 503 || status === 504;
+        if (!isTransient || attempt === maxAttempts) {
+          throw err;
+        }
+
+        const backoffMs = 1500 * attempt;
+        console.warn(`🔁 Retrying Imagen edit after ${backoffMs}ms (attempt ${attempt + 1}/${maxAttempts})...`);
+        await sleep(backoffMs);
+      }
+    }
+
+    console.log('✅ Imagen edit completed');
+
+    const pred = response.data?.predictions?.[0];
+    const bytes =
+      pred?.bytesBase64Encoded ||
+      pred?.image?.bytesBase64Encoded ||
+      pred?.imageBytesBase64Encoded ||
+      response.data?.bytesBase64Encoded;
+
+    if (!bytes) {
+      console.error('🛑 Imagen edit unexpected response:', JSON.stringify(response.data || {}, null, 2));
+      throw new Error('Imagen edit returned no image bytes');
+    }
+
+    return {
+      data: String(bytes),
+      mimeType: 'image/jpeg'
+    };
+  } catch (error) {
+    console.error('❌ Imagen edit failed:', {
+      status: error?.response?.status,
+      message: error?.message,
+      apiMessage: error?.response?.data?.error?.message,
+      apiStatus: error?.response?.data?.error?.status,
+      apiDetails: error?.response?.data?.error?.details
+    });
+    throw error;
   }
 }
 
@@ -360,9 +542,156 @@ async function downloadImageAsBase64(imageUrl) {
   }
 }
 
+// Local image memory (disk) to stabilize feedback retries.
+// This avoids Cloudinary recompression/lighting drift if the try-on output was used as a reference.
+function getImageMemoryDir() {
+  return path.join(process.cwd(), 'image_memory');
+}
+
+async function saveImageToMemory(base64Data, memoryKey) {
+  if (!memoryKey) return;
+  const memDir = getImageMemoryDir();
+  await fs.mkdir(memDir, { recursive: true });
+  const buf = Buffer.from(base64Data, 'base64');
+  const memPath = path.join(memDir, `${memoryKey}.jpg`);
+  await fs.writeFile(memPath, buf);
+}
+
+async function loadImageFromMemory(memoryKey) {
+  if (!memoryKey) return null;
+  const memPath = path.join(getImageMemoryDir(), `${memoryKey}.jpg`);
+  try {
+    const buf = await fs.readFile(memPath);
+    return { data: buf.toString('base64'), mimeType: 'image/jpeg' };
+  } catch {
+    return null;
+  }
+}
+
 function rgbToHex(r, g, b) {
   const toHex = (n) => Math.max(0, Math.min(255, n)).toString(16).padStart(2, '0');
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}
+
+function hexToRgb(hex) {
+  const h = String(hex || '').trim();
+  if (!/^#[0-9a-fA-F]{6}$/.test(h)) return null;
+  return {
+    r: parseInt(h.slice(1, 3), 16),
+    g: parseInt(h.slice(3, 5), 16),
+    b: parseInt(h.slice(5, 7), 16)
+  };
+}
+
+function colorDistance(a, b) {
+  const dr = a.r - b.r;
+  const dg = a.g - b.g;
+  const db = a.b - b.b;
+  return Math.sqrt(dr * dr + dg * dg + db * db);
+}
+
+function escapeXml(unsafe) {
+  return String(unsafe)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
+
+async function downloadImageBuffer(imageUrl) {
+  const response = await axios.get(imageUrl, {
+    responseType: 'arraybuffer',
+    timeout: 30000,
+    headers: { 'User-Agent': 'Mozilla/5.0' }
+  });
+  return Buffer.from(response.data);
+}
+
+function makeLabelSvg(width, height, label) {
+  const safeLabel = escapeXml(label);
+  // Simple label: white pill with gray border and centered text.
+  return Buffer.from(
+    `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
+  <rect x="0" y="0" width="${width}" height="${height}" fill="#ffffff"/>
+  <rect x="16" y="16" width="${width - 32}" height="${height - 32}" rx="14" ry="14" fill="#ffffff" stroke="#d0d0d0" stroke-width="3"/>
+  <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="44" fill="#111111">${safeLabel}</text>
+</svg>`
+  );
+}
+
+async function createLabeledPartsSheet(partUrls) {
+  // Layout matches the example: 3 columns x 2 rows.
+  const W = 2400;
+  const H = 1600;
+  const padding = 40;
+  const gap = 30;
+  const cols = 3;
+  const rows = 2;
+  const cellW = Math.floor((W - padding * 2 - gap * (cols - 1)) / cols);
+  const cellH = Math.floor((H - padding * 2 - gap * (rows - 1)) / rows);
+  const labelH = 140;
+
+  const base = sharp({
+    create: {
+      width: W,
+      height: H,
+      channels: 3,
+      background: { r: 255, g: 255, b: 255 }
+    }
+  });
+
+  const order = [
+    { key: 'blouse-body', label: 'Blouse Body' },
+    { key: 'blouse-border', label: 'Blouse Border' },
+    { key: 'saree-body', label: 'Saree Body' },
+    { key: 'saree-pleats', label: 'Saree Pleats' },
+    { key: 'saree-border', label: 'Saree Border' },
+    { key: 'saree-pallu', label: 'Pallu' }
+  ];
+
+  const composites = [];
+
+  for (let i = 0; i < order.length; i++) {
+    const { key, label } = order[i];
+    const url = partUrls?.[key];
+    if (!url) continue;
+
+    const row = Math.floor(i / cols);
+    const col = i % cols;
+    const x = padding + col * (cellW + gap);
+    const y = padding + row * (cellH + gap);
+
+    const buf = await downloadImageBuffer(url);
+
+    // Fit image into cell with white padding to preserve full fabric.
+    const cellImage = await sharp(buf)
+      .resize(cellW, cellH, {
+        fit: 'contain',
+        background: { r: 255, g: 255, b: 255 },
+        withoutEnlargement: true
+      })
+      .jpeg({ quality: 92, progressive: true })
+      .toBuffer();
+
+    composites.push({ input: cellImage, left: x, top: y });
+
+    // Label overlay near bottom of the cell.
+    const labelSvg = makeLabelSvg(Math.max(1, cellW), Math.max(1, labelH), label);
+    composites.push({
+      input: labelSvg,
+      left: x,
+      top: y + cellH - labelH
+    });
+  }
+
+  const out = await base
+    .composite(composites)
+    .jpeg({ quality: 92, progressive: true })
+    .toBuffer();
+
+  return out;
 }
 
 async function estimateDominantColorHexFromUrl(imageUrl) {
@@ -413,6 +742,133 @@ async function estimateDominantColorHexFromUrl(imageUrl) {
   const g = Math.round(sumG / count);
   const b = Math.round(sumB / count);
   return rgbToHex(r, g, b);
+}
+
+async function estimateDominantColorHexFromBuffer(buf) {
+  const { data, info } = await sharp(buf)
+    .resize(64, 64, { fit: 'inside' })
+    .removeAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+
+  let sumR = 0;
+  let sumG = 0;
+  let sumB = 0;
+  let count = 0;
+
+  for (let i = 0; i < data.length; i += info.channels) {
+    const r = data[i];
+    const g = data[i + 1];
+    const b = data[i + 2];
+
+    if (r > 245 && g > 245 && b > 245) continue;
+
+    sumR += r;
+    sumG += g;
+    sumB += b;
+    count++;
+  }
+
+  if (!count) {
+    for (let i = 0; i < data.length; i += info.channels) {
+      sumR += data[i];
+      sumG += data[i + 1];
+      sumB += data[i + 2];
+      count++;
+    }
+  }
+
+  const r = Math.round(sumR / count);
+  const g = Math.round(sumG / count);
+  const b = Math.round(sumB / count);
+  return rgbToHex(r, g, b);
+}
+
+async function estimateMedianColorHexFromBuffer(buf) {
+  // NOTE:
+  // A per-channel median can create a color that doesn't actually exist in the fabric
+  // (e.g., pink + green motifs -> muddy brown median). That can lead to bad “locked” colors.
+  // Instead, estimate a representative base color by taking the most frequent quantized RGB bin.
+  const { data, info } = await sharp(buf)
+    .resize(96, 96, { fit: 'inside' })
+    .removeAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+
+  // Sample every Nth pixel for speed.
+  const stride = Math.max(1, Math.floor((info.width * info.height) / 8000));
+  let pixelIndex = 0;
+
+  // Quantize to 16 levels per channel (0-15). This stabilizes “dominant” detection.
+  const BIN = 16;
+  const stats = new Map();
+
+  for (let i = 0; i < data.length; i += info.channels) {
+    pixelIndex++;
+    if (pixelIndex % stride !== 0) continue;
+
+    const r = data[i];
+    const g = data[i + 1];
+    const b = data[i + 2];
+
+    // Skip near-white (common backgrounds).
+    if (r > 245 && g > 245 && b > 245) continue;
+
+    // Skip very dark pixels (fold shadows) which can bias toward a darker lock.
+    if ((r + g + b) < 90) continue;
+
+    // Skip likely metallic/gold motifs. These are typically high R+G with lower B.
+    // This helps lock the FABRIC BASE color instead of the zari/motif color.
+    // Heuristic: yellow-ish pixels where blue is significantly lower than green.
+    if (r > 140 && g > 120 && (g - b) > 40 && b < 170) continue;
+
+    const rq = Math.min(BIN - 1, Math.floor(r / BIN));
+    const gq = Math.min(BIN - 1, Math.floor(g / BIN));
+    const bq = Math.min(BIN - 1, Math.floor(b / BIN));
+    const key = `${rq},${gq},${bq}`;
+
+    const prev = stats.get(key);
+    if (prev) {
+      prev.count += 1;
+      prev.sumR += r;
+      prev.sumG += g;
+      prev.sumB += b;
+    } else {
+      stats.set(key, { count: 1, sumR: r, sumG: g, sumB: b });
+    }
+  }
+
+  if (!stats.size) {
+    return await estimateDominantColorHexFromBuffer(buf);
+  }
+
+  let best = null;
+  for (const v of stats.values()) {
+    if (!best || v.count > best.count) best = v;
+  }
+
+  const r = Math.round(best.sumR / best.count);
+  const g = Math.round(best.sumG / best.count);
+  const b = Math.round(best.sumB / best.count);
+  return rgbToHex(r, g, b);
+}
+
+function createSolidColorSwatchBuffer(hex, size = 256) {
+  const clean = String(hex || '').trim();
+  if (!/^#[0-9a-fA-F]{6}$/.test(clean)) return null;
+  const r = parseInt(clean.slice(1, 3), 16);
+  const g = parseInt(clean.slice(3, 5), 16);
+  const b = parseInt(clean.slice(5, 7), 16);
+  return sharp({
+    create: {
+      width: size,
+      height: size,
+      channels: 3,
+      background: { r, g, b }
+    }
+  })
+    .jpeg({ quality: 90, progressive: true })
+    .toBuffer();
 }
 
 async function generateSareeViewWithVITON(imageUrls, viewType) {
@@ -590,7 +1046,7 @@ async function generateSareeSequentially(imageUrls, viewType, masterReferenceUrl
   }
 
   const colorLockBlock = (sareeBodyHex || blouseBodyHex)
-    ? `\n\nCOLOR LOCK (NON-NEGOTIABLE):\n- Saree body base color must match: ${sareeBodyHex || 'EXACTLY match saree-body reference'}\n- Blouse base color must match: ${blouseBodyHex || 'EXACTLY match blouse-body reference'}\n- DO NOT shift hue/saturation/brightness. Do NOT introduce maroon/red/orange tints if the reference is pink/blue.\n- Borders/pallu can add accents but MUST NOT recolor the main saree body or blouse body.`
+    ? `\n\nCOLOR LOCK (NON-NEGOTIABLE):\n- Saree BODY base color must EXACTLY match the saree-body reference image (do not darken).\n- Blouse BODY base color must EXACTLY match the blouse-body reference image (do not darken).\n- DO NOT shift hue/saturation/brightness. DO NOT auto-enhance, recolor, increase contrast, or add tints.\n- Borders/pallu can add accents but MUST NOT recolor the main saree body or blouse body.`
     : '';
   
   console.log(`Step 1/4: Generating base with saree body + blouse body...`);
@@ -938,6 +1394,144 @@ Generate ONE photo of the woman. Nothing else.` });
   return finalImage;
 }
 
+// NEW: Single-shot saree DESIGN generation (no multi-step).
+// Generates a clean product-style saree design image using ALL 6 parts at once.
+async function generateSareeDesignOneShot(
+  imageUrls,
+  viewType,
+  masterReferenceUrl = null,
+  userFeedback = '',
+  partsSheetImage = null,
+  lockedColorsIn = null,
+  paletteLockIn = null,
+  masterReferenceImage = null
+) {
+  const [sareeBorderUrl, blouseBorderUrl, sareeBodyUrl, blouseBodyUrl, sareePalluUrl, sareePleatsUrl] = imageUrls;
+  const viewName = viewType === 'front' ? 'FRONT VIEW' : 'BACK VIEW';
+
+  // Prefer deterministic locks computed from original upload buffers in the handler.
+  const lockedSareeBodyHex = lockedColorsIn?.sareeBody || null;
+  const lockedBlouseBodyHex = lockedColorsIn?.blouseBody || null;
+
+  if (lockedSareeBodyHex || lockedBlouseBodyHex) {
+    console.log(`🎨 Color lock (saree-body): ${lockedSareeBodyHex || '(unavailable)'}`);
+    console.log(`🎨 Color lock (blouse-body): ${lockedBlouseBodyHex || '(unavailable)'}`);
+  } else {
+    console.warn('⚠️ Color lock unavailable (lockedColorsIn missing)');
+  }
+
+  const colorLockBlock = (lockedSareeBodyHex || lockedBlouseBodyHex)
+    ? `\n\nCOLOR LOCK (NON-NEGOTIABLE):\n- Saree BODY base color must be preserved EXACTLY as the saree-body reference image. Do NOT shift hue/saturation/brightness. Do NOT darken or increase contrast.\n- Blouse BODY base color must be preserved EXACTLY as the blouse-body reference image. Do NOT shift hue/saturation/brightness. Do NOT darken or increase contrast.\n- Even when applying user feedback, these two base colors must remain unchanged. If feedback conflicts, prioritize color lock.`
+    : '';
+
+  // IMPORTANT: Do NOT enforce a full "allowed palette".
+  // It can cause unintended shifts in the saree's overall color.
+  // We only enforce the two base colors via COLOR LOCK + swatch references.
+  void paletteLockIn;
+
+  const feedbackBlock = userFeedback && String(userFeedback).trim()
+    ? `\n\nUSER FEEDBACK (apply strictly):\n${String(userFeedback).trim()}`
+    : '';
+
+  const editModeBlock = (masterReferenceUrl || masterReferenceImage?.data)
+    ? `\n\nEDIT MODE (NON-NEGOTIABLE):\n- Treat the MASTER REFERENCE as the base output.\n- Keep EVERYTHING identical unless the user feedback explicitly requires a change.\n- Preserve ALL colors and patterns; do not recolor or add any new color blocks.\n- Make the smallest possible change to satisfy the feedback.`
+    : '';
+
+  const parts = [];
+
+  parts.push({
+    text: `You are generating a SINGLE product design image of a saree using reference fabric parts.\n\nOUTPUT REQUIREMENTS (NON-NEGOTIABLE):\n- EXACT size: 2400×3200 px, portrait\n- Background: pure white (RGB 255,255,255)\n- Output must show ONLY the saree product design (NO woman, NO mannequin, NO model, NO jewellery, NO props).\n- Show a complete saree design layout: body, pleats section, pallu, and borders clearly visible.\n- Include the blouse piece/fabric as a small folded piece next to the saree (same background).\n- High-quality e-commerce product photo style.\n\nVIEW: ${viewName}${colorLockBlock}\n${feedbackBlock}${editModeBlock}\n\nI will provide (A) a LABELED 2×3 reference sheet image to help you understand which fabric is which, plus (B) the 6 individual fabric part images.\n\nCRITICAL: The labeled sheet and the reference images are ONLY FOR UNDERSTANDING. Do NOT copy the labels, do NOT include any text, do NOT include any collage/split screen in the output.\n\nCopy patterns and colors EXACTLY. Do not invent new motifs.\n\nStart with MASTER REFERENCE only if present, then use the LABELED SHEET for part identification, then apply all individual parts below.`
+  });
+
+  parts.push({
+    text: `\nSECTION MAPPING (NON-NEGOTIABLE):\n- Saree BODY area: use ONLY SAREE BODY reference (pattern + color).\n- PALLU area: use ONLY PALLU reference (pattern + color).\n- PLEATS area: use ONLY SAREE PLEATS reference (pattern + color).\n- SAREE BORDERS/EDGES: use ONLY SAREE BORDER reference (pattern + color).\n- BLOUSE PIECE: use ONLY BLOUSE BODY + BLOUSE BORDER references (pattern + color).\n\nABSOLUTELY FORBIDDEN:\n- Adding any new color blocks/bands/panels not present in the references.\n- Adding extra motifs or extra colored stripes.\n- Putting any text/labels in the output.`
+  });
+
+  if (masterReferenceImage?.data) {
+    parts.push({
+      text: `\nMASTER REFERENCE (base output; do not include it in output):`
+    });
+    parts.push({
+      inline_data: {
+        mime_type: masterReferenceImage.mimeType || masterReferenceImage.mime_type || 'image/jpeg',
+        data: masterReferenceImage.data
+      }
+    });
+  } else if (masterReferenceUrl) {
+    parts.push({
+      text: `\nMASTER REFERENCE (consistency only, do not include it in output):`
+    });
+    const masterImg = await downloadImageAsBase64(masterReferenceUrl);
+    parts.push({ inline_data: { mime_type: masterImg.mimeType, data: masterImg.data } });
+  }
+
+  if (partsSheetImage?.data) {
+    parts.push({ text: `\nLABELED REFERENCE SHEET (use for identifying which part is which; do not include in output):` });
+    parts.push({
+      inline_data: {
+        mime_type: partsSheetImage.mimeType || partsSheetImage.mime_type || 'image/jpeg',
+        data: partsSheetImage.data
+      }
+    });
+  }
+
+  // Do NOT send hex-derived swatches.
+  // In practice, swatches + hex values can cause the model to “reinterpret” the shade.
+  // The fabric reference images are the source of truth.
+
+  parts.push({ text: `\nSAREE BODY reference:` });
+  const sareeBodyImg = await downloadImageAsBase64(sareeBodyUrl);
+  parts.push({ inline_data: { mime_type: sareeBodyImg.mimeType, data: sareeBodyImg.data } });
+
+  parts.push({ text: `\nBLOUSE BODY reference:` });
+  const blouseBodyImg = await downloadImageAsBase64(blouseBodyUrl);
+  parts.push({ inline_data: { mime_type: blouseBodyImg.mimeType, data: blouseBodyImg.data } });
+
+  parts.push({ text: `\nSAREE PLEATS reference (apply to pleats section):` });
+  const sareePleatsImg = await downloadImageAsBase64(sareePleatsUrl);
+  parts.push({ inline_data: { mime_type: sareePleatsImg.mimeType, data: sareePleatsImg.data } });
+
+  parts.push({ text: `\nSAREE BORDER reference (apply as borders/edges):` });
+  const sareeBorderImg = await downloadImageAsBase64(sareeBorderUrl);
+  parts.push({ inline_data: { mime_type: sareeBorderImg.mimeType, data: sareeBorderImg.data } });
+
+  parts.push({ text: `\nBLOUSE BORDER reference (apply to blouse piece border):` });
+  const blouseBorderImg = await downloadImageAsBase64(blouseBorderUrl);
+  parts.push({ inline_data: { mime_type: blouseBorderImg.mimeType, data: blouseBorderImg.data } });
+
+  parts.push({ text: `\nSAREE PALLU reference (apply to pallu area):` });
+  const sareePalluImg = await downloadImageAsBase64(sareePalluUrl);
+  parts.push({ inline_data: { mime_type: sareePalluImg.mimeType, data: sareePalluImg.data } });
+
+  parts.push({
+    text: `\nFINAL INSTRUCTIONS:\n- Generate ONE SINGLE IMAGE only.\n- Do NOT show any person/model/mannequin.\n- Do NOT show any of the reference images in the output.\n- Keep output clean and centered on white background.\n\nGenerate the saree product design image now.`
+  });
+
+  const response = await callGeminiWithRetry(parts);
+  const content = response.data.candidates?.[0]?.content?.parts || [];
+  let outImage = null;
+  for (const part of content) {
+    if (part.inlineData || part.inline_data) {
+      outImage = part.inlineData || part.inline_data;
+      break;
+    }
+  }
+
+  if (!outImage) {
+    throw new Error('One-shot saree design generation failed: no image returned');
+  }
+
+  outImage = await sanitizeCatalogOutput(outImage, { stage: `one-shot-${viewType}` });
+
+  return {
+    image: outImage,
+    lockedColors: {
+      sareeBody: lockedSareeBodyHex,
+      blouseBody: lockedBlouseBodyHex
+    }
+  };
+}
+
 export default async function handler(req, res) {
   console.log(`\n🧩 [drape-saree-parts] handler reached: ${req.method} (content-type: ${req.headers?.['content-type'] || 'n/a'})`);
   res.setHeader('Access-Control-Allow-Credentials', true);
@@ -989,70 +1583,396 @@ export default async function handler(req, res) {
       cloudinaryResults[partName] = result;
     }
 
-    const viewTypes = ['front', 'back'];
+    // Deterministic color lock from ORIGINAL UPLOAD BUFFERS (not Cloudinary URLs).
+    // This avoids tiny drift due to Cloudinary transcoding and keeps feedback retries stable.
+    let lockedColorsFromParts = { sareeBody: null, blouseBody: null };
+    try {
+      lockedColorsFromParts.sareeBody = await estimateMedianColorHexFromBuffer(files['saree-body'][0].buffer);
+    } catch (e) {
+      console.warn('⚠️ Failed to compute locked saree-body color from buffer:', e?.message || e);
+    }
+    try {
+      lockedColorsFromParts.blouseBody = await estimateMedianColorHexFromBuffer(files['blouse-body'][0].buffer);
+    } catch (e) {
+      console.warn('⚠️ Failed to compute locked blouse-body color from buffer:', e?.message || e);
+    }
+    console.log('🎯 Locked colors from uploads:', lockedColorsFromParts);
+
+    // NOTE: User requested to NOT use a full allowed-palette lock.
+    // We only lock saree-body + blouse-body base colors for consistency.
+
+    // Create a labeled parts sheet:
+    // 1) Return it for UI/debugging
+    // 2) ALSO feed it to Gemini as a reference to improve part understanding/accuracy
+    let partsSheetUrl = null;
+    let partsSheetImageForGemini = null;
+    try {
+      console.log('🧾 Building labeled parts sheet (2x3 grid)...');
+      const partUrls = {
+        'saree-border': cloudinaryResults['saree-border']?.secure_url,
+        'blouse-border': cloudinaryResults['blouse-border']?.secure_url,
+        'saree-body': cloudinaryResults['saree-body']?.secure_url,
+        'blouse-body': cloudinaryResults['blouse-body']?.secure_url,
+        'saree-pallu': cloudinaryResults['saree-pallu']?.secure_url,
+        'saree-pleats': cloudinaryResults['saree-pleats']?.secure_url
+      };
+
+      const sheetBuffer = await createLabeledPartsSheet(partUrls);
+      partsSheetImageForGemini = { data: sheetBuffer.toString('base64'), mimeType: 'image/jpeg' };
+
+      const sheetUpload = await uploadToCloudinary(sheetBuffer, 'parts-sheet');
+      partsSheetUrl = sheetUpload?.secure_url || null;
+      if (partsSheetUrl) {
+        console.log('✅ Parts sheet uploaded:', partsSheetUrl);
+      }
+    } catch (e) {
+      console.warn('⚠️ Parts sheet generation failed (continuing):', e?.message || e);
+    }
+
     const generatedViews = {};
     const generatedUrls = {};
-    let frontImageData = null;
 
     const userFeedback = req.body?.userFeedback || '';
     const masterReferenceUrl = req.body?.masterReferenceUrl || null;
-
-    // Generate front view first (5-step sequential)
-    console.log(`\n🎨 Generating front view with sequential process...`);
-    
+    const masterReferenceMemoryKey = req.body?.masterReferenceMemoryKey || null;
+    const masterReferenceFrontMemoryKey = req.body?.masterReferenceFrontMemoryKey || null;
+    const masterReferenceBackMemoryKey = req.body?.masterReferenceBackMemoryKey || null;
+    let feedbackTargets = [];
     try {
-      frontImageData = await generateSareeView(uploadResults, 'front', masterReferenceUrl, userFeedback);
-      
-      if (!frontImageData) {
-        throw new Error('No front image data generated');
+      const raw = req.body?.feedbackTargets;
+      if (raw) {
+        const parsed = JSON.parse(String(raw));
+        if (Array.isArray(parsed)) feedbackTargets = parsed;
+      }
+    } catch {
+      // ignore
+    }
+    const feedbackTargetSet = new Set(Array.isArray(feedbackTargets) ? feedbackTargets : []);
+    const sessionId = req.body?.sessionId || null;
+
+    // Stable memory key per session to support "image memory" feedback loops.
+    const sareeDesignMemoryKey = String(masterReferenceMemoryKey || (sessionId ? `saree-design-${sessionId}` : 'saree-design-default'));
+    const masterReferenceImage = masterReferenceMemoryKey
+      ? await loadImageFromMemory(String(masterReferenceMemoryKey))
+      : null;
+    if (masterReferenceMemoryKey) {
+      console.log('🧠 Master reference memory key:', masterReferenceMemoryKey, masterReferenceImage ? '(hit)' : '(miss)');
+    }
+
+    // Stable memory keys for final (front/back) outputs.
+    const frontViewMemoryKey = String(masterReferenceFrontMemoryKey || (sessionId ? `final-front-${sessionId}` : 'final-front-default'));
+    const backViewMemoryKey = String(masterReferenceBackMemoryKey || (sessionId ? `final-back-${sessionId}` : 'final-back-default'));
+
+    const masterFrontImage = masterReferenceFrontMemoryKey
+      ? await loadImageFromMemory(String(masterReferenceFrontMemoryKey))
+      : null;
+    const masterBackImage = masterReferenceBackMemoryKey
+      ? await loadImageFromMemory(String(masterReferenceBackMemoryKey))
+      : null;
+    if (masterReferenceFrontMemoryKey) {
+      console.log('🧠 Master FRONT memory key:', masterReferenceFrontMemoryKey, masterFrontImage ? '(hit)' : '(miss)');
+    }
+    if (masterReferenceBackMemoryKey) {
+      console.log('🧠 Master BACK memory key:', masterReferenceBackMemoryKey, masterBackImage ? '(hit)' : '(miss)');
+    }
+
+    // If the user is giving feedback and we have BOTH prior final views in memory,
+    // prefer editing the final outputs directly (more stable than re-running try-on).
+    const hasFeedback = !!(userFeedback && String(userFeedback).trim());
+    const canEditFinalViewsFromMemory = hasFeedback && !!(masterFrontImage?.data && masterBackImage?.data);
+
+    async function partBufferToSmallJpegBase64(buf) {
+      try {
+        const out = await sharp(buf)
+          .resize(1024, 1024, { fit: 'inside', withoutEnlargement: true })
+          .jpeg({ quality: 85, progressive: true })
+          .toBuffer();
+        return out.toString('base64');
+      } catch {
+        return Buffer.from(buf).toString('base64');
+      }
+    }
+
+    // Build extra fabric refs for Imagen based on the selected feedback targets.
+    // This helps Imagen keep the exact fabric/pattern (e.g., pallu) while editing.
+    const extraFabricRefsBase64 = [];
+    try {
+      const map = {
+        'saree-pallu': 'saree-pallu',
+        'saree-border': 'saree-border',
+        'saree-body': 'saree-body',
+        'saree-pleats': 'saree-pleats',
+        'blouse-body': 'blouse-body',
+        'blouse-border': 'blouse-border'
+      };
+      for (const [target, field] of Object.entries(map)) {
+        if (!feedbackTargetSet.has(target)) continue;
+        const part = req.files?.[field]?.[0];
+        if (part?.buffer) {
+          extraFabricRefsBase64.push(await partBufferToSmallJpegBase64(part.buffer));
+        }
+      }
+    } catch (e) {
+      console.warn('⚠️ Failed building extra fabric refs for Imagen (continuing):', e?.message || e);
+    }
+
+    function buildStrictTargetRulesForImagen(targetSet) {
+      const hasTargets = targetSet && targetSet.size > 0;
+      const targetsLine = hasTargets
+        ? `\n\nONLY CHANGE THESE TARGETS (STRICT):\n- ${Array.from(targetSet).join('\n- ')}\n\nFOR EVERYTHING ELSE:\n- Keep it IDENTICAL to the input image. Do NOT make any other improvements or changes.`
+        : `\n\nONLY CHANGE what the user feedback explicitly requires. Otherwise keep everything IDENTICAL.`;
+
+      const rules = [];
+      const regions = [
+        {
+          key: 'saree-pallu',
+          name: 'Saree pallu',
+          edit: 'Change ONLY the pallu drape/flow/placement/appearance. Do not touch any other saree regions.',
+          freeze: 'Do NOT change the pallu (drape, length, folds, pattern, color) unless feedback explicitly demands it.'
+        },
+        {
+          key: 'saree-border',
+          name: 'Saree border',
+          edit: 'Change ONLY the saree border/edge detailing. Do not recolor or alter the saree body, pleats, or pallu.',
+          freeze: 'Do NOT change the saree border/edge detailing.'
+        },
+        {
+          key: 'saree-body',
+          name: 'Saree body',
+          edit: 'Change ONLY the main saree body area. Do not alter borders, pallu, pleats, or blouse.',
+          freeze: 'Do NOT change the saree body area.'
+        },
+        {
+          key: 'saree-pleats',
+          name: 'Saree pleats',
+          edit: 'Change ONLY the pleats region (folds/placement/pleat pattern alignment). Do not alter pallu, borders, saree body, or blouse.',
+          freeze: 'Do NOT change the pleats region.'
+        },
+        {
+          key: 'blouse-body',
+          name: 'Blouse body',
+          edit: 'Change ONLY the blouse body area. Do not alter the saree (body/border/pallu/pleats).',
+          freeze: 'Do NOT change the blouse body area.'
+        },
+        {
+          key: 'blouse-border',
+          name: 'Blouse border',
+          edit: 'Change ONLY the blouse border/trim. Do not alter blouse body or any saree regions.',
+          freeze: 'Do NOT change the blouse border/trim.'
+        }
+      ];
+
+      for (const r of regions) {
+        const on = targetSet?.has?.(r.key);
+        rules.push(`- ${r.name}: ${on ? r.edit : r.freeze}`);
       }
 
-      // Final safety: sanitize before upload and before generating back view.
-      frontImageData = await sanitizeCatalogOutput(frontImageData, { stage: 'front-final-upload' });
-      
-      // Upload front view to Cloudinary
-      const frontUrl = await uploadGeneratedImageToCloudinary(
-        frontImageData.data, 
-        'front-view',
-        frontImageData.mime_type || frontImageData.mimeType || 'image/png'
+      return `${targetsLine}\n\nTARGET-SPECIFIC RULES (STRICT):\n${rules.join('\n')}`;
+    }
+
+    // NEW: One-shot saree DESIGN generation (no multi-step)
+    console.log(`\n🎨 Generating saree DESIGN in one shot (no multi-step)...`);
+    let designImageData = null;
+    let designUrl = null;
+    let lockedColors = null;
+    try {
+      const shouldTryImagenEdit = !!(userFeedback && String(userFeedback).trim() && (masterReferenceImage?.data || masterReferenceUrl));
+
+      if (shouldTryImagenEdit) {
+        console.log('🧩 Feedback detected + master reference present → trying Imagen edit first');
+
+        // Get the raw base64 from memory (preferred) or from the URL.
+        const rawRef = masterReferenceImage?.data
+          ? masterReferenceImage
+          : (masterReferenceUrl ? await downloadImageAsBase64(masterReferenceUrl) : null);
+
+        const lockedSaree = lockedColorsFromParts?.sareeBody;
+        const lockedBlouse = lockedColorsFromParts?.blouseBody;
+
+        const strictRules = buildStrictTargetRulesForImagen(feedbackTargetSet);
+        const editPrompt = `Edit the provided saree PRODUCT DESIGN image (flatlay / product layout).\n\nUSER FEEDBACK (apply exactly):\n${String(userFeedback).trim()}${strictRules}\n\nNON-NEGOTIABLE CONSTRAINTS:\n- Saree BODY base color must remain EXACTLY as the saree-body reference image (do NOT darken, do NOT increase contrast).\n- Blouse BODY base color must remain EXACTLY as the blouse-body reference image (do NOT darken, do NOT increase contrast).\n- Do NOT introduce new color bands/blocks/stripes/panels.\n- Do NOT change the overall product layout (single product on pure white background, no person, no text).\n- Output must remain a clean e-commerce product image.\n- Use the provided fabric reference images as the source of truth for pattern + color (no reinterpretation).`;
+
+        const negativePrompt = `No recolor. No new colors. No global enhancement. No style change. No text. No labels. No collage. No split screen. No mannequin. No model. No background patterns.`;
+
+        try {
+          const edited = await editImageWithImagenCapability({
+            rawImageBase64: rawRef?.data,
+            prompt: editPrompt,
+            negativePrompt,
+            // Imagen edit (mask-free) only supports 1 RAW image; extra refs are ignored.
+            extraRawImagesBase64: extraFabricRefsBase64
+          });
+
+          const sanitized = await sanitizeCatalogOutput(
+            { data: edited.data, mimeType: edited.mimeType, mime_type: edited.mimeType },
+            { stage: 'imagen-edit' }
+          );
+
+          designImageData = sanitized;
+          lockedColors = {
+            sareeBody: lockedColorsFromParts?.sareeBody || null,
+            blouseBody: lockedColorsFromParts?.blouseBody || null
+          };
+        } catch (e) {
+          console.warn('⚠️ Imagen edit failed; falling back to Gemini one-shot design regeneration:', e?.message || e);
+          const designResult = await generateSareeDesignOneShot(
+            uploadResults,
+            'front',
+            masterReferenceUrl,
+            userFeedback,
+            partsSheetImageForGemini,
+            lockedColorsFromParts,
+            null,
+            masterReferenceImage
+          );
+          designImageData = designResult?.image;
+          lockedColors = designResult?.lockedColors || null;
+        }
+      } else {
+        const designResult = await generateSareeDesignOneShot(
+          uploadResults,
+          'front',
+          masterReferenceUrl,
+          userFeedback,
+          partsSheetImageForGemini,
+          lockedColorsFromParts,
+          null,
+          masterReferenceImage
+        );
+        designImageData = designResult?.image;
+        lockedColors = designResult?.lockedColors || null;
+      }
+
+      if (!designImageData?.data) throw new Error('No design image data generated');
+
+      // Save the *high-quality* design into local memory for the next feedback retry.
+      try {
+        await saveImageToMemory(designImageData.data, sareeDesignMemoryKey);
+        console.log('🧠 Saved design to memory:', sareeDesignMemoryKey);
+      } catch (e) {
+        console.warn('⚠️ Failed to save design to memory (continuing):', e?.message || e);
+      }
+
+      designUrl = await uploadGeneratedImageToCloudinary(
+        designImageData.data,
+        'saree-design',
+        designImageData.mime_type || designImageData.mimeType || 'image/png'
       );
-      
-      generatedViews.front = frontUrl;
-      generatedUrls.front = frontUrl;
-      
-      console.log(`✅ Front view generated successfully`);
-      
+
+      // Use the same single saree design image for both try-on views.
+      generatedViews.front = designUrl;
+      generatedViews.back = designUrl;
+      generatedUrls.front = designUrl;
+      generatedUrls.back = designUrl;
+
+      console.log('\n========================================');
+      console.log('🧵 SAREE DESIGN UPLOADED TO CLOUDINARY');
+      console.log('========================================');
+      console.log('✅ Design URL:', designUrl);
+      if (lockedColors?.sareeBody || lockedColors?.blouseBody) {
+        console.log('🎨 Locked colors:', lockedColors);
+      }
+      console.log('========================================\n');
     } catch (error) {
-      console.error(`Failed to generate front view:`, error.message);
+      console.error('Failed to generate one-shot saree design:', error.message);
       throw error;
     }
 
-    // Generate back view from front view (1 step, much faster)
-    console.log(`\n🎨 Generating back view from front view...`);
-    
-    try {
-      const backImageDataRaw = await generateBackFromFront(frontImageData, userFeedback);
-      const backImageData = await sanitizeCatalogOutput(backImageDataRaw, { stage: 'back-final-upload' });
-      
-      if (!backImageData) {
-        throw new Error('No back image data generated');
+    // IMPORTANT:
+    // Editing human/model photos directly with Imagen (mask-free) has been producing
+    // low-quality outputs (face masking, background artifacts). For feedback retries,
+    // we always re-run Virtual Try-On on the fixed model images after updating the design.
+    // Keep the memory keys, but DO NOT short-circuit by editing final views.
+    if (false && canEditFinalViewsFromMemory) {
+      console.log('🧩 Editing FINAL front/back views from memory using Imagen...');
+      const lockedSaree = lockedColorsFromParts?.sareeBody;
+      const lockedBlouse = lockedColorsFromParts?.blouseBody;
+
+      const targetNames = {
+        'saree-pallu': 'Saree pallu',
+        'saree-border': 'Saree border',
+        'saree-body': 'Saree body',
+        'saree-pleats': 'Saree pleats',
+        'blouse-body': 'Blouse body',
+        'blouse-border': 'Blouse border'
+      };
+      const selectedTargets = Array.from(feedbackTargetSet)
+        .map((t) => targetNames[t] || t)
+        .filter(Boolean);
+
+      const strictRules = buildStrictTargetRulesForImagen(feedbackTargetSet);
+
+      const commonPrompt = `Edit the provided image of a model wearing the saree.\n\nUSER FEEDBACK (apply exactly):\n${String(userFeedback).trim()}${strictRules}\n\nNON-NEGOTIABLE CONSTRAINTS:\n- Keep the OUTPUT STYLE identical to the input photo.\n- Saree BODY base color must remain EXACTLY as the saree-body reference image (do NOT darken, do NOT increase contrast).\n- Blouse BODY base color must remain EXACTLY as the blouse-body reference image (do NOT darken, do NOT increase contrast).\n- Do NOT introduce any new color bands/blocks/stripes/panels.\n- Keep the same pose, lighting, composition, and background.\n- Do NOT change face, hair, skin, jewelry, background, pose, camera, lighting unless the feedback explicitly demands it.\n- Output must remain ONE single model photo (no collage, no split-screen, no extra people).`;
+
+      const negativePrompt = `No recolor. No new colors. No global enhancement. No style change. No text. No labels. No collage. No split-screen. No extra people. No product-flatlay.`;
+
+      let editedFront = null;
+      let editedBack = null;
+      try {
+        const frontOut = await editImageWithImagenCapability({
+          rawImageBase64: masterFrontImage.data,
+          prompt: `FRONT VIEW. ${commonPrompt}`,
+          negativePrompt,
+          extraRawImagesBase64: extraFabricRefsBase64
+        });
+        editedFront = await sanitizeCatalogOutput(
+          { data: frontOut.data, mimeType: frontOut.mimeType, mime_type: frontOut.mimeType },
+          { stage: 'imagen-edit-final-front' }
+        );
+      } catch (e) {
+        console.warn('⚠️ Imagen edit failed for FRONT; falling back to previous front image:', e?.message || e);
       }
-      
-      // Upload back view to Cloudinary
-      const backUrl = await uploadGeneratedImageToCloudinary(
-        backImageData.data, 
-        'back-view',
-        backImageData.mime_type || backImageData.mimeType || 'image/png'
-      );
-      
-      generatedViews.back = backUrl;
-      generatedUrls.back = backUrl;
-      
-      console.log(`✅ Back view generated successfully`);
-      
-    } catch (error) {
-      console.error(`Failed to generate back view:`, error.message);
-      throw error;
+
+      try {
+        const backOut = await editImageWithImagenCapability({
+          rawImageBase64: masterBackImage.data,
+          prompt: `BACK VIEW. ${commonPrompt}`,
+          negativePrompt,
+          extraRawImagesBase64: extraFabricRefsBase64
+        });
+        editedBack = await sanitizeCatalogOutput(
+          { data: backOut.data, mimeType: backOut.mimeType, mime_type: backOut.mimeType },
+          { stage: 'imagen-edit-final-back' }
+        );
+      } catch (e) {
+        console.warn('⚠️ Imagen edit failed for BACK; falling back to previous back image:', e?.message || e);
+      }
+
+      const finalFrontBase64 = editedFront?.data || masterFrontImage.data;
+      const finalBackBase64 = editedBack?.data || masterBackImage.data;
+
+      // Persist edited finals back to memory for the next retry.
+      try {
+        await saveImageToMemory(finalFrontBase64, frontViewMemoryKey);
+        await saveImageToMemory(finalBackBase64, backViewMemoryKey);
+        console.log('🧠 Saved edited final views to memory:', frontViewMemoryKey, backViewMemoryKey);
+      } catch (e) {
+        console.warn('⚠️ Failed to save final views to memory (continuing):', e?.message || e);
+      }
+
+      // Upload edited finals for UI.
+      const frontUrl = await uploadGeneratedImageToCloudinary(finalFrontBase64, 'final-front-edit');
+      const backUrl = await uploadGeneratedImageToCloudinary(finalBackBase64, 'final-back-edit');
+
+      res.json({
+        success: true,
+        frontView: frontUrl,
+        backView: backUrl,
+        sareeDesignUrl: designUrl || null,
+        sareeDesignMemoryKey,
+        frontViewMemoryKey,
+        backViewMemoryKey,
+        lockedColors: lockedColors || null,
+        partsSheetUrl,
+        generatedUrls: {
+          front: frontUrl,
+          back: backUrl
+        },
+        message: 'Updated front/back views using your feedback.',
+        model: 'Imagen Edit (final views)',
+        hasTryOn: true
+      });
+      return;
     }
 
     // Apply Virtual Try-On to BOTH front and back views (optional, won't break if it fails)
@@ -1082,6 +2002,13 @@ export default async function handler(req, res) {
         console.log('    Model:', MODEL_FRONT_URL);
         const tryonFrontData = await applyVirtualTryOn(generatedViews.front, MODEL_FRONT_URL);
         if (tryonFrontData) {
+          // Save base64 to memory before uploading.
+          try {
+            await saveImageToMemory(tryonFrontData.data, frontViewMemoryKey);
+            console.log('🧠 Saved final FRONT to memory:', frontViewMemoryKey);
+          } catch (e) {
+            console.warn('⚠️ Failed to save final FRONT to memory (continuing):', e?.message || e);
+          }
           const tryonFrontUrl = await uploadGeneratedImageToCloudinary(
             tryonFrontData.data,
             'tryon-front-view',
@@ -1105,6 +2032,13 @@ export default async function handler(req, res) {
         console.log('    Model:', MODEL_BACK_URL);
         const tryonBackData = await applyVirtualTryOn(generatedViews.back, MODEL_BACK_URL);
         if (tryonBackData) {
+          // Save base64 to memory before uploading.
+          try {
+            await saveImageToMemory(tryonBackData.data, backViewMemoryKey);
+            console.log('🧠 Saved final BACK to memory:', backViewMemoryKey);
+          } catch (e) {
+            console.warn('⚠️ Failed to save final BACK to memory (continuing):', e?.message || e);
+          }
           const tryonBackUrl = await uploadGeneratedImageToCloudinary(
             tryonBackData.data,
             'tryon-back-view',
@@ -1151,6 +2085,12 @@ export default async function handler(req, res) {
       success: true,
       frontView: finalFrontView,
       backView: finalBackView,
+      sareeDesignUrl: designUrl || generatedUrls.front || null,
+      sareeDesignMemoryKey,
+      frontViewMemoryKey,
+      backViewMemoryKey,
+      lockedColors: lockedColors || null,
+      partsSheetUrl,
       generatedUrls: {
         front: finalFrontView,
         back: finalBackView

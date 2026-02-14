@@ -24,7 +24,7 @@ const SareePartsUploader = ({ formData = {}, onChange = () => { } }) => {
   const [feedbackText, setFeedbackText] = useState("");
   const [feedbackSaving, setFeedbackSaving] = useState(false);
   const [feedbackStatus, setFeedbackStatus] = useState(null); // { type: 'success'|'error', message }
-  const [fixTarget, setFixTarget] = useState('saree-border');
+  const [feedbackTargets, setFeedbackTargets] = useState(['saree-border']);
 
 
 
@@ -231,7 +231,7 @@ const SareePartsUploader = ({ formData = {}, onChange = () => { } }) => {
   };
 
   // Then in handleAutoGenerateCompleteSaree
-  const handleAutoGenerateCompleteSaree = async (userFeedback = "") => {
+  const handleAutoGenerateCompleteSaree = async (userFeedback = "", feedbackTargetsOverride = null) => {
     if (!getAllPartsUploaded()) {
       console.log("Not all parts uploaded yet");
       return;
@@ -244,6 +244,20 @@ const SareePartsUploader = ({ formData = {}, onChange = () => { } }) => {
     try {
       const formDataToSend = new FormData();
 
+      // Stable session so server can keep consistent memory slots (design + final views).
+      // Keep it simple: one key per browser (localStorage).
+      try {
+        const key = "sareeDesignSessionId";
+        let sid = window.localStorage.getItem(key);
+        if (!sid) {
+          sid = `sid_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+          window.localStorage.setItem(key, sid);
+        }
+        formDataToSend.append("sessionId", sid);
+      } catch {
+        // ignore
+      }
+
       // ✅ Use files from ref
       Object.entries(originalFilesRef.current).forEach(([partName, file]) => {
         if (file) {
@@ -255,10 +269,30 @@ const SareePartsUploader = ({ formData = {}, onChange = () => { } }) => {
       if (userFeedback && String(userFeedback).trim()) {
         formDataToSend.append("userFeedback", String(userFeedback).trim());
 
-        const masterRef = formData?.generatedSareeViews?.front;
-        if (masterRef) {
-          formDataToSend.append("masterReferenceUrl", masterRef);
+        const targetsToSend = Array.isArray(feedbackTargetsOverride)
+          ? feedbackTargetsOverride
+          : [];
+        if (targetsToSend.length > 0) {
+          formDataToSend.append('feedbackTargets', JSON.stringify(targetsToSend));
         }
+
+        // Use ONLY the last generated saree *design* as the master reference.
+        // Do NOT fall back to try-on outputs (they include lighting/shadows and can shift colors).
+        const memoryKey = formData?.sareeDesignMemoryKey;
+        if (memoryKey) {
+          formDataToSend.append("masterReferenceMemoryKey", String(memoryKey));
+        } else {
+          const masterRef = formData?.sareeDesignUrl;
+          if (masterRef) {
+            formDataToSend.append("masterReferenceUrl", masterRef);
+          }
+        }
+
+        // Prefer editing the final front/back views from memory when available.
+        const frontKey = formData?.frontViewMemoryKey;
+        const backKey = formData?.backViewMemoryKey;
+        if (frontKey) formDataToSend.append('masterReferenceFrontMemoryKey', String(frontKey));
+        if (backKey) formDataToSend.append('masterReferenceBackMemoryKey', String(backKey));
       }
 
       console.log("Sending 6 saree parts to AI backend...");
@@ -284,6 +318,22 @@ const SareePartsUploader = ({ formData = {}, onChange = () => { } }) => {
       if (data.success) {
         console.log("AI generation successful!");
         console.log(`Model used: ${data.model || 'Unknown'}`);
+
+        // Persist the underlying design URL for feedback-driven regeneration.
+        if (data.sareeDesignUrl) {
+          onChange("sareeDesignUrl", data.sareeDesignUrl);
+        }
+
+        if (data.sareeDesignMemoryKey) {
+          onChange("sareeDesignMemoryKey", data.sareeDesignMemoryKey);
+        }
+
+        if (data.frontViewMemoryKey) {
+          onChange('frontViewMemoryKey', data.frontViewMemoryKey);
+        }
+        if (data.backViewMemoryKey) {
+          onChange('backViewMemoryKey', data.backViewMemoryKey);
+        }
 
         // Store generated views (single URLs, not arrays)
         onChange("generatedSareeViews", {
@@ -382,7 +432,7 @@ const SareePartsUploader = ({ formData = {}, onChange = () => { } }) => {
   const handleOpenBadModal = () => {
     setFeedbackText('');
     setFeedbackStatus(null);
-    setFixTarget('saree-border');
+    setFeedbackTargets(['saree-border']);
     setFeedbackModalOpen(true);
   };
 
@@ -390,6 +440,10 @@ const SareePartsUploader = ({ formData = {}, onChange = () => { } }) => {
     const msg = String(feedbackText || '').trim();
     if (!msg) {
       setFeedbackStatus({ type: 'error', message: 'Please describe what went wrong before retrying.' });
+      return;
+    }
+    if (!Array.isArray(feedbackTargets) || feedbackTargets.length === 0) {
+      setFeedbackStatus({ type: 'error', message: 'Please select at least one thing to fix.' });
       return;
     }
     if (!formData.generatedSareeViews?.front && !formData.generatedSareeViews?.back) {
@@ -403,38 +457,15 @@ const SareePartsUploader = ({ formData = {}, onChange = () => { } }) => {
     setFeedbackStatus(null);
 
     try {
-      const inputs = {};
-      Object.keys(partLabels).forEach((k) => {
-        const url = sareeParts?.[k]?.url;
-        if (url) inputs[k] = url;
-      });
+      // Re-generate the saree design using feedback, then re-run virtual try-on.
+      // Allow multi-select targets; fold into one clear instruction string.
+      const targetLabels = feedbackTargets
+        .map((t) => partLabels?.[t]?.name || t)
+        .filter(Boolean);
+      const feedbackForModel = `Fix targets: ${targetLabels.join(', ')}.\n\nUser description:\n${msg}`;
 
-      const payload = {
-        fixTarget,
-        feedbackText: msg,
-        inputs,
-        outputs: {
-          front: formData.generatedSareeViews?.front || null,
-          back: formData.generatedSareeViews?.back || null,
-        }
-      };
-
-      const resp = await fetch('/api/retouch-saree', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const data = await resp.json().catch(() => ({}));
-      if (!resp.ok || !data.success) {
-        throw new Error(data.error || `HTTP ${resp.status}`);
-      }
-
-      const nextFront = data.updated?.front || formData.generatedSareeViews?.front;
-      const nextBack = data.updated?.back || formData.generatedSareeViews?.back;
-
-      onChange('generatedSareeViews', { front: nextFront, back: nextBack });
-      onChange('generatedSareeUrls', { ...(formData.generatedSareeUrls || {}), ...(data.updated || {}) });
-      setFeedbackStatus({ type: 'success', message: 'Updated the image. Thanks for the feedback.' });
+      await handleAutoGenerateCompleteSaree(feedbackForModel, feedbackTargets);
+      setFeedbackStatus({ type: 'success', message: 'Generated a new design using your feedback.' });
     } catch (e) {
       setError(`Fix failed: ${e.message}`);
     } finally {
@@ -879,26 +910,40 @@ const SareePartsUploader = ({ formData = {}, onChange = () => { } }) => {
               Example: “Front view has fabric panel in background” or “Two women side-by-side collage”.
             </p>
 
-            <label className="block text-sm font-medium text-gray-700 mb-2">What should be fixed?</label>
-            <select
-              value={fixTarget}
-              onChange={(e) => setFixTarget(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg p-2 text-sm mb-3"
-              disabled={generatingComplete}
-            >
-              <option value="saree-border">Saree border</option>
-              <option value="blouse-border">Blouse border</option>
-              <option value="saree-pallu">Saree pallu</option>
-              <option value="saree-pleats">Saree pleats</option>
-              <option value="saree-body">Saree body color/pattern</option>
-              <option value="blouse-body">Blouse body color/pattern</option>
-            </select>
+            <label className="block text-sm font-medium text-gray-700 mb-2">What should be fixed? (select all that apply)</label>
+            <div className="w-full border border-gray-300 rounded-lg p-3 text-sm mb-3">
+              {[
+                { key: 'saree-border', label: 'Saree border' },
+                { key: 'blouse-border', label: 'Blouse border' },
+                { key: 'saree-pallu', label: 'Saree pallu' },
+                { key: 'saree-pleats', label: 'Saree pleats' },
+                { key: 'saree-body', label: 'Saree body color/pattern' },
+                { key: 'blouse-body', label: 'Blouse body color/pattern' },
+              ].map((opt) => (
+                <label key={opt.key} className="flex items-center gap-2 py-1">
+                  <input
+                    type="checkbox"
+                    checked={feedbackTargets.includes(opt.key)}
+                    onChange={(e) => {
+                      const checked = e.target.checked;
+                      setFeedbackTargets((prev) => {
+                        const cur = Array.isArray(prev) ? prev : [];
+                        if (checked) return Array.from(new Set([...cur, opt.key]));
+                        return cur.filter((x) => x !== opt.key);
+                      });
+                    }}
+                    disabled={generatingComplete}
+                  />
+                  <span className="text-gray-800">{opt.label}</span>
+                </label>
+              ))}
+            </div>
 
             <textarea
               value={feedbackText}
               onChange={(e) => setFeedbackText(e.target.value)}
               className="w-full min-h-[110px] border border-gray-300 rounded-lg p-3 text-sm focus:outline-none"
-              placeholder="Describe the issue…"
+              placeholder="Describe what should change…"
               disabled={generatingComplete}
             />
 

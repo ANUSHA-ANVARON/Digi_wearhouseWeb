@@ -5,10 +5,23 @@
   "type": "module",
   "scripts": {
     "dev": "concurrently \"vite\" \"npm run server\"",
-    "server": "nodemon server.js",
+    "server": "nodemon --watch server.js --watch api --ignore training-data/** --ignore image_memory/** --ignore node_modules/** --ignore public/** --ignore *.log server.js",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
+  },
+  "nodemonConfig": {
+    "watch": [
+      "server.js",
+      "api"
+    ],
+    "ignore": [
+      "training-data/**",
+      "image_memory/**",
+      "node_modules/**",
+      "public/**",
+      "*.log"
+    ]
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.12",

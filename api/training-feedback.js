@@ -22,16 +22,40 @@ export default async function handler(req, res) {
             return;
         }
 
+        if (req.method !== 'POST') {
+            res.status(405).json({ error: 'Method not allowed' });
+            return;
+        }
+
         // Read JSON body
         const chunks = [];
         for await (const c of req) chunks.push(c);
         const raw = Buffer.concat(chunks).toString('utf-8');
         const payload = raw ? JSON.parse(raw) : {};
 
-        const { imageUrl, feedback, rating, metadata } = payload;
+        // Support both payload shapes:
+        // 1) Legacy: { imageUrl, feedback, rating, metadata }
+        // 2) Frontend (current): { verdict, note, inputs, outputs: {front, back}, meta }
 
-        if (!imageUrl) {
-            res.status(400).json({ error: 'Missing imageUrl' });
+        const legacyImageUrl = payload?.imageUrl;
+        const legacyFeedback = payload?.feedback;
+        const legacyRating = payload?.rating;
+        const legacyMetadata = payload?.metadata;
+
+        const verdict = payload?.verdict; // e.g. 'good' | 'bad'
+        const note = payload?.note;
+        const inputs = payload?.inputs;
+        const outputs = payload?.outputs;
+        const meta = payload?.meta;
+
+        const outputUrls = [];
+        if (outputs?.front) outputUrls.push(outputs.front);
+        if (outputs?.back) outputUrls.push(outputs.back);
+
+        const imageUrlsToSave = legacyImageUrl ? [legacyImageUrl] : outputUrls;
+
+        if (!imageUrlsToSave.length) {
+            res.status(400).json({ error: 'Missing imageUrl', details: 'Provide imageUrl or outputs.front/outputs.back' });
             return;
         }
 
@@ -50,23 +74,37 @@ export default async function handler(req, res) {
             // File doesn't exist yet, start fresh
         }
 
-        const feedbackEntry = {
-            timestamp: new Date().toISOString(),
-            imageUrl,
-            feedback: feedback || 'Good quality',
-            rating: rating || 5,
-            metadata: metadata || {},
-        };
+        const nowIso = new Date().toISOString();
+        const savedEntries = [];
 
-        feedbackLog.push(feedbackEntry);
+        for (const imageUrl of imageUrlsToSave) {
+            const feedbackEntry = {
+                timestamp: nowIso,
+                imageUrl,
+                verdict: verdict || (legacyRating === 5 ? 'good' : undefined) || 'good',
+                feedback: legacyFeedback || note || 'Good quality',
+                rating: legacyRating || 5,
+                metadata: legacyMetadata || meta || {},
+                inputs: inputs || {},
+                outputs: outputs || {},
+            };
+
+            feedbackLog.push(feedbackEntry);
+            savedEntries.push(feedbackEntry);
+        }
+
         await fs.writeFile(feedbackFile, JSON.stringify(feedbackLog, null, 2));
 
-        console.log(`✅ Saved feedback for image: ${imageUrl}`);
-        console.log(`   Rating: ${rating}/5, Total feedback entries: ${feedbackLog.length}`);
+        for (const entry of savedEntries) {
+            console.log(`✅ Saved feedback for image: ${entry.imageUrl}`);
+            console.log(`   Verdict: ${entry.verdict}, Rating: ${entry.rating}/5`);
+        }
+        console.log(`   Total feedback entries: ${feedbackLog.length}`);
 
         res.json({
             success: true,
             message: 'Feedback saved successfully',
+            saved: savedEntries.length,
             totalEntries: feedbackLog.length
         });
 
