@@ -12,6 +12,90 @@ import sharp from 'sharp';
 const execPromise = promisify(exec);
 dotenv.config();
 
+// Helper function to get Google Cloud access token
+async function getGoogleAccessToken() {
+  try {
+    const { stdout } = await execPromise('gcloud auth application-default print-access-token');
+    return stdout.trim();
+  } catch (error) {
+    console.error('Failed to get Google access token:', error.message);
+    throw new Error('Google Cloud authentication failed. Make sure gcloud CLI is installed and authenticated.');
+  }
+}
+
+// Convert image URL to base64
+async function urlToBase64(imageUrl) {
+  try {
+    // Check if it's a local file path
+    if (imageUrl.startsWith('./') || imageUrl.startsWith('../') || imageUrl.includes('public/')) {
+      const filePath = path.join(process.cwd(), imageUrl.replace('./', ''));
+      const fileBuffer = await fs.readFile(filePath);
+      return Buffer.from(fileBuffer).toString('base64');
+    }
+    
+    // Otherwise fetch from URL
+    const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+    return Buffer.from(response.data).toString('base64');
+  } catch (error) {
+    console.error('Failed to fetch image:', error.message);
+    throw error;
+  }
+}
+
+// Google Virtual Try-On Service
+async function applyVirtualTryOn(sareeImageUrl, modelImageUrl = MODEL_IMAGE_URL) {
+  try {
+    console.log('🎭 Starting Virtual Try-On...');
+    
+    const token = await getGoogleAccessToken();
+    const sareeBase64 = await urlToBase64(sareeImageUrl);
+    const modelBase64 = await urlToBase64(modelImageUrl);
+    
+    const url = `https://${LOCATION}-aiplatform.googleapis.com/v1/projects/${GOOGLE_PROJECT_ID}/locations/${LOCATION}/publishers/google/models/virtual-try-on-001:predict`;
+    
+    const requestBody = {
+      instances: [{
+        personImage: {
+          image: { bytesBase64Encoded: modelBase64 }
+        },
+        productImages: [{
+          image: { bytesBase64Encoded: sareeBase64 }
+        }],
+        productType: "APPAREL"
+      }],
+      parameters: {
+        garmentType: "full_body",
+        sampleCount: 1,
+        preserveGarmentShape: true,
+        poseAlignment: true,
+        outputStyle: "realistic"
+      }
+    };
+    
+    const response = await axios.post(url, requestBody, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+      timeout: 120000 // 2 minutes
+    });
+    
+    console.log('✅ Virtual Try-On completed');
+    
+    // Return the first generated image
+    const tryonImageBase64 = response.data.predictions[0].bytesBase64Encoded;
+    return {
+      data: Buffer.from(tryonImageBase64, 'base64'),
+      mimeType: 'image/png'
+    };
+    
+  } catch (error) {
+    console.error('❌ Virtual Try-On failed:', error.response?.data || error.message);
+    // Don't throw - return null so the main flow can continue without try-on
+    return null;
+  }
+}
+
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -22,6 +106,11 @@ const GEMINI_API_KEY = 'AIzaSyCGGNoinwQJZI66jNp9Y462isJFAp33nN8';
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent';
 const FLUX_LOCAL_URL = 'http://localhost:5003';  // FLUX service
 const VITON_LOCAL_URL = process.env.VITON_LOCAL_URL || 'http://localhost:5002';
+
+// Google Virtual Try-On Configuration
+const GOOGLE_PROJECT_ID = process.env.GOOGLE_PROJECT_ID;
+const LOCATION = "us-central1";
+const MODEL_IMAGE_URL = "./public/img5.png"; // Fixed model image - local path
 
 // Retry helper for Gemini API calls
 async function callGeminiWithRetry(parts, maxRetries = 3) {
@@ -937,13 +1026,37 @@ export default async function handler(req, res) {
       throw error;
     }
 
+    // Apply Virtual Try-On to front view (optional, won't break if it fails)
+    let tryonView = null;
+    if (GOOGLE_PROJECT_ID && generatedViews.front) {
+      console.log('\n👗 Applying Virtual Try-On to generated saree...');
+      try {
+        const tryonData = await applyVirtualTryOn(generatedViews.front);
+        if (tryonData) {
+          const tryonUrl = await uploadGeneratedImageToCloudinary(
+            tryonData.data,
+            'tryon-view',
+            tryonData.mimeType
+          );
+          tryonView = tryonUrl;
+          console.log('✅ Virtual Try-On applied successfully');
+        }
+      } catch (error) {
+        console.warn('⚠️ Virtual Try-On skipped:', error.message);
+      }
+    }
+
     res.json({
       success: true,
       frontView: generatedViews.front,
       backView: generatedViews.back,
+      tryonView: tryonView,
       generatedUrls,
-      message: 'Saree views generated successfully with FLUX!',
-      model: 'FLUX.1-schnell'
+      message: tryonView 
+        ? 'Saree views generated successfully with Virtual Try-On!' 
+        : 'Saree views generated successfully with FLUX!',
+      model: 'FLUX.1-schnell',
+      hasTryOn: !!tryonView
     });
 
   } catch (error) {
