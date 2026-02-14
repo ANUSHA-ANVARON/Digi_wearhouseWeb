@@ -8,6 +8,7 @@ import { promisify } from 'util';
 import fs from 'fs/promises';
 import path from 'path';
 import sharp from 'sharp';
+import { GoogleAuth } from 'google-auth-library';
 
 const execPromise = promisify(exec);
 dotenv.config();
@@ -18,8 +19,34 @@ async function getGoogleAccessToken() {
     const { stdout } = await execPromise('gcloud auth application-default print-access-token');
     return stdout.trim();
   } catch (error) {
+    const isGcloudMissing = String(error?.message || '').toLowerCase().includes('gcloud') && String(error?.message || '').toLowerCase().includes('not recognized');
+    const isSpawnMissing = error?.code === 'ENOENT' || String(error?.message || '').toLowerCase().includes('enoent');
+
+    // If gcloud isn't installed/available, fall back to Application Default Credentials (ADC)
+    if (isGcloudMissing || isSpawnMissing) {
+      try {
+        console.warn('gcloud CLI not available; falling back to GoogleAuth (ADC/service account)');
+        const auth = new GoogleAuth({
+          scopes: ['https://www.googleapis.com/auth/cloud-platform']
+        });
+        const client = await auth.getClient();
+        const token = await client.getAccessToken();
+        // token can be string or { token }
+        const accessToken = typeof token === 'string' ? token : token?.token;
+        if (!accessToken) {
+          throw new Error('Empty access token from GoogleAuth');
+        }
+        return accessToken;
+      } catch (authErr) {
+        console.error('Failed to get access token via GoogleAuth:', authErr?.message || authErr);
+        throw new Error(
+          'Google auth failed. Install gcloud OR set GOOGLE_APPLICATION_CREDENTIALS to a service-account JSON key that has Vertex AI permissions.'
+        );
+      }
+    }
+
     console.error('Failed to get Google access token:', error.message);
-    throw new Error('Google Cloud authentication failed. Make sure gcloud CLI is installed and authenticated.');
+    throw new Error('Google Cloud authentication failed. Install gcloud CLI or configure GOOGLE_APPLICATION_CREDENTIALS.');
   }
 }
 
@@ -43,7 +70,7 @@ async function urlToBase64(imageUrl) {
 }
 
 // Google Virtual Try-On Service
-async function applyVirtualTryOn(sareeImageUrl, modelImageUrl = MODEL_IMAGE_URL) {
+async function applyVirtualTryOn(sareeImageUrl, modelImageUrl) {
   try {
     console.log('🎭 Starting Virtual Try-On...');
     
@@ -110,7 +137,8 @@ const VITON_LOCAL_URL = process.env.VITON_LOCAL_URL || 'http://localhost:5002';
 // Google Virtual Try-On Configuration
 const GOOGLE_PROJECT_ID = process.env.GOOGLE_PROJECT_ID;
 const LOCATION = "us-central1";
-const MODEL_IMAGE_URL = "./public/img5.png"; // Fixed model image - local path
+const MODEL_FRONT_URL = "https://res.cloudinary.com/doiezptnn/image/upload/v1771054723/saree-models/model-front.png"; // Front view model
+const MODEL_BACK_URL = "https://res.cloudinary.com/doiezptnn/image/upload/v1771054724/saree-models/model-back.png"; // Back view model
 
 // Retry helper for Gemini API calls
 async function callGeminiWithRetry(parts, maxRetries = 3) {
@@ -911,6 +939,7 @@ Generate ONE photo of the woman. Nothing else.` });
 }
 
 export default async function handler(req, res) {
+  console.log(`\n🧩 [drape-saree-parts] handler reached: ${req.method} (content-type: ${req.headers?.['content-type'] || 'n/a'})`);
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
@@ -1026,37 +1055,111 @@ export default async function handler(req, res) {
       throw error;
     }
 
-    // Apply Virtual Try-On to front view (optional, won't break if it fails)
-    let tryonView = null;
-    if (GOOGLE_PROJECT_ID && generatedViews.front) {
-      console.log('\n👗 Applying Virtual Try-On to generated saree...');
+    // Apply Virtual Try-On to BOTH front and back views (optional, won't break if it fails)
+    let tryonFrontView = null;
+    let tryonBackView = null;
+    
+    console.log('\n========================================');
+    console.log('🔄 VIRTUAL TRY-ON PROCESS STARTING');
+    console.log('========================================');
+    
+    if (!GOOGLE_PROJECT_ID) {
+      console.log('❌ GOOGLE_PROJECT_ID not set - SKIPPING Virtual Try-On');
+      console.log('📦 Will return: ORIGINAL GEMINI-GENERATED SAREE DESIGNS');
+    } else if (!generatedViews.front || !generatedViews.back) {
+      console.log('❌ Missing saree views - SKIPPING Virtual Try-On');
+      console.log('📦 Will return: ORIGINAL GEMINI-GENERATED SAREE DESIGNS');
+    } else {
+      console.log('✅ Google Project ID found:', GOOGLE_PROJECT_ID);
+      console.log('✅ Front saree URL:', generatedViews.front);
+      console.log('✅ Back saree URL:', generatedViews.back);
+      console.log('👗 Starting Virtual Try-On with your model images...\n');
+      
+      // Apply to FRONT view with FRONT model
       try {
-        const tryonData = await applyVirtualTryOn(generatedViews.front);
-        if (tryonData) {
-          const tryonUrl = await uploadGeneratedImageToCloudinary(
-            tryonData.data,
-            'tryon-view',
-            tryonData.mimeType
+        console.log('🔹 [1/2] FRONT VIEW TRY-ON');
+        console.log('    Saree:', generatedViews.front);
+        console.log('    Model:', MODEL_FRONT_URL);
+        const tryonFrontData = await applyVirtualTryOn(generatedViews.front, MODEL_FRONT_URL);
+        if (tryonFrontData) {
+          const tryonFrontUrl = await uploadGeneratedImageToCloudinary(
+            tryonFrontData.data,
+            'tryon-front-view',
+            tryonFrontData.mimeType
           );
-          tryonView = tryonUrl;
-          console.log('✅ Virtual Try-On applied successfully');
+          tryonFrontView = tryonFrontUrl;
+          console.log('    ✅ SUCCESS - Front view try-on URL:', tryonFrontUrl);
+        } else {
+          console.log('    ❌ FAILED - No data returned from Google API');
         }
       } catch (error) {
-        console.warn('⚠️ Virtual Try-On skipped:', error.message);
+        console.log('    ❌ FAILED - Error:', error.message);
       }
+      
+      console.log('');
+      
+      // Apply to BACK view with BACK model
+      try {
+        console.log('🔹 [2/2] BACK VIEW TRY-ON');
+        console.log('    Saree:', generatedViews.back);
+        console.log('    Model:', MODEL_BACK_URL);
+        const tryonBackData = await applyVirtualTryOn(generatedViews.back, MODEL_BACK_URL);
+        if (tryonBackData) {
+          const tryonBackUrl = await uploadGeneratedImageToCloudinary(
+            tryonBackData.data,
+            'tryon-back-view',
+            tryonBackData.mimeType
+          );
+          tryonBackView = tryonBackUrl;
+          console.log('    ✅ SUCCESS - Back view try-on URL:', tryonBackUrl);
+        } else {
+          console.log('    ❌ FAILED - No data returned from Google API');
+        }
+      } catch (error) {
+        console.log('    ❌ FAILED - Error:', error.message);
+      }
+      
+      console.log('');
     }
+
+    // Return ONLY try-on views if available, otherwise fallback to original generated views
+    const finalFrontView = tryonFrontView || generatedViews.front;
+    const finalBackView = tryonBackView || generatedViews.back;
+    
+    console.log('========================================');
+    console.log('📦 FINAL OUTPUT:');
+    console.log('========================================');
+    if (tryonFrontView && tryonBackView) {
+      console.log('✅ VIRTUAL TRY-ON SUCCESS!');
+      console.log('📸 Returning: MODEL WEARING SAREE (both views)');
+      console.log('   Front:', finalFrontView);
+      console.log('   Back:', finalBackView);
+    } else if (tryonFrontView || tryonBackView) {
+      console.log('⚠️ PARTIAL VIRTUAL TRY-ON');
+      console.log('📸 Returning: Mixed results');
+      console.log('   Front:', tryonFrontView ? '✅ Try-on' : '❌ Fallback to Gemini', finalFrontView);
+      console.log('   Back:', tryonBackView ? '✅ Try-on' : '❌ Fallback to Gemini', finalBackView);
+    } else {
+      console.log('❌ NO VIRTUAL TRY-ON');
+      console.log('📸 Returning: ORIGINAL GEMINI-GENERATED DESIGNS');
+      console.log('   Front:', finalFrontView);
+      console.log('   Back:', finalBackView);
+    }
+    console.log('========================================\n');
 
     res.json({
       success: true,
-      frontView: generatedViews.front,
-      backView: generatedViews.back,
-      tryonView: tryonView,
-      generatedUrls,
-      message: tryonView 
-        ? 'Saree views generated successfully with Virtual Try-On!' 
-        : 'Saree views generated successfully with FLUX!',
-      model: 'FLUX.1-schnell',
-      hasTryOn: !!tryonView
+      frontView: finalFrontView,
+      backView: finalBackView,
+      generatedUrls: {
+        front: finalFrontView,
+        back: finalBackView
+      },
+      message: (tryonFrontView && tryonBackView) 
+        ? 'Saree generated and applied to your model successfully!' 
+        : 'Saree views generated successfully!',
+      model: 'FLUX.1-schnell + Google Virtual Try-On',
+      hasTryOn: !!(tryonFrontView && tryonBackView)
     });
 
   } catch (error) {
