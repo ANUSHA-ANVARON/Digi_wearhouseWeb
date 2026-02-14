@@ -145,13 +145,13 @@ async function uploadGeneratedImageToCloudinary(base64Data, viewType) {
 async function compressImageData(base64Data, mimeType) {
   try {
     const buffer = Buffer.from(base64Data, 'base64');
-
+    
     // Compress with sharp - reduce to 1024px max width for API transmission only
     const compressed = await sharp(buffer)
       .resize(1024, null, { fit: 'inside', withoutEnlargement: true })
       .jpeg({ quality: 80, progressive: true })
       .toBuffer();
-
+    
     return {
       data: compressed.toString('base64'),
       mimeType: 'image/jpeg'
@@ -184,10 +184,10 @@ async function sanitizeCatalogOutput(image, opts = {}) {
   // ALWAYS output at high resolution - no cropping, no complex logic
   const TARGET_WIDTH = 2400;
   const TARGET_HEIGHT = 3200;
-
+  
   // Maintain aspect ratio and add white padding to reach exact dimensions
   const out = await sharp(source)
-    .resize(TARGET_WIDTH, TARGET_HEIGHT, {
+    .resize(TARGET_WIDTH, TARGET_HEIGHT, { 
       fit: 'contain',  // Maintain aspect ratio, add white padding if needed
       background: white,
       position: 'center'
@@ -206,7 +206,7 @@ async function sanitizeCatalogOutput(image, opts = {}) {
 async function saveStepImage(imageData, stepNumber, viewType) {
   try {
     const buffer = Buffer.from(imageData.data, 'base64');
-
+    
     return new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
@@ -219,7 +219,7 @@ async function saveStepImage(imageData, stepNumber, viewType) {
           else resolve(result.secure_url);
         }
       );
-
+      
       Readable.from(buffer).pipe(uploadStream);
     });
   } catch (error) {
@@ -300,7 +300,7 @@ async function estimateDominantColorHexFromUrl(imageUrl) {
 
 async function generateSareeViewWithVITON(imageUrls, viewType) {
   console.log(`Generating ${viewType} view using local IDM-VTON...`);
-
+  
   try {
     const response = await axios.post(`${VITON_LOCAL_URL}/generate_saree`, {
       parts: imageUrls,
@@ -308,14 +308,14 @@ async function generateSareeViewWithVITON(imageUrls, viewType) {
     }, {
       timeout: 180000 // 3 minutes timeout
     });
-
+    
     if (response.data.success) {
       return {
         data: response.data.image,
         mimeType: response.data.mime_type
       };
     }
-
+    
     throw new Error('VITON generation failed');
   } catch (error) {
     console.error(`VITON error for ${viewType}:`, error.message);
@@ -325,7 +325,7 @@ async function generateSareeViewWithVITON(imageUrls, viewType) {
 
 async function generateSareeViewWithFLUX(imageUrls, viewType, seed) {
   console.log(`Generating ${viewType} view using local FLUX model...`);
-
+  
   try {
     // Send all 4 saree part URLs to FLUX service
     const response = await axios.post(`${FLUX_LOCAL_URL}/generate_saree`, {
@@ -335,14 +335,14 @@ async function generateSareeViewWithFLUX(imageUrls, viewType, seed) {
     }, {
       timeout: 180000 // 3 minutes for FLUX generation
     });
-
+    
     if (response.data.success) {
       return {
         data: response.data.image,
         mimeType: 'image/jpeg'
       };
     }
-
+    
     throw new Error('FLUX generation failed');
   } catch (error) {
     console.error(`FLUX error for ${viewType}:`, error.message);
@@ -352,7 +352,7 @@ async function generateSareeViewWithFLUX(imageUrls, viewType, seed) {
 
 async function generateSareeView(imageUrls, viewType, masterReferenceUrl, userFeedback = '') {
   // Priority: FLUX > Gemini (FLUX gives better pattern accuracy)
-
+  
   // Try FLUX first (90%+ accuracy when working)
   try {
     const healthCheck = await axios.get(`${FLUX_LOCAL_URL}/health`, { timeout: 3000 });
@@ -364,7 +364,7 @@ async function generateSareeView(imageUrls, viewType, masterReferenceUrl, userFe
   } catch (err) {
     console.log('⚠️ FLUX service not ready yet (model still downloading), using Gemini sequential generation...');
   }
-
+  
   // Fallback to Gemini with SEQUENTIAL generation
   console.log('Using Gemini SEQUENTIAL generation for better accuracy');
   return await generateSareeSequentially(imageUrls, viewType, masterReferenceUrl, userFeedback);
@@ -377,10 +377,9 @@ async function generateBackFromFront(frontViewImage, userFeedback = '') {
   const feedbackBlock = userFeedback && String(userFeedback).trim()
     ? `\n\nUSER FEEDBACK FROM PREVIOUS TRY (fix this):\n${String(userFeedback).trim()}\n\nApply the feedback strictly. If feedback mentions collage/split-screen/fabric panels/two women, ensure output is ONE full-body catalog photo on solid white background with nothing else.`
     : '';
-
+  
   const backViewParts = [
-    {
-      text: `❌ ABSOLUTELY FORBIDDEN - DO NOT CREATE:
+    { text: `❌ ABSOLUTELY FORBIDDEN - DO NOT CREATE:
 - Side-by-side layouts (front view + back view together)
 - Multiple women in one image
 - Before/after comparisons
@@ -406,8 +405,7 @@ Generate ONE single photograph showing:
 
 FRONT VIEW REFERENCE (for analyzing saree details ONLY - DO NOT include this image in your output):` },
     { inline_data: { mime_type: frontViewImage.mimeType || frontViewImage.mime_type || 'image/jpeg', data: frontViewImage.data } },
-    {
-      text: `\n\n=== CRITICAL REMINDER ===
+    { text: `\n\n=== CRITICAL REMINDER ===
 The image above is REFERENCE ONLY for understanding the saree colors and patterns.
 
 Your output MUST be:
@@ -423,9 +421,9 @@ Your output MUST be:
 
 Generate the back view NOW. Show ONLY the back view. Nothing else.` }
   ];
-
+  
   const response = await callGeminiWithRetry(backViewParts);
-
+  
   const content = response.data.candidates?.[0]?.content?.parts || [];
   let backImage = null;
   for (const part of content) {
@@ -434,20 +432,20 @@ Generate the back view NOW. Show ONLY the back view. Nothing else.` }
       break;
     }
   }
-
+  
   if (!backImage) {
     throw new Error('Failed to generate back view from front view');
   }
 
   // Sanitize output to avoid collages/fabric panels.
   backImage = await sanitizeCatalogOutput(backImage, { stage: 'back-from-front' });
-
+  
   // Save back view
   const backUrl = await saveStepImage(backImage, 'final', 'back');
   if (backUrl) {
     console.log(`📸 Back view saved: ${backUrl}`);
   }
-
+  
   console.log('✅ Back view generated successfully!');
   return backImage;
 }
@@ -460,7 +458,7 @@ async function generateSareeSequentially(imageUrls, viewType, masterReferenceUrl
   const feedbackBlock = userFeedback && String(userFeedback).trim()
     ? `\n\nUSER FEEDBACK FROM PREVIOUS TRY (fix this):\n${String(userFeedback).trim()}\n\nApply the feedback strictly while keeping the same single-subject catalog format.`
     : '';
-
+  
   const stepUrls = {}; // Track intermediate step URLs
 
   // Deterministic color lock based on uploaded references
@@ -477,13 +475,12 @@ async function generateSareeSequentially(imageUrls, viewType, masterReferenceUrl
   const colorLockBlock = (sareeBodyHex || blouseBodyHex)
     ? `\n\nCOLOR LOCK (NON-NEGOTIABLE):\n- Saree body base color must match: ${sareeBodyHex || 'EXACTLY match saree-body reference'}\n- Blouse base color must match: ${blouseBodyHex || 'EXACTLY match blouse-body reference'}\n- DO NOT shift hue/saturation/brightness. Do NOT introduce maroon/red/orange tints if the reference is pink/blue.\n- Borders/pallu can add accents but MUST NOT recolor the main saree body or blouse body.`
     : '';
-
+  
   console.log(`Step 1/4: Generating base with saree body + blouse body...`);
-
+  
   // STEP 1: Generate base woman with BOTH saree body + blouse body patterns
   let step1Parts = [
-    {
-      text: `⚠️ CRITICAL REQUIREMENTS - READ CAREFULLY:
+    { text: `⚠️ CRITICAL REQUIREMENTS - READ CAREFULLY:
 
 1. IMAGE DIMENSIONS: Generate at EXACTLY 2400 pixels wide × 3200 pixels tall
 2. SUBJECT SIZE: The woman MUST be LARGE, filling 80-90% of the 3200 pixel height (approximately 2560-2880 pixels tall)
@@ -531,17 +528,16 @@ SAREE BODY fabric reference:` }
     const masterImg = await downloadImageAsBase64(masterReferenceUrl);
     step1Parts.push({ inline_data: { mime_type: masterImg.mimeType, data: masterImg.data } });
   }
-
+  
   const sareeBodyImg = await downloadImageAsBase64(sareeBodyUrl);
   step1Parts.push({ inline_data: { mime_type: sareeBodyImg.mimeType, data: sareeBodyImg.data } });
-
+  
   step1Parts.push({ text: `\n\nBLOUSE BODY fabric reference:` });
-
+  
   const blouseBodyImg = await downloadImageAsBase64(blouseBodyUrl);
   step1Parts.push({ inline_data: { mime_type: blouseBodyImg.mimeType, data: blouseBodyImg.data } });
-
-  step1Parts.push({
-    text: `\n\nYour task: Apply these fabric patterns to the woman's saree and blouse.
+  
+  step1Parts.push({ text: `\n\nYour task: Apply these fabric patterns to the woman's saree and blouse.
 
 CRITICAL INSTRUCTIONS:
 1. Generate ONE photo showing ONLY the woman wearing the saree
@@ -550,9 +546,9 @@ CRITICAL INSTRUCTIONS:
 4. Output should contain ONLY the woman - no fabric samples, no swatches, no pattern images
 
 Generate the image now. Show only the woman. White background. Nothing else.` });
-
+  
   const step1Response = await callGeminiWithRetry(step1Parts);
-
+  
   const step1Content = step1Response.data.candidates?.[0]?.content?.parts || [];
   let step1Image = null;
   for (const part of step1Content) {
@@ -561,27 +557,26 @@ Generate the image now. Show only the woman. White background. Nothing else.` })
       break;
     }
   }
-
+  
   if (!step1Image) {
     throw new Error('Step 1 failed: No base image generated');
   }
 
   step1Image = await sanitizeCatalogOutput(step1Image, { stage: 'step1' });
-
+  
   // Save Step 1 output
   const step1Url = await saveStepImage(step1Image, 1, viewType);
   if (step1Url) {
     stepUrls.step1 = step1Url;
     console.log(`📸 Step 1 saved: ${step1Url}`);
   }
-
+  
   console.log(`✅ Step 1 complete. Step 2/4: Adding saree pleats pattern...`);
   await new Promise(r => setTimeout(r, 2000)); // Rate limit delay
-
+  
   // STEP 2: Add saree pleats pattern
   let step2Parts = [
-    {
-      text: `MAINTAIN 2400×3200 PIXEL RESOLUTION. Keep the woman LARGE (80-90% of image height).
+    { text: `MAINTAIN 2400×3200 PIXEL RESOLUTION. Keep the woman LARGE (80-90% of image height).
 
 I have a saree image. Your task: MODIFY the PLEATS section with a new pattern.${feedbackBlock}${colorLockBlock}
 
@@ -602,19 +597,19 @@ CHANGE ONLY: The pleats section pattern
 
 Here is the current image:` }
   ];
-
+  
   // Use full resolution from step 1 (already sanitized at 2400x3200)
   step2Parts.push({ inline_data: { mime_type: step1Image.mimeType || step1Image.mime_type || 'image/jpeg', data: step1Image.data } });
-
+  
   step2Parts.push({ text: `\n\nNow here is the SAREE PLEATS fabric reference - apply this to the pleats section only:` });
-
+  
   const sareePleatsImg = await downloadImageAsBase64(sareePleatsUrl);
   step2Parts.push({ inline_data: { mime_type: sareePleatsImg.mimeType, data: sareePleatsImg.data } });
-
+  
   step2Parts.push({ text: `\n\nApply this pleats pattern to the saree. Output: ONE photo of the woman only. No fabric samples visible. White background.` });
-
+  
   const step2Response = await callGeminiWithRetry(step2Parts);
-
+  
   const step2Content = step2Response.data.candidates?.[0]?.content?.parts || [];
   let step2Image = null;
   for (const part of step2Content) {
@@ -623,7 +618,7 @@ Here is the current image:` }
       break;
     }
   }
-
+  
   if (!step2Image) {
     console.warn('Step 2 failed, using step 1 image');
     step2Image = step1Image;
@@ -636,14 +631,13 @@ Here is the current image:` }
       console.log(`📸 Step 2 saved: ${step2Url}`);
     }
   }
-
+  
   console.log(`✅ Step 2 complete. Step 3/4: Adding saree borders...`);
   await new Promise(r => setTimeout(r, 2000)); // Rate limit delay
-
+  
   // STEP 3: Add saree border pattern
   let step3Parts = [
-    {
-      text: `MAINTAIN 2400×3200 PIXEL RESOLUTION. Keep the woman LARGE (80-90% of image height).
+    { text: `MAINTAIN 2400×3200 PIXEL RESOLUTION. Keep the woman LARGE (80-90% of image height).
 
 I have a saree image. Your task: Add SAREE BORDERS with EXACT pattern matching.${feedbackBlock}${colorLockBlock}
 
@@ -676,17 +670,16 @@ PATTERN MATCHING REQUIREMENTS:
 
 Current image:` }
   ];
-
+  
   // Use full resolution from step 2 (already sanitized at 2400x3200)
   step3Parts.push({ inline_data: { mime_type: step2Image.mimeType || step2Image.mime_type || 'image/jpeg', data: step2Image.data } });
-
+  
   step3Parts.push({ text: `\n\nSAREE BORDER reference image - REPLICATE this pattern EXACTLY at the border locations described above:` });
-
+  
   const sareeBorderImg = await downloadImageAsBase64(sareeBorderUrl);
   step3Parts.push({ inline_data: { mime_type: sareeBorderImg.mimeType, data: sareeBorderImg.data } });
-
-  step3Parts.push({
-    text: `\n\nVISUAL ANALYSIS REQUIRED:
+  
+  step3Parts.push({ text: `\n\nVISUAL ANALYSIS REQUIRED:
 1. Identify the base color of the border (navy blue, maroon, green, gold, etc.)
 2. Count the number of distinct design elements (motifs like peacocks, elephants, mangoes, flowers, geometric shapes)
 3. Note the weaving technique (zari work, embroidery, print)
@@ -699,9 +692,9 @@ Now APPLY this border TO THE SAREE at:
 - Pallu edge - along the decorative drape
 
 Apply these borders to the saree. Output: ONE photo of the woman only. No fabric samples visible. White background.` });
-
+  
   const step3Response = await callGeminiWithRetry(step3Parts);
-
+  
   const step3Content = step3Response.data.candidates?.[0]?.content?.parts || [];
   let step3Image = null;
   for (const part of step3Content) {
@@ -710,7 +703,7 @@ Apply these borders to the saree. Output: ONE photo of the woman only. No fabric
       break;
     }
   }
-
+  
   if (!step3Image) {
     console.warn('Step 3 failed, using step 2 image');
     step3Image = step2Image;
@@ -723,18 +716,17 @@ Apply these borders to the saree. Output: ONE photo of the woman only. No fabric
       console.log(`📸 Step 3 saved: ${step3Url}`);
     }
   }
-
+  
   console.log(`✅ Step 3 complete. Step 4/4: Adding blouse border and pallu (FINAL STEP)...`);
   await new Promise(r => setTimeout(r, 2000)); // Rate limit delay
-
+  
   // STEP 4: Add blouse border AND pallu (combined final step)
-  const palluInstruction = viewType === 'front'
+  const palluInstruction = viewType === 'front' 
     ? 'Add the SAREE PALLU draped over the LEFT shoulder (partially visible on front)'
     : 'Add the SAREE PALLU flowing down the back from left shoulder (this is the MAIN FOCUS in back view)';
-
+    
   let step4Parts = [
-    {
-      text: `MAINTAIN 2400×3200 PIXEL RESOLUTION. Keep the woman LARGE (80-90% of image height).
+    { text: `MAINTAIN 2400×3200 PIXEL RESOLUTION. Keep the woman LARGE (80-90% of image height).
 
 I have a saree image. FINAL TASK: Add BLOUSE BORDER and SAREE PALLU together.${feedbackBlock}${colorLockBlock}
 
@@ -761,22 +753,21 @@ PALLU is the most decorative element - match it PRECISELY with EXACT pattern and
 
 Current image:` }
   ];
-
+  
   // Use full resolution from step 3 (already sanitized at 2400x3200)
   step4Parts.push({ inline_data: { mime_type: step3Image.mimeType || step3Image.mime_type || 'image/jpeg', data: step3Image.data } });
-
+  
   step4Parts.push({ text: `\n\nBLOUSE BORDER fabric reference - add this below shoulder, above elbow:` });
-
+  
   const blouseBorderImg = await downloadImageAsBase64(blouseBorderUrl);
   step4Parts.push({ inline_data: { mime_type: blouseBorderImg.mimeType, data: blouseBorderImg.data } });
-
+  
   step4Parts.push({ text: `\n\nSAREE PALLU fabric reference - Study CAREFULLY and replicate EXACTLY:` });
-
+  
   const sareePalluImg = await downloadImageAsBase64(sareePalluUrl);
   step4Parts.push({ inline_data: { mime_type: sareePalluImg.mimeType, data: sareePalluImg.data } });
-
-  step4Parts.push({
-    text: `\n\nDETAILED PALLU ANALYSIS:
+  
+  step4Parts.push({ text: `\n\nDETAILED PALLU ANALYSIS:
 
 STEP 1 - BASE COLOR: Match the EXACT background color (navy blue, maroon, red, green, etc.)
 STEP 2 - MOTIFS: Identify ALL traditional symbols (elephants, peacocks, mangoes, lotuses, geometric patterns, florals)
@@ -793,9 +784,9 @@ Apply blouse border (below shoulder, above elbow) and pallu patterns to complete
 CRITICAL: Output must show ONLY the woman wearing the saree. The fabric images are references - do NOT include them in the output. Background: solid white. No fabric samples visible anywhere.
 
 Generate ONE photo of the woman. Nothing else.` });
-
+  
   const step4Response = await callGeminiWithRetry(step4Parts);
-
+  
   const step4Content = step4Response.data.candidates?.[0]?.content?.parts || [];
   let step4Image = null;
   for (const part of step4Content) {
@@ -804,7 +795,7 @@ Generate ONE photo of the woman. Nothing else.` });
       break;
     }
   }
-
+  
   if (!step4Image) {
     console.warn('Step 4 failed, using step 3 image');
     step4Image = step3Image;
@@ -817,14 +808,16 @@ Generate ONE photo of the woman. Nothing else.` });
       console.log(`📸 Step 4 saved: ${step4Url}`);
     }
   }
-
+  
+  // Step 4 is the final image
   const finalImage = step4Image;
-
+  
   console.log(`✅ Sequential generation complete (4 steps)!`);
   console.log(`🎨 View intermediate steps at:`, stepUrls);
-
+  
+  // Attach step URLs to the final image for debugging
   finalImage.stepUrls = stepUrls;
-
+  
   return finalImage;
 }
 
@@ -864,8 +857,8 @@ export default async function handler(req, res) {
     const requiredParts = ['saree-border', 'blouse-border', 'saree-body', 'blouse-body', 'saree-pallu', 'saree-pleats'];
     const missingParts = requiredParts.filter(part => !req.files[part]);
     if (missingParts.length > 0) {
-      return res.status(400).json({
-        error: 'Missing required saree part images',
+      return res.status(400).json({ 
+        error: 'Missing required saree part images', 
         missingParts,
         required: 'Please upload all 6 parts: saree-border, blouse-border, saree-body, blouse-body, saree-pallu, saree-pleats'
       });
@@ -888,29 +881,29 @@ export default async function handler(req, res) {
 
     // Generate front view first (5-step sequential)
     console.log(`\n🎨 Generating front view with sequential process...`);
-
+    
     try {
       frontImageData = await generateSareeView(uploadResults, 'front', masterReferenceUrl, userFeedback);
-
+      
       if (!frontImageData) {
         throw new Error('No front image data generated');
       }
 
       // Final safety: sanitize before upload and before generating back view.
       frontImageData = await sanitizeCatalogOutput(frontImageData, { stage: 'front-final-upload' });
-
+      
       // Upload front view to Cloudinary
       const frontUrl = await uploadGeneratedImageToCloudinary(
-        frontImageData.data,
+        frontImageData.data, 
         'front-view',
         frontImageData.mime_type || frontImageData.mimeType || 'image/png'
       );
-
+      
       generatedViews.front = frontUrl;
       generatedUrls.front = frontUrl;
-
+      
       console.log(`✅ Front view generated successfully`);
-
+      
     } catch (error) {
       console.error(`Failed to generate front view:`, error.message);
       throw error;
@@ -918,27 +911,27 @@ export default async function handler(req, res) {
 
     // Generate back view from front view (1 step, much faster)
     console.log(`\n🎨 Generating back view from front view...`);
-
+    
     try {
       const backImageDataRaw = await generateBackFromFront(frontImageData, userFeedback);
       const backImageData = await sanitizeCatalogOutput(backImageDataRaw, { stage: 'back-final-upload' });
-
+      
       if (!backImageData) {
         throw new Error('No back image data generated');
       }
-
+      
       // Upload back view to Cloudinary
       const backUrl = await uploadGeneratedImageToCloudinary(
-        backImageData.data,
+        backImageData.data, 
         'back-view',
         backImageData.mime_type || backImageData.mimeType || 'image/png'
       );
-
+      
       generatedViews.back = backUrl;
       generatedUrls.back = backUrl;
-
+      
       console.log(`✅ Back view generated successfully`);
-
+      
     } catch (error) {
       console.error(`Failed to generate back view:`, error.message);
       throw error;
@@ -955,11 +948,11 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('API Error:', error);
-
+    
     if (Object.keys(cloudinaryResults).length > 0) {
       for (const part of Object.values(cloudinaryResults)) {
         if (part?.public_id) {
-          await cloudinary.uploader.destroy(part.public_id).catch(() => { });
+          await cloudinary.uploader.destroy(part.public_id).catch(() => {});
         }
       }
     }
