@@ -70,7 +70,7 @@ async function urlToBase64(imageUrl) {
       const fileBuffer = await fs.readFile(filePath);
       return Buffer.from(fileBuffer).toString('base64');
     }
-    
+
     // Otherwise fetch from URL
     const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
     return Buffer.from(response.data).toString('base64');
@@ -80,14 +80,80 @@ async function urlToBase64(imageUrl) {
   }
 }
 
+async function urlToBuffer(imageUrl) {
+  // Check if it's a local file path
+  if (imageUrl.startsWith('./') || imageUrl.startsWith('../') || imageUrl.includes('public/')) {
+    const filePath = path.join(process.cwd(), imageUrl.replace('./', ''));
+    return await fs.readFile(filePath);
+  }
+  const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+  return Buffer.from(response.data);
+}
+
+async function urlToNormalizedPngBase64(imageUrl, { width, height, fit }) {
+  const input = await urlToBuffer(imageUrl);
+  const out = await sharp(input)
+    .flatten({ background: { r: 255, g: 255, b: 255 } })
+    .resize({ width, height, fit: fit || 'cover' })
+    .png()
+    .toBuffer();
+  return out.toString('base64');
+}
+
+function rgbDistance(a, b) {
+  if (!a || !b) return Number.POSITIVE_INFINITY;
+  const dr = (a.r || 0) - (b.r || 0);
+  const dg = (a.g || 0) - (b.g || 0);
+  const db = (a.b || 0) - (b.b || 0);
+  return Math.sqrt(dr * dr + dg * dg + db * db);
+}
+
+async function averageRgbFromBase64Region(base64Data, regionNorm) {
+  const buf = Buffer.from(String(base64Data), 'base64');
+  const img = sharp(buf);
+  const meta = await img.metadata();
+  const width = meta.width || 0;
+  const height = meta.height || 0;
+  if (!width || !height) return null;
+
+  const left = Math.max(0, Math.floor(width * regionNorm.x));
+  const top = Math.max(0, Math.floor(height * regionNorm.y));
+  const extractW = Math.max(1, Math.min(width - left, Math.floor(width * regionNorm.w)));
+  const extractH = Math.max(1, Math.min(height - top, Math.floor(height * regionNorm.h)));
+
+  const { data, info } = await img
+    .extract({ left, top, width: extractW, height: extractH })
+    .removeAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+
+  let r = 0;
+  let g = 0;
+  let b = 0;
+  const n = Math.max(1, info.width * info.height);
+  for (let i = 0; i < data.length; i += 3) {
+    r += data[i];
+    g += data[i + 1];
+    b += data[i + 2];
+  }
+  return {
+    r: Math.round(r / n),
+    g: Math.round(g / n),
+    b: Math.round(b / n)
+  };
+}
+
 // Google Virtual Try-On Service
-async function applyVirtualTryOn(sareeImageUrl, modelImageUrl) {
+async function applyVirtualTryOn(sareeImageUrl, modelImageUrl, { sampleCount = 1 } = {}) {
   try {
     console.log('🎭 Starting Virtual Try-On...');
     
     const token = await getGoogleAccessToken();
-    const sareeBase64 = await urlToBase64(sareeImageUrl);
-    const modelBase64 = await urlToBase64(modelImageUrl);
+    // Normalize inputs for more consistent try-on results.
+    // - Person images are normalized to 1024×1024 (cover)
+    // - Product images are normalized to 768×1024 (contain) on white
+    const modelBase64 = await urlToNormalizedPngBase64(modelImageUrl, { width: 1024, height: 1024, fit: 'cover' });
+    const sareeBase64 = await urlToNormalizedPngBase64(sareeImageUrl, { width: 768, height: 1024, fit: 'contain' });
     
     const url = `https://${LOCATION}-aiplatform.googleapis.com/v1/projects/${GOOGLE_PROJECT_ID}/locations/${LOCATION}/publishers/google/models/virtual-try-on-001:predict`;
     
@@ -103,7 +169,7 @@ async function applyVirtualTryOn(sareeImageUrl, modelImageUrl) {
       }],
       parameters: {
         garmentType: "full_body",
-        sampleCount: 1,
+        sampleCount: Math.max(1, Number(sampleCount) || 1),
         preserveGarmentShape: true,
         poseAlignment: true,
         outputStyle: "realistic"
@@ -120,12 +186,22 @@ async function applyVirtualTryOn(sareeImageUrl, modelImageUrl) {
     
     console.log('✅ Virtual Try-On completed');
     
-    // Return the first generated image
-    const tryonImageBase64 = response.data.predictions[0].bytesBase64Encoded;
-    return {
-      data: String(tryonImageBase64),
-      mimeType: 'image/png'
-    };
+    const preds = Array.isArray(response.data?.predictions) ? response.data.predictions : [];
+    const images = preds
+      .map((p) => p?.bytesBase64Encoded)
+      .filter(Boolean)
+      .map((b64) => ({ data: String(b64), mimeType: 'image/png' }));
+
+    if (images.length === 0) {
+      return null;
+    }
+
+    // Backward-compatible: return single image when sampleCount=1
+    if ((Number(sampleCount) || 1) <= 1) {
+      return images[0];
+    }
+
+    return images;
     
   } catch (error) {
     console.error('❌ Virtual Try-On failed:', error.response?.data || error.message);
@@ -319,8 +395,10 @@ const VITON_LOCAL_URL = process.env.VITON_LOCAL_URL || 'http://localhost:5002';
 // Google Virtual Try-On Configuration
 const GOOGLE_PROJECT_ID = process.env.GOOGLE_PROJECT_ID;
 const LOCATION = "us-central1";
-const MODEL_FRONT_URL = "https://res.cloudinary.com/doiezptnn/image/upload/v1771054723/saree-models/model-front.png"; // Front view model
-const MODEL_BACK_URL = "https://res.cloudinary.com/doiezptnn/image/upload/v1771054724/saree-models/model-back.png"; // Back view model
+// Fixed model images (defaults to local public assets).
+// You can override these via env vars to swap models without code changes.
+const MODEL_FRONT_URL = process.env.MODEL_FRONT_URL || "public/img5.png"; // Front view model
+const MODEL_BACK_URL = process.env.MODEL_BACK_URL || "public/image.png"; // Back view model
 
 // Retry helper for Gemini API calls
 async function callGeminiWithRetry(parts, maxRetries = 3) {
@@ -1978,6 +2056,7 @@ export default async function handler(req, res) {
     // Apply Virtual Try-On to BOTH front and back views (optional, won't break if it fails)
     let tryonFrontView = null;
     let tryonBackView = null;
+    let frontTryonBlouseRgb = null;
     
     console.log('\n========================================');
     console.log('🔄 VIRTUAL TRY-ON PROCESS STARTING');
@@ -2000,8 +2079,19 @@ export default async function handler(req, res) {
         console.log('🔹 [1/2] FRONT VIEW TRY-ON');
         console.log('    Saree:', generatedViews.front);
         console.log('    Model:', MODEL_FRONT_URL);
-        const tryonFrontData = await applyVirtualTryOn(generatedViews.front, MODEL_FRONT_URL);
+        const tryonFrontData = await applyVirtualTryOn(generatedViews.front, MODEL_FRONT_URL, { sampleCount: 1 });
         if (tryonFrontData) {
+          // Capture a cheap reference signal for cross-view consistency selection.
+          // This uses the blouse region average color from the FRONT result.
+          try {
+            frontTryonBlouseRgb = await averageRgbFromBase64Region(tryonFrontData.data, { x: 0.30, y: 0.20, w: 0.40, h: 0.25 });
+            if (frontTryonBlouseRgb) {
+              console.log('🎯 Front blouse reference RGB:', frontTryonBlouseRgb);
+            }
+          } catch (e) {
+            console.warn('⚠️ Could not compute front blouse reference RGB (continuing):', e?.message || e);
+          }
+
           // Save base64 to memory before uploading.
           try {
             await saveImageToMemory(tryonFrontData.data, frontViewMemoryKey);
@@ -2030,19 +2120,42 @@ export default async function handler(req, res) {
         console.log('🔹 [2/2] BACK VIEW TRY-ON');
         console.log('    Saree:', generatedViews.back);
         console.log('    Model:', MODEL_BACK_URL);
-        const tryonBackData = await applyVirtualTryOn(generatedViews.back, MODEL_BACK_URL);
-        if (tryonBackData) {
+        // Generate a few back candidates and pick the one closest to the FRONT blouse appearance.
+        const tryonBackData = await applyVirtualTryOn(generatedViews.back, MODEL_BACK_URL, { sampleCount: 3 });
+        const candidates = Array.isArray(tryonBackData) ? tryonBackData : (tryonBackData ? [tryonBackData] : []);
+
+        let chosenBack = candidates[0] || null;
+        if (candidates.length > 1 && frontTryonBlouseRgb) {
+          let bestScore = Number.POSITIVE_INFINITY;
+          for (let i = 0; i < candidates.length; i++) {
+            const c = candidates[i];
+            try {
+              const cRgb = await averageRgbFromBase64Region(c.data, { x: 0.28, y: 0.18, w: 0.44, h: 0.28 });
+              const score = rgbDistance(cRgb, frontTryonBlouseRgb);
+              console.log(`   🧪 Back candidate ${i + 1}/${candidates.length} blouse RGB:`, cRgb, 'score:', score.toFixed(2));
+              if (score < bestScore) {
+                bestScore = score;
+                chosenBack = c;
+              }
+            } catch (e) {
+              console.warn(`⚠️ Failed scoring back candidate ${i + 1} (continuing):`, e?.message || e);
+            }
+          }
+          console.log('✅ Selected best back candidate by blouse match score');
+        }
+
+        if (chosenBack) {
           // Save base64 to memory before uploading.
           try {
-            await saveImageToMemory(tryonBackData.data, backViewMemoryKey);
+            await saveImageToMemory(chosenBack.data, backViewMemoryKey);
             console.log('🧠 Saved final BACK to memory:', backViewMemoryKey);
           } catch (e) {
             console.warn('⚠️ Failed to save final BACK to memory (continuing):', e?.message || e);
           }
           const tryonBackUrl = await uploadGeneratedImageToCloudinary(
-            tryonBackData.data,
+            chosenBack.data,
             'tryon-back-view',
-            tryonBackData.mimeType
+            chosenBack.mimeType
           );
           tryonBackView = tryonBackUrl;
           console.log('    ✅ SUCCESS - Back view try-on URL:', tryonBackUrl);

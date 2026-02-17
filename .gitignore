@@ -28,7 +28,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-
 # Google service account keys (DO NOT COMMIT)
 dvyb-8b572-230d61d58793.json
 *service-account*.json

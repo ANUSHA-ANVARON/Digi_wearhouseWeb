@@ -44,5 +44,119 @@
       "front": "https://res.cloudinary.com/doiezptnn/image/upload/v1771069659/saree-retouch/front_saree-border_1771069655037.jpg",
       "back": "https://res.cloudinary.com/doiezptnn/image/upload/v1771069678/saree-retouch/back_saree-border_1771069675582.jpg"
     }
+  },
+  {
+    "timestamp": "2026-02-15T07:48:56.672Z",
+    "imageUrl": "https://res.cloudinary.com/doiezptnn/image/upload/v1771141306/generated-sarees/tryon-front-view/saree-tryon-front-view-1771141302931.jpg",
+    "verdict": "good",
+    "feedback": "Good quality",
+    "rating": 5,
+    "metadata": {
+      "app": "DigiWearHouse",
+      "createdFrom": "SareePartsUploader"
+    },
+    "inputs": {
+      "saree-border": "https://res.cloudinary.com/doiezptnn/image/upload/v1771141206/qgxzpdcjcewmeytaj0dc.jpg",
+      "blouse-border": "https://res.cloudinary.com/doiezptnn/image/upload/v1771141211/rlb1arlhz1xcqxuo1qel.jpg",
+      "saree-body": "https://res.cloudinary.com/doiezptnn/image/upload/v1771141217/ipd3nkrtp7tljstv5ojb.jpg",
+      "blouse-body": "https://res.cloudinary.com/doiezptnn/image/upload/v1771141223/wxuwekz2bpusafjdtlfs.jpg",
+      "saree-pallu": "https://res.cloudinary.com/doiezptnn/image/upload/v1771141232/wqma9xn8ofusye5etl4j.jpg",
+      "saree-pleats": "https://res.cloudinary.com/doiezptnn/image/upload/v1771141238/tyw6knmblxse8kczmojo.jpg"
+    },
+    "outputs": {
+      "front": "https://res.cloudinary.com/doiezptnn/image/upload/v1771141306/generated-sarees/tryon-front-view/saree-tryon-front-view-1771141302931.jpg",
+      "back": "https://res.cloudinary.com/doiezptnn/image/upload/v1771141327/generated-sarees/tryon-back-view/saree-tryon-back-view-1771141323402.jpg"
+    }
+  },
+  {
+    "timestamp": "2026-02-15T07:48:56.672Z",
+    "imageUrl": "https://res.cloudinary.com/doiezptnn/image/upload/v1771141327/generated-sarees/tryon-back-view/saree-tryon-back-view-1771141323402.jpg",
+    "verdict": "good",
+    "feedback": "Good quality",
+    "rating": 5,
+    "metadata": {
+      "app": "DigiWearHouse",
+      "createdFrom": "SareePartsUploader"
+    },
+    "inputs": {
+      "saree-border": "https://res.cloudinary.com/doiezptnn/image/upload/v1771141206/qgxzpdcjcewmeytaj0dc.jpg",
+      "blouse-border": "https://res.cloudinary.com/doiezptnn/image/upload/v1771141211/rlb1arlhz1xcqxuo1qel.jpg",
+      "saree-body": "https://res.cloudinary.com/doiezptnn/image/upload/v1771141217/ipd3nkrtp7tljstv5ojb.jpg",
+      "blouse-body": "https://res.cloudinary.com/doiezptnn/image/upload/v1771141223/wxuwekz2bpusafjdtlfs.jpg",
+      "saree-pallu": "https://res.cloudinary.com/doiezptnn/image/upload/v1771141232/wqma9xn8ofusye5etl4j.jpg",
+      "saree-pleats": "https://res.cloudinary.com/doiezptnn/image/upload/v1771141238/tyw6knmblxse8kczmojo.jpg"
+    },
+    "outputs": {
+      "front": "https://res.cloudinary.com/doiezptnn/image/upload/v1771141306/generated-sarees/tryon-front-view/saree-tryon-front-view-1771141302931.jpg",
+      "back": "https://res.cloudinary.com/doiezptnn/image/upload/v1771141327/generated-sarees/tryon-back-view/saree-tryon-back-view-1771141323402.jpg"
+    }
+  },
+  {
+    "timestamp": "2026-02-15T08:32:32.661Z",
+    "imageUrl": "https://res.cloudinary.com/doiezptnn/image/upload/v1771144286/generated-sarees/tryon-front-view/saree-tryon-front-view-1771144283058.jpg",
+    "verdict": "good",
+    "feedback": "Good quality",
+    "rating": 5,
+    "metadata": {
+      "app": "DigiWearHouse",
+      "createdFrom": "SareePartsUploader"
+    },
+    "inputs": {
+      "saree-border": "https://res.cloudinary.com/doiezptnn/image/upload/v1771143659/rdxm3arx5kockkeaha0z.jpg",
+      "blouse-border": "https://res.cloudinary.com/doiezptnn/image/upload/v1771143664/im87rzer3yuohimemdyz.jpg",
+      "saree-body": "https://res.cloudinary.com/doiezptnn/image/upload/v1771143670/stfxcm68qhrluyswlyxo.jpg",
+      "blouse-body": "https://res.cloudinary.com/doiezptnn/image/upload/v1771143675/bnmbtvnakg9mltuprknm.jpg",
+      "saree-pallu": "https://res.cloudinary.com/doiezptnn/image/upload/v1771143680/a5ayh2tg6w2dbfh1s0lf.jpg",
+      "saree-pleats": "https://res.cloudinary.com/doiezptnn/image/upload/v1771143685/hinyl9zxf1gstofbyh2v.jpg"
+    },
+    "outputs": {
+      "front": "https://res.cloudinary.com/doiezptnn/image/upload/v1771144286/generated-sarees/tryon-front-view/saree-tryon-front-view-1771144283058.jpg",
+      "back": "https://res.cloudinary.com/doiezptnn/image/upload/v1771144305/generated-sarees/tryon-back-view/saree-tryon-back-view-1771144301143.jpg"
+    }
+  },
+  {
+    "timestamp": "2026-02-15T08:32:32.661Z",
+    "imageUrl": "https://res.cloudinary.com/doiezptnn/image/upload/v1771144305/generated-sarees/tryon-back-view/saree-tryon-back-view-1771144301143.jpg",
+    "verdict": "good",
+    "feedback": "Good quality",
+    "rating": 5,
+    "metadata": {
+      "app": "DigiWearHouse",
+      "createdFrom": "SareePartsUploader"
+    },
+    "inputs": {
+      "saree-border": "https://res.cloudinary.com/doiezptnn/image/upload/v1771143659/rdxm3arx5kockkeaha0z.jpg",
+      "blouse-border": "https://res.cloudinary.com/doiezptnn/image/upload/v1771143664/im87rzer3yuohimemdyz.jpg",
+      "saree-body": "https://res.cloudinary.com/doiezptnn/image/upload/v1771143670/stfxcm68qhrluyswlyxo.jpg",
+      "blouse-body": "https://res.cloudinary.com/doiezptnn/image/upload/v1771143675/bnmbtvnakg9mltuprknm.jpg",
+      "saree-pallu": "https://res.cloudinary.com/doiezptnn/image/upload/v1771143680/a5ayh2tg6w2dbfh1s0lf.jpg",
+      "saree-pleats": "https://res.cloudinary.com/doiezptnn/image/upload/v1771143685/hinyl9zxf1gstofbyh2v.jpg"
+    },
+    "outputs": {
+      "front": "https://res.cloudinary.com/doiezptnn/image/upload/v1771144286/generated-sarees/tryon-front-view/saree-tryon-front-view-1771144283058.jpg",
+      "back": "https://res.cloudinary.com/doiezptnn/image/upload/v1771144305/generated-sarees/tryon-back-view/saree-tryon-back-view-1771144301143.jpg"
+    }
+  },
+  {
+    "timestamp": "2026-02-15T09:23:11.253Z",
+    "imageUrl": "https://res.cloudinary.com/doiezptnn/image/upload/v1771147348/generated-sarees/tryon-front-view/saree-tryon-front-view-1771147343522.jpg",
+    "verdict": "good",
+    "feedback": "Good quality",
+    "rating": 5,
+    "metadata": {
+      "app": "DigiWearHouse",
+      "createdFrom": "SareePartsUploader"
+    },
+    "inputs": {
+      "saree-border": "https://res.cloudinary.com/doiezptnn/image/upload/v1771147256/fezsufzusywkx64nqagi.jpg",
+      "blouse-border": "https://res.cloudinary.com/doiezptnn/image/upload/v1771147261/xa5vjobudwicud3wjs4a.jpg",
+      "saree-body": "https://res.cloudinary.com/doiezptnn/image/upload/v1771147268/xh71g815dvxjzlabug9g.jpg",
+      "blouse-body": "https://res.cloudinary.com/doiezptnn/image/upload/v1771147273/bbwuuvhsf9mungg9rbkq.jpg",
+      "saree-pallu": "https://res.cloudinary.com/doiezptnn/image/upload/v1771147279/q6ogvqbylbdhxjekfjd4.jpg",
+      "saree-pleats": "https://res.cloudinary.com/doiezptnn/image/upload/v1771147284/puoyqlvbdrgsnbumszo9.jpg"
+    },
+    "outputs": {
+      "front": "https://res.cloudinary.com/doiezptnn/image/upload/v1771147348/generated-sarees/tryon-front-view/saree-tryon-front-view-1771147343522.jpg"
+    }
   }
 ]
