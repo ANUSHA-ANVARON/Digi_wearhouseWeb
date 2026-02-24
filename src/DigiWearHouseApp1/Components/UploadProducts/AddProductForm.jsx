@@ -202,6 +202,21 @@ const AddProductForm = ({ onBack, initialData }) => {
       return;
     }
 
+    // If saree and required input uploads not ready → block
+    if (isSaree) {
+      const inputUrls = formData?.sareeInputUrls || {};
+      const required = [
+        { key: "saree", label: "Saree Image" },
+        { key: "pallu", label: "Saree Pallu" },
+        { key: "body", label: "Saree Body" },
+      ];
+      const missing = required.filter((r) => !inputUrls?.[r.key]).map((r) => r.label);
+      if (missing.length > 0) {
+        alert(`Please upload: ${missing.join(", ")}`);
+        return;
+      }
+    }
+
     // Delete draft when proceeding to preview (will be published)
     if (draftIdRef.current) {
       console.log("Deleting draft before preview:", draftIdRef.current);
@@ -224,7 +239,14 @@ const AddProductForm = ({ onBack, initialData }) => {
 
     // Check if we have generated views
     const generatedViews = formData.generatedSareeViews;
-    return generatedViews && Object.keys(generatedViews).length > 0;
+    const hasGenerated = generatedViews && Object.keys(generatedViews).length > 0;
+    if (!hasGenerated) return false;
+
+    const inputUrls = formData?.sareeInputUrls || {};
+    const hasInputs =
+      !!inputUrls?.saree && !!inputUrls?.pallu && !!inputUrls?.body;
+
+    return hasInputs;
   };
 
   const renderTabContent = () => {

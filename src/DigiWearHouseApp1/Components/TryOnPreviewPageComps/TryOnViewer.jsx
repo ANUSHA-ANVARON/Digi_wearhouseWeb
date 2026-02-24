@@ -133,9 +133,6 @@ export const TryOnViewer = ({
               <div className="w-full h-full relative flex items-center justify-center">
                 
                 <img src={STATIC_MODEL_IMAGE} alt="Model" className="w-full h-full object-cover object-top" />
-                <div className="absolute bottom-4 left-4 right-4 text-center">
-                  <div className="text-white font-medium">Front view</div>
-                </div>
               </div>
             )}
           </div>
@@ -174,11 +171,6 @@ export const TryOnViewer = ({
 
                 {isSaree && (
                   <>
-                    <div className="absolute -bottom-1 left-0 right-0">
-                      <div className="bg-black bg-opacity-70 text-white text-xs px-1 py-0.5 rounded text-center">
-                        {imageData.label}
-                      </div>
-                    </div>
                     {imageData.type === 'generated' && (
                       <div className="absolute top-1 right-1 w-2 h-2 bg-green-500 rounded-full"></div>
                     )}

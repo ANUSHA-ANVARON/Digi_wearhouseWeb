@@ -387,7 +387,7 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-const GEMINI_API_KEY = 'AIzaSyCGGNoinwQJZI66jNp9Y462isJFAp33nN8';
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent';
 const FLUX_LOCAL_URL = 'http://localhost:5003';  // FLUX service
 const VITON_LOCAL_URL = process.env.VITON_LOCAL_URL || 'http://localhost:5002';
@@ -402,6 +402,9 @@ const MODEL_BACK_URL = process.env.MODEL_BACK_URL || "public/image.png"; // Back
 
 // Retry helper for Gemini API calls
 async function callGeminiWithRetry(parts, maxRetries = 3) {
+  if (!GEMINI_API_KEY) {
+    throw new Error('Missing GEMINI_API_KEY. Set it in your .env (server-side) before calling Gemini image generation.');
+  }
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       console.log(`🔄 API attempt ${attempt}/${maxRetries}...`);
@@ -624,6 +627,31 @@ async function downloadImageAsBase64(imageUrl) {
 // This avoids Cloudinary recompression/lighting drift if the try-on output was used as a reference.
 function getImageMemoryDir() {
   return path.join(process.cwd(), 'image_memory');
+}
+
+function getPhotoshootJobsDir() {
+  return path.join(getImageMemoryDir(), 'photoshoot_jobs');
+}
+
+async function savePhotoshootJob(jobId, data) {
+  const dir = getPhotoshootJobsDir();
+  await fs.mkdir(dir, { recursive: true });
+  const file = path.join(dir, `${jobId}.json`);
+  await fs.writeFile(file, JSON.stringify(data, null, 2), 'utf8');
+}
+
+async function loadPhotoshootJob(jobId) {
+  const file = path.join(getPhotoshootJobsDir(), `${jobId}.json`);
+  try {
+    const raw = await fs.readFile(file, 'utf8');
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+function makeJobId(prefix = 'ps') {
+  return `${prefix}_${Date.now()}_${Math.random().toString(16).slice(2)}`;
 }
 
 async function saveImageToMemory(base64Data, memoryKey) {
@@ -1099,6 +1127,180 @@ Generate the back view NOW. Show ONLY the back view. Nothing else.` }
   
   console.log('✅ Back view generated successfully!');
   return backImage;
+}
+
+async function generatePoseVariantFromFront(frontViewImage, variant) {
+  const v = String(variant || '').toLowerCase();
+  const viewName = v === 'left' ? 'LEFT VIEW' : v === 'right' ? 'RIGHT VIEW' : 'BACK VIEW';
+  const directionBlock = v === 'left'
+    ? '- LEFT view: model turned 90° to the left (left profile / left side view)'
+    : v === 'right'
+      ? '- RIGHT view: model turned 90° to the right (right profile / right side view)'
+      : '- BACK view: model from behind';
+
+  const parts = [
+    {
+      text: `Create EXACTLY ONE professional catalog photograph (${viewName}) based on the reference image.
+
+NON-NEGOTIABLE REQUIREMENTS:
+- Output must be EXACTLY 2400×3200 pixels, portrait
+- EXACTLY ONE person in the image
+- Same person identity as the reference (face, hair, body)
+- Same saree + blouse + drape, patterns, and colors as the reference
+- Same lighting style and simple studio backdrop (keep it clean; ideally plain/neutral)
+${directionBlock}
+
+FORBIDDEN:
+- Collage/split-screen
+- Multiple people
+- Text/labels/watermarks
+- Changing saree colors or blouse sleeve style
+
+REFERENCE IMAGE (use for outfit + identity ONLY; do not include it in output):`
+    },
+    {
+      inline_data: {
+        mime_type: frontViewImage.mimeType || frontViewImage.mime_type || 'image/jpeg',
+        data: frontViewImage.data
+      }
+    },
+    {
+      text: `Generate the ${viewName} now. Output ONE image only.`
+    }
+  ];
+
+  const response = await callGeminiWithRetry(parts);
+  const content = response.data.candidates?.[0]?.content?.parts || [];
+  let outImage = null;
+  for (const part of content) {
+    if (part.inlineData || part.inline_data) {
+      outImage = part.inlineData || part.inline_data;
+      break;
+    }
+  }
+  if (!outImage) {
+    throw new Error(`Failed to generate ${viewName}: no image returned`);
+  }
+
+  outImage = await sanitizeCatalogOutput(outImage, { stage: `photoshoot-${v}` });
+  return outImage;
+}
+
+export async function photoshootStart(req, res) {
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+  res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
+
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+  if (req.method !== 'POST') {
+    res.status(405).json({ error: 'Method not allowed' });
+    return;
+  }
+
+  const uploadOne = upload.single('sareeImage');
+  try {
+    await new Promise((resolve, reject) => {
+      uploadOne(req, res, (err) => {
+        if (err) return reject(new Error(`File upload error: ${err.message}`));
+        resolve();
+      });
+    });
+
+    const file = req.file;
+    if (!file?.buffer) {
+      res.status(400).json({ error: 'Missing sareeImage (single saree product image)' });
+      return;
+    }
+
+    const jobId = makeJobId('photoshoot');
+    const uploaded = await uploadToCloudinary(file.buffer, 'saree-product');
+    const productUrl = uploaded?.secure_url;
+    if (!productUrl) {
+      throw new Error('Failed to upload saree image to Cloudinary');
+    }
+
+    await savePhotoshootJob(jobId, {
+      jobId,
+      productUrl,
+      createdAt: new Date().toISOString()
+    });
+
+    res.json({ success: true, jobId, productUrl });
+  } catch (e) {
+    console.error('❌ photoshootStart failed:', e);
+    res.status(500).json({ error: 'Failed to start photoshoot', message: e?.message || String(e) });
+  }
+}
+
+export async function photoshootStream(req, res) {
+  res.setHeader('Cache-Control', 'no-cache, no-transform');
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+
+  // If the runtime supports it, flush headers immediately.
+  try {
+    res.flushHeaders?.();
+  } catch {
+    // ignore
+  }
+
+  const jobId = req.params?.jobId || req.query?.jobId;
+  const job = await loadPhotoshootJob(String(jobId || ''));
+
+  const send = (event, payload) => {
+    res.write(`event: ${event}\n`);
+    res.write(`data: ${JSON.stringify(payload)}\n\n`);
+  };
+
+  if (!job?.productUrl) {
+    send('error', { message: 'Invalid jobId (missing or expired job)' });
+    res.end();
+    return;
+  }
+
+  // Allow client to close connection.
+  let closed = false;
+  req.on('close', () => {
+    closed = true;
+  });
+
+  try {
+    send('status', { step: 'front', message: 'Generating front view (virtual try-on)...' });
+    const tryonFront = await applyVirtualTryOn(job.productUrl, MODEL_FRONT_URL);
+    if (!tryonFront?.data) {
+      throw new Error('Virtual try-on failed for front view');
+    }
+
+    const frontUrl = await uploadGeneratedImageToCloudinary(tryonFront.data, 'photoshoot-front');
+    send('view', { view: 'front', url: frontUrl });
+    if (closed) return;
+
+    const frontRef = await sanitizeCatalogOutput(
+      { data: tryonFront.data, mimeType: tryonFront.mimeType || 'image/png', mime_type: tryonFront.mimeType || 'image/png' },
+      { stage: 'photoshoot-front-ref' }
+    );
+
+    // Sequentially generate pose variants from the front reference.
+    for (const v of ['left', 'right', 'back']) {
+      send('status', { step: v, message: `Generating ${v} view (Gemini)...` });
+      const out = await generatePoseVariantFromFront(frontRef, v);
+      const url = await uploadGeneratedImageToCloudinary(out.data, `photoshoot-${v}`);
+      send('view', { view: v, url });
+      if (closed) return;
+    }
+
+    send('done', { success: true });
+    res.end();
+  } catch (e) {
+    console.error('❌ photoshootStream failed:', e);
+    send('error', { message: e?.message || String(e) });
+    res.end();
+  }
 }
 
 // NEW: Sequential generation - build saree step by step

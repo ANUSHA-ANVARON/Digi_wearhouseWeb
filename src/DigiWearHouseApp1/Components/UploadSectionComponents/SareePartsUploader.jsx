@@ -1,131 +1,309 @@
-import React, { useState, useEffect } from "react";
-import {
-  Upload,
-  X,
-  CheckCircle,
-  Sparkles,
-  AlertCircle,
-  Download,
-} from "lucide-react";
-import { uploadToCloudinary } from "../../utilities/cloudinary";
+import React, { useEffect, useMemo, useState } from "react";
+import { AlertCircle, CheckCircle, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { uploadToCloudinary } from "../../utilities/cloudinary";
 
-const SareePartsUploader = ({ formData = {}, onChange = () => { } }) => {
-
-  const [uploading, setUploading] = useState(false);
-  const [draggedPart, setDraggedPart] = useState(null);
-  const [error, setError] = useState(null);
-  const [generatingComplete, setGeneratingComplete] = useState(false);
+const SareePartsUploader = ({ formData = {}, onChange = () => {} }) => {
   const navigate = useNavigate();
-  const [hasGeneratedOnce, setHasGeneratedOnce] = useState(false);
-  const originalFilesRef = React.useRef({});
 
-  const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
-  const [feedbackText, setFeedbackText] = useState("");
-  const [feedbackSaving, setFeedbackSaving] = useState(false);
-  const [feedbackStatus, setFeedbackStatus] = useState(null); // { type: 'success'|'error', message }
-  const [feedbackTargets, setFeedbackTargets] = useState(['saree-border']);
+  const [error, setError] = useState(null);
 
+  const [photoshootFile, setPhotoshootFile] = useState(null);
+  const [photoshootUploading, setPhotoshootUploading] = useState(false);
+  const [photoshootStep, setPhotoshootStep] = useState(null); // front|left|right|back
+  const [photoshootStatus, setPhotoshootStatus] = useState(null);
+  const [photoshootViews, setPhotoshootViews] = useState({});
+  const photoshootSourceRef = React.useRef(null);
+  const photoshootViewsRef = React.useRef({});
 
+  const [palluFile, setPalluFile] = useState(null);
+  const [bodyFile, setBodyFile] = useState(null);
 
-  const partLabels = {
-    'saree-border': {
-      name: "Saree Border",
-      description: "Borders at pleats edge, pallu bottom, and shoulder",
-      icon: "✨",
-    },
-    'blouse-border': {
-      name: "Blouse Border",
-      description: "Border below shoulder, almost above elbow",
-      icon: "💫",
-    },
-    'saree-body': {
-      name: "Saree Body",
-      description: "Main saree fabric pattern",
-      icon: "🧵",
-    },
-    'blouse-body': {
-      name: "Blouse Body",
-      description: "Main blouse fabric pattern",
-      icon: "👚",
-    },
-    'saree-pallu': {
-      name: "Saree Pallu",
-      description: "Decorative shoulder drape",
-      icon: "🎨",
-    },
-    'saree-pleats': {
-      name: "Saree Pleats",
-      description: "Folded front portion",
-      icon: "📏",
-    },
-  };
+  const [palluPreviewUrl, setPalluPreviewUrl] = useState(null);
+  const [bodyPreviewUrl, setBodyPreviewUrl] = useState(null);
 
-  // View labels for the 4 generated views
-  const viewLabels = {
-    front: {
-      name: "Front View",
-      description: "Standing front pose",
-      icon: "👗",
-    },
-    back: { name: "Back View", description: "Back draping view", icon: "🔄" },
-  };
+  const [inputUploading, setInputUploading] = useState({
+    saree: false,
+    pallu: false,
+    body: false,
+  });
 
-
-  const sareeParts = {
-    'saree-border': formData.sareeParts?.['saree-border'] || { file: null, preview: null, url: null },
-    'blouse-border': formData.sareeParts?.['blouse-border'] || { file: null, preview: null, url: null },
-    'saree-body': formData.sareeParts?.['saree-body'] || { file: null, preview: null, url: null },
-    'blouse-body': formData.sareeParts?.['blouse-body'] || { file: null, preview: null, url: null },
-    'saree-pallu': formData.sareeParts?.['saree-pallu'] || { file: null, preview: null, url: null },
-    'saree-pleats': formData.sareeParts?.['saree-pleats'] || { file: null, preview: null, url: null },
-  };
-
+  const sareeInputUrlsRef = React.useRef(formData?.sareeInputUrls || {});
 
   useEffect(() => {
+    sareeInputUrlsRef.current = formData?.sareeInputUrls || {};
+  }, [formData?.sareeInputUrls]);
 
-    if (formData.hasGeneratedSaree) return;
+  const [photoshootPreviewUrl, setPhotoshootPreviewUrl] = useState(null);
 
-    if (formData.generatedSareeViews) return;
-
-
-    const allPartsUploaded = Object.values(sareeParts).every(part => part.file);
-
-    if (
-      allPartsUploaded &&
-      !formData.generatedSareeViews &&
-      !hasGeneratedOnce &&
-      !generatingComplete
-    ) {
-      setHasGeneratedOnce(true);  // prevent re-triggering
-      handleAutoGenerateCompleteSaree();
+  useEffect(() => {
+    if (!palluFile) {
+      setPalluPreviewUrl(null);
+      return;
     }
-  }, [sareeParts['saree-border'].file,
-  sareeParts['blouse-border'].file,
-  sareeParts['saree-body'].file,
-  sareeParts['blouse-body'].file,
-  sareeParts['saree-pallu'].file,
-  sareeParts['saree-pleats'].file]);
+    const url = URL.createObjectURL(palluFile);
+    setPalluPreviewUrl(url);
+    return () => {
+      try {
+        URL.revokeObjectURL(url);
+      } catch {
+        // ignore
+      }
+    };
+  }, [palluFile]);
 
-  const handleDrag = (e, partName) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDraggedPart(partName);
-    } else if (e.type === "dragleave") {
-      setDraggedPart(null);
+  useEffect(() => {
+    if (!bodyFile) {
+      setBodyPreviewUrl(null);
+      return;
+    }
+    const url = URL.createObjectURL(bodyFile);
+    setBodyPreviewUrl(url);
+    return () => {
+      try {
+        URL.revokeObjectURL(url);
+      } catch {
+        // ignore
+      }
+    };
+  }, [bodyFile]);
+
+  const composeAndPersistImageUrls = (viewsArg, inputUrlsArg) => {
+    const views = viewsArg || photoshootViewsRef.current || {};
+    const inputUrls = inputUrlsArg || sareeInputUrlsRef.current || {};
+
+    const nextImageUrls = [
+      views.front,
+      views.left,
+      views.right,
+      views.back,
+      inputUrls.saree,
+      inputUrls.pallu,
+      inputUrls.body,
+    ].filter(Boolean);
+
+    try {
+      onChange("imageUrls", nextImageUrls);
+    } catch {
+      // ignore
     }
   };
 
-  const handleDrop = (e, partName) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDraggedPart(null);
+  const uploadAndPersistInputImage = async (kind, file) => {
+    if (!file) return;
 
-    const files = e.dataTransfer.files;
-    if (files && files[0]) {
-      handleFile(files[0], partName);
+    setInputUploading((prev) => ({ ...prev, [kind]: true }));
+    try {
+      const url = await uploadToCloudinary(file);
+      const next = { ...(sareeInputUrlsRef.current || {}), [kind]: url };
+      sareeInputUrlsRef.current = next;
+      try {
+        onChange("sareeInputUrls", next);
+      } catch {
+        // ignore
+      }
+
+      composeAndPersistImageUrls(undefined, next);
+    } catch (e) {
+      setError(e?.message || String(e));
+    } finally {
+      setInputUploading((prev) => ({ ...prev, [kind]: false }));
     }
+  };
+
+  const clearInputKind = (kind) => {
+    const next = { ...(sareeInputUrlsRef.current || {}), [kind]: null };
+    sareeInputUrlsRef.current = next;
+
+    try {
+      onChange("sareeInputUrls", next);
+    } catch {
+      // ignore
+    }
+
+    composeAndPersistImageUrls(undefined, next);
+  };
+
+  const progressPercent = useMemo(() => {
+    const order = ["front", "left", "right", "back"];
+    const idx = photoshootStep ? order.indexOf(photoshootStep) : -1;
+    if (idx < 0) return photoshootUploading ? 5 : 0;
+    return Math.min(100, Math.round(((idx + 1) / order.length) * 100));
+  }, [photoshootStep, photoshootUploading]);
+
+  useEffect(() => {
+    return () => {
+      try {
+        photoshootSourceRef.current?.close?.();
+      } catch {
+        // ignore
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!photoshootFile) {
+      setPhotoshootPreviewUrl(null);
+      return;
+    }
+
+    const url = URL.createObjectURL(photoshootFile);
+    setPhotoshootPreviewUrl(url);
+    return () => {
+      try {
+        URL.revokeObjectURL(url);
+      } catch {
+        // ignore
+      }
+    };
+  }, [photoshootFile]);
+
+  const startPhotoshoot = async () => {
+    if (!photoshootFile) {
+      setError("Please upload a saree image first.");
+      return;
+    }
+
+    setPhotoshootUploading(true);
+    setPhotoshootStep(null);
+    setPhotoshootStatus("Preparing generation...");
+    setPhotoshootViews({});
+    photoshootViewsRef.current = {};
+    setError(null);
+
+    // Clear previously generated views so Submit gating is accurate
+    try {
+      onChange("generatedSareeViews", null);
+      onChange("hasGeneratedSaree", false);
+    } catch {
+      // ignore
+    }
+
+    try {
+      const fd = new FormData();
+      fd.append("sareeImage", photoshootFile);
+
+      const resp = await fetch("/api/photoshoot/start", {
+        method: "POST",
+        body: fd,
+      });
+
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok || !data?.jobId) {
+        throw new Error(data?.message || data?.error || "Failed to start generation");
+      }
+
+      try {
+        photoshootSourceRef.current?.close?.();
+      } catch {
+        // ignore
+      }
+
+      const es = new EventSource(`/api/photoshoot/stream/${data.jobId}`);
+      photoshootSourceRef.current = es;
+
+      es.addEventListener("status", (ev) => {
+        try {
+          const payload = JSON.parse(ev.data);
+          setPhotoshootStep(payload?.step || null);
+          setPhotoshootStatus("Generating images...");
+        } catch {
+          setPhotoshootStatus("Generating images...");
+        }
+      });
+
+      es.addEventListener("view", (ev) => {
+        try {
+          const payload = JSON.parse(ev.data);
+          if (payload?.view && payload?.url) {
+            setPhotoshootStatus("Generating images...");
+            const next = {
+              ...photoshootViewsRef.current,
+              [payload.view]: payload.url,
+            };
+            photoshootViewsRef.current = next;
+            setPhotoshootViews(next);
+
+            // Persist to parent form state so Submit works
+            try {
+              onChange("generatedSareeViews", next);
+              composeAndPersistImageUrls(next);
+              onChange("hasGeneratedSaree", true);
+            } catch {
+              // ignore
+            }
+          }
+        } catch {
+          // ignore
+        }
+      });
+
+      es.addEventListener("done", () => {
+        setPhotoshootStatus("Generation complete.");
+        setPhotoshootUploading(false);
+        setPhotoshootStep("back");
+
+        // Ensure final state is persisted
+        try {
+          const finalViews = photoshootViewsRef.current || {};
+          onChange("generatedSareeViews", finalViews);
+          composeAndPersistImageUrls(finalViews);
+          onChange("hasGeneratedSaree", true);
+        } catch {
+          // ignore
+        }
+        try {
+          es.close();
+        } catch {
+          // ignore
+        }
+      });
+
+      es.addEventListener("error", (ev) => {
+        try {
+          const payload = ev?.data ? JSON.parse(ev.data) : null;
+          setError(payload?.message || "Generation error. Please retry.");
+        } catch {
+          setError("Generation error. Please retry.");
+        }
+        setPhotoshootUploading(false);
+        try {
+          es.close();
+        } catch {
+          // ignore
+        }
+      });
+    } catch (e) {
+      setError(e?.message || String(e));
+      setPhotoshootUploading(false);
+      setPhotoshootStatus(null);
+      setPhotoshootStep(null);
+    }
+  };
+
+  const PhotoshootLoader = () => {
+    return (
+      <div className="bg-white rounded-xl border border-gray-200 p-4">
+        <div className="flex items-center gap-3">
+          <div className="w-6 h-6 rounded-full border-2 border-t-transparent border-pink-400 animate-spin" />
+          <div className="flex-1">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-sm font-medium text-gray-800">Generating…</p>
+              <p className="text-xs text-gray-600">{progressPercent}%</p>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+              <div
+                className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-300"
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
+            {photoshootStatus && (
+              <p className="text-xs text-gray-600 mt-2">{photoshootStatus}</p>
+            )}
+          </div>
+        </div>
+      </div>
+    );
   };
 
   // const handleFile = async (file, partName) => {
@@ -651,166 +829,263 @@ const SareePartsUploader = ({ formData = {}, onChange = () => { } }) => {
     }
   };
 
-  const FashionLoader = () => {
-    return (
-      <div className="flex flex-col items-center justify-center p-6 animate-pulse">
-        <div className="w-20 h-20 rounded-full border-4 border-t-transparent border-pink-400 animate-spin mb-4"></div>
-        <p className="text-pink-600 font-medium text-sm tracking-wide">
-          Generating stunning saree view...
-        </p>
-        <p className="text-gray-500 text-xs mt-1">
-          AI is assembling your saree parts <br />
-          It Takes around 30 seconds...
-        </p>
-      </div>
-    );
-  };
-
-  if (!formData || !formData.sareeParts) {
-    return (
-      <div className="text-center p-10 text-gray-500">
-        Loading saree uploader...
-      </div>
-    );
-  }
-
   return (
     <div className="max-w-6xl mx-auto p-6 bg-gray-50">
       {/* Header */}
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Upload Photos</h1>
-        <p className="text-gray-600 mb-4">Add Photos of your saree parts</p>
+        <p className="text-gray-600 mb-4">
+          Upload 3 saree images (Saree, Pallu, Body). Generation depends only on the Saree image.
+        </p>
       </div>
+
       <div className="pb-6">
         <button
           onClick={() => navigate("/instructions")}
           className="text-[#800000] cursor-pointer hover:text-blue-700 font-medium flex items-center space-x-2"
         >
           <span>View Instructions</span>
-          <svg
-            className="w-4 h-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 5l7 7-7 7"
-            />
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         </button>
       </div>
 
-      {/* Upload Grid */}
+      {/* Input upload cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        {Object.entries(partLabels).map(([partName, partInfo]) => (
-          <div
-            key={partName}
-            className="bg-white rounded-lg border-2 border-dashed border-gray-300 hover:border-[#800000] transition-all duration-200"
-          >
-            {!sareeParts[partName].file ? (
-              <div
-                className={`p-8 text-center transition-all duration-200 ${draggedPart === partName
-                    ? "border-blue-400 bg-blue-50"
-                    : "hover:bg-gray-50"
-                  }`}
-                onDragEnter={(e) => handleDrag(e, partName)}
-                onDragLeave={(e) => handleDrag(e, partName)}
-                onDragOver={(e) => handleDrag(e, partName)}
-                onDrop={(e) => handleDrop(e, partName)}
-              >
-                <div className="flex flex-col items-center">
-                  <svg
-                    className="w-12 h-12 text-gray-400 mb-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={1.5}
-                      d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                    />
-                  </svg>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-3">
-                    {partInfo.name}
-                  </h3>
-                  <label className="inline-flex items-center px-6 py-2 bg-black text-white rounded-lg cursor-pointer transition-colors font-medium">
-                    Upload
-                    <input
-                      type="file"
-                      className="hidden"
-                      accept="image/*"
-                      onChange={(e) => handleFileInput(e, partName)}
-                      disabled={uploading || generatingComplete}
-                    />
-                  </label>
-                </div>
-              </div>
-            ) : (
-              <div className="relative p-4">
-                <div className="relative rounded-lg overflow-hidden bg-gray-100">
-                  <img
-                    src={sareeParts[partName].preview}
-                    alt={`${partInfo.name} preview`}
-                    className="w-full h-48 object-cover"
+        {/* Saree */}
+        <div className="bg-white rounded-lg border-2 border-dashed border-gray-300 hover:border-[#800000] transition-all duration-200">
+          {!photoshootFile ? (
+            <div className="p-8 text-center hover:bg-gray-50 transition-all duration-200">
+              <div className="flex flex-col items-center">
+                <svg className="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
                   />
-                  <button
-                    onClick={() => clearPart(partName)}
-                    className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
-                    disabled={uploading || generatingComplete}
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
-                <div className="mt-3 text-center">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                    {partInfo.name}
-                  </h3>
-                  <div className="flex items-center justify-center gap-2">
-                    <CheckCircle className="text-green-500" size={16} />
-                    <span className="text-sm text-green-600 font-medium">
-                      Uploaded ✓
-                    </span>
-                  </div>
+                </svg>
+                <h3 className="text-lg font-semibold text-gray-800 mb-3">Saree Image</h3>
+                <label className="inline-flex items-center px-6 py-2 bg-black text-white rounded-lg cursor-pointer transition-colors font-medium">
+                  Upload
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0] || null;
+                      setPhotoshootFile(f);
+                      setError(null);
+                      if (f) uploadAndPersistInputImage("saree", f);
+                    }}
+                    disabled={photoshootUploading || inputUploading.saree}
+                  />
+                </label>
+              </div>
+            </div>
+          ) : (
+            <div className="relative p-4">
+              <div className="relative rounded-lg overflow-hidden bg-gray-100">
+                <img src={photoshootPreviewUrl} alt="Saree preview" className="w-full h-48 object-cover" />
+                <button
+                  onClick={() => {
+                    setPhotoshootFile(null);
+                    setPhotoshootViews({});
+                    photoshootViewsRef.current = {};
+                    setPhotoshootStatus(null);
+                    setPhotoshootStep(null);
+                    setError(null);
+
+                    clearInputKind("saree");
+
+                    try {
+                      onChange("generatedSareeViews", null);
+                      onChange("hasGeneratedSaree", false);
+                    } catch {
+                      // ignore
+                    }
+                  }}
+                  className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                  disabled={photoshootUploading || inputUploading.saree}
+                >
+                  <X size={16} />
+                </button>
+              </div>
+              <div className="mt-3 text-center">
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">Saree Image</h3>
+                <div className="flex items-center justify-center gap-2">
+                  {inputUploading.saree ? (
+                    <>
+                      <div className="w-4 h-4 rounded-full border-2 border-t-transparent border-gray-500 animate-spin" />
+                      <span className="text-sm text-gray-600 font-medium">Uploading…</span>
+                    </>
+                  ) : formData?.sareeInputUrls?.saree ? (
+                    <>
+                      <CheckCircle className="text-green-500" size={16} />
+                      <span className="text-sm text-green-600 font-medium">Uploaded ✓</span>
+                    </>
+                  ) : (
+                    <span className="text-sm text-gray-600 font-medium">Pending upload</span>
+                  )}
                 </div>
               </div>
-            )}
-          </div>
-        ))}
-      </div>
-
-      {/* Progress Bar */}
-      <div className="bg-white rounded-xl border border-gray-200 p-4 mb-6">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium text-gray-700">
-            Uploaded: {getUploadedPartsCount()}/6 parts
-            {formData.generatedSareeViews && (
-              <span className="ml-2 text-green-600">
-                {generatingComplete
-                  ? "(Generating...)"
-                  : `(Generated: ${getGeneratedViewsCount()}/2 views)`}
-              </span>
-            )}
-          </span>
-          {getUploadedPartsCount() > 0 && (
-            <button
-              onClick={clearAllParts}
-              className="text-sm text-red-600 hover:text-red-800 font-medium"
-            >
-              Clear All
-            </button>
+            </div>
           )}
         </div>
-        <div className="w-full bg-gray-200 rounded-full h-2">
-          <div
-            className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-300"
-            style={{ width: `${(getUploadedPartsCount() / 6) * 100}%` }}
-          />
+
+        {/* Pallu */}
+        <div className="bg-white rounded-lg border-2 border-dashed border-gray-300 hover:border-[#800000] transition-all duration-200">
+          {!palluFile ? (
+            <div className="p-8 text-center hover:bg-gray-50 transition-all duration-200">
+              <div className="flex flex-col items-center">
+                <svg className="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                  />
+                </svg>
+                <h3 className="text-lg font-semibold text-gray-800 mb-3">Saree Pallu</h3>
+                <label className="inline-flex items-center px-6 py-2 bg-black text-white rounded-lg cursor-pointer transition-colors font-medium">
+                  Upload
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0] || null;
+                      setPalluFile(f);
+                      setError(null);
+                      if (f) uploadAndPersistInputImage("pallu", f);
+                    }}
+                    disabled={photoshootUploading || inputUploading.pallu}
+                  />
+                </label>
+              </div>
+            </div>
+          ) : (
+            <div className="relative p-4">
+              <div className="relative rounded-lg overflow-hidden bg-gray-100">
+                <img src={palluPreviewUrl} alt="Pallu preview" className="w-full h-48 object-cover" />
+                <button
+                  onClick={() => {
+                    setPalluFile(null);
+                    setError(null);
+                    clearInputKind("pallu");
+                  }}
+                  className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                  disabled={photoshootUploading || inputUploading.pallu}
+                >
+                  <X size={16} />
+                </button>
+              </div>
+              <div className="mt-3 text-center">
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">Saree Pallu</h3>
+                <div className="flex items-center justify-center gap-2">
+                  {inputUploading.pallu ? (
+                    <>
+                      <div className="w-4 h-4 rounded-full border-2 border-t-transparent border-gray-500 animate-spin" />
+                      <span className="text-sm text-gray-600 font-medium">Uploading…</span>
+                    </>
+                  ) : formData?.sareeInputUrls?.pallu ? (
+                    <>
+                      <CheckCircle className="text-green-500" size={16} />
+                      <span className="text-sm text-green-600 font-medium">Uploaded ✓</span>
+                    </>
+                  ) : (
+                    <span className="text-sm text-gray-600 font-medium">Pending upload</span>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
+
+        {/* Body */}
+        <div className="bg-white rounded-lg border-2 border-dashed border-gray-300 hover:border-[#800000] transition-all duration-200">
+          {!bodyFile ? (
+            <div className="p-8 text-center hover:bg-gray-50 transition-all duration-200">
+              <div className="flex flex-col items-center">
+                <svg className="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                  />
+                </svg>
+                <h3 className="text-lg font-semibold text-gray-800 mb-3">Saree Body</h3>
+                <label className="inline-flex items-center px-6 py-2 bg-black text-white rounded-lg cursor-pointer transition-colors font-medium">
+                  Upload
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0] || null;
+                      setBodyFile(f);
+                      setError(null);
+                      if (f) uploadAndPersistInputImage("body", f);
+                    }}
+                    disabled={photoshootUploading || inputUploading.body}
+                  />
+                </label>
+              </div>
+            </div>
+          ) : (
+            <div className="relative p-4">
+              <div className="relative rounded-lg overflow-hidden bg-gray-100">
+                <img src={bodyPreviewUrl} alt="Body preview" className="w-full h-48 object-cover" />
+                <button
+                  onClick={() => {
+                    setBodyFile(null);
+                    setError(null);
+                    clearInputKind("body");
+                  }}
+                  className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                  disabled={photoshootUploading || inputUploading.body}
+                >
+                  <X size={16} />
+                </button>
+              </div>
+              <div className="mt-3 text-center">
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">Saree Body</h3>
+                <div className="flex items-center justify-center gap-2">
+                  {inputUploading.body ? (
+                    <>
+                      <div className="w-4 h-4 rounded-full border-2 border-t-transparent border-gray-500 animate-spin" />
+                      <span className="text-sm text-gray-600 font-medium">Uploading…</span>
+                    </>
+                  ) : formData?.sareeInputUrls?.body ? (
+                    <>
+                      <CheckCircle className="text-green-500" size={16} />
+                      <span className="text-sm text-green-600 font-medium">Uploaded ✓</span>
+                    </>
+                  ) : (
+                    <span className="text-sm text-gray-600 font-medium">Pending upload</span>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+      </div>
+
+      {/* Action */}
+      <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center mb-6">
+        <button
+          onClick={startPhotoshoot}
+          disabled={photoshootUploading || !photoshootFile}
+          className="px-4 py-2 rounded-lg bg-black text-white font-medium disabled:opacity-60"
+        >
+          {photoshootUploading ? "Generating..." : "Generate"}
+        </button>
+        {!photoshootUploading && photoshootStatus && (
+          <span className="text-sm text-gray-700">{photoshootStatus}</span>
+        )}
       </div>
 
       {/* Error Message */}
@@ -821,148 +1096,30 @@ const SareePartsUploader = ({ formData = {}, onChange = () => { } }) => {
         </div>
       )}
 
-      {/* Loader while AI is generating */}
-      {generatingComplete && (
-        <div className="mt-4">
-          <FashionLoader />
+      {/* Real-time loader */}
+      {photoshootUploading && (
+        <div className="mb-6">
+          <PhotoshootLoader />
         </div>
       )}
 
-      {/* Generated Saree Views Display - Single Image per View */}
-      {formData.generatedSareeViews && (
-        <div className="bg-gradient-to-br rounded-xl p-6">
-          <h4 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            <Sparkles className="text-purple-600" />
-            AI Generated Saree Views
-          </h4>
+      {Object.keys(photoshootViews || {}).length > 0 && (
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+          {Object.entries(photoshootViews).map(([viewType, imageUrl]) => {
+            if (!imageUrl) return null;
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {Object.entries(formData.generatedSareeViews).map(
-              ([viewType, imageUrl]) => {
-                const viewLabel = viewLabels[viewType] || { name: viewType, description: '', icon: '👗' };
-
-                if (!imageUrl) return null;
-
-                return (
-                  <div key={viewType} className="bg-white border-2 border-gray-200 rounded-lg p-4">
-                    <h5 className="text-md font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                      <span className="text-2xl">{viewLabel.icon}</span>
-                      {viewLabel.name}
-                    </h5>
-
-                    <div className="relative overflow-hidden rounded-md w-full">
-                      <img
-                        src={imageUrl}
-                        alt={`${viewLabel.name}`}
-                        className="w-full h-[520px] object-contain bg-white rounded-md"
-                      />
-                    </div>
-
-                    <p className="text-xs text-gray-600 mt-2">
-                      {viewLabel.description}
-                    </p>
-                  </div>
-                );
-              }
-            )}
-          </div>
-
-          <div className="mt-6 flex flex-col gap-3">
-            <div className="flex flex-wrap gap-3">
-              <button
-                onClick={handleMarkGood}
-                disabled={feedbackSaving || generatingComplete}
-                className="px-4 py-2 rounded-lg bg-black text-white font-medium disabled:opacity-60"
-              >
-                {feedbackSaving ? 'Saving…' : 'Good'}
-              </button>
-              <button
-                onClick={handleOpenBadModal}
-                disabled={generatingComplete}
-                className="px-4 py-2 rounded-lg border border-gray-300 text-gray-800 font-medium disabled:opacity-60"
-              >
-                Bad
-              </button>
-            </div>
-
-            {feedbackStatus && (
-              <div className={`p-3 rounded-lg border ${feedbackStatus.type === 'success' ? 'bg-green-50 border-green-200 text-green-800' : 'bg-red-50 border-red-200 text-red-800'}`}>
-                {feedbackStatus.message}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {feedbackModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-lg rounded-xl bg-white p-5 border border-gray-200">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-lg font-semibold text-gray-900">What went wrong?</h3>
-              <button
-                onClick={() => setFeedbackModalOpen(false)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <X size={18} />
-              </button>
-            </div>
-            <p className="text-sm text-gray-600 mb-3">
-              Example: “Front view has fabric panel in background” or “Two women side-by-side collage”.
-            </p>
-
-            <label className="block text-sm font-medium text-gray-700 mb-2">What should be fixed? (select all that apply)</label>
-            <div className="w-full border border-gray-300 rounded-lg p-3 text-sm mb-3">
-              {[
-                { key: 'saree-border', label: 'Saree border' },
-                { key: 'blouse-border', label: 'Blouse border' },
-                { key: 'saree-pallu', label: 'Saree pallu' },
-                { key: 'saree-pleats', label: 'Saree pleats' },
-                { key: 'saree-body', label: 'Saree body color/pattern' },
-                { key: 'blouse-body', label: 'Blouse body color/pattern' },
-              ].map((opt) => (
-                <label key={opt.key} className="flex items-center gap-2 py-1">
-                  <input
-                    type="checkbox"
-                    checked={feedbackTargets.includes(opt.key)}
-                    onChange={(e) => {
-                      const checked = e.target.checked;
-                      setFeedbackTargets((prev) => {
-                        const cur = Array.isArray(prev) ? prev : [];
-                        if (checked) return Array.from(new Set([...cur, opt.key]));
-                        return cur.filter((x) => x !== opt.key);
-                      });
-                    }}
-                    disabled={generatingComplete}
+            return (
+              <div key={viewType} className="bg-white border-2 border-gray-200 rounded-lg p-4">
+                <div className="relative overflow-hidden rounded-md w-full">
+                  <img
+                    src={imageUrl}
+                    alt="Generated view"
+                    className="w-full h-[520px] object-contain bg-white rounded-md"
                   />
-                  <span className="text-gray-800">{opt.label}</span>
-                </label>
-              ))}
-            </div>
-
-            <textarea
-              value={feedbackText}
-              onChange={(e) => setFeedbackText(e.target.value)}
-              className="w-full min-h-[110px] border border-gray-300 rounded-lg p-3 text-sm focus:outline-none"
-              placeholder="Describe what should change…"
-              disabled={generatingComplete}
-            />
-
-            <div className="mt-4 flex gap-3 justify-end">
-              <button
-                onClick={() => setFeedbackModalOpen(false)}
-                className="px-4 py-2 rounded-lg border border-gray-300 text-gray-800 font-medium"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleRetryWithFeedback}
-                disabled={generatingComplete}
-                className="px-4 py-2 rounded-lg bg-black text-white font-medium disabled:opacity-60"
-              >
-                Fix
-              </button>
-            </div>
-          </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

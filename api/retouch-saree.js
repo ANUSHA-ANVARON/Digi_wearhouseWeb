@@ -17,10 +17,13 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-const GEMINI_API_KEY = 'AIzaSyCGGNoinwQJZI66jNp9Y462isJFAp33nN8';
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent';
 
 async function callGeminiWithRetry(parts, maxRetries = 3) {
+  if (!GEMINI_API_KEY) {
+    throw new Error('Missing GEMINI_API_KEY. Set it in your .env (server-side) before calling Gemini image generation.');
+  }
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       const response = await axios.post(

@@ -2,7 +2,7 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
-import handler from "./api/drape-saree-parts.js";
+import handler, { photoshootStart, photoshootStream } from "./api/drape-saree-parts.js";
 import trainingFeedbackHandler from "./api/training-feedback.js";
 import retouchSareeHandler from "./api/retouch-saree.js";
 
@@ -36,6 +36,33 @@ app.post("/api/drape-saree-parts", async (req, res) => {
     console.error('❌ /api/drape-saree-parts failed:', e);
     if (!res.headersSent) {
       res.status(500).json({ error: 'Internal server error', message: e?.message || String(e) });
+    }
+  }
+});
+
+// Single saree upload → front try-on → left/right/back views (streamed)
+app.post("/api/photoshoot/start", async (req, res) => {
+  try {
+    await photoshootStart(req, res);
+  } catch (e) {
+    console.error('❌ /api/photoshoot/start failed:', e);
+    if (!res.headersSent) {
+      res.status(500).json({ error: 'Internal server error', message: e?.message || String(e) });
+    }
+  }
+});
+
+app.get("/api/photoshoot/stream/:jobId", async (req, res) => {
+  try {
+    await photoshootStream(req, res);
+  } catch (e) {
+    console.error('❌ /api/photoshoot/stream failed:', e);
+    try {
+      if (!res.headersSent) {
+        res.status(500).json({ error: 'Internal server error', message: e?.message || String(e) });
+      }
+    } catch {
+      // ignore
     }
   }
 });

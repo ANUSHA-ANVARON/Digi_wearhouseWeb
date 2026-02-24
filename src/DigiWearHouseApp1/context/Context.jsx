@@ -186,6 +186,10 @@ export const AppProvider = ({ children }) => {
       let errorMessage = "Registration failed";
 
       switch (error.code) {
+        case "auth/network-request-failed":
+          errorMessage =
+            "Network error while contacting Firebase. Check your internet/VPN, disable ad-blockers, and ensure access to Google/Firebase endpoints (identitytoolkit.googleapis.com, securetoken.googleapis.com).";
+          break;
         case "auth/email-already-in-use":
           errorMessage = "Email is already registered";
           break;
@@ -225,6 +229,10 @@ export const AppProvider = ({ children }) => {
       let errorMessage = "Login failed";
 
       switch (error.code) {
+        case "auth/network-request-failed":
+          errorMessage =
+            "Network error while contacting Firebase. Check your internet/VPN, disable ad-blockers, and ensure access to Google/Firebase endpoints (identitytoolkit.googleapis.com, securetoken.googleapis.com).";
+          break;
         case "auth/user-not-found":
         case "auth/invalid-credential":
           errorMessage = "Invalid email or password";
@@ -343,7 +351,13 @@ export const AppProvider = ({ children }) => {
       return { success: true };
     } catch (error) {
       console.error("Error sending OTP:", error);
-      setError(error.message);
+      if (error?.code === "auth/network-request-failed") {
+        setError(
+          "Network error while contacting Firebase. If you use an ad-blocker or strict browser privacy settings, allow reCAPTCHA + Google endpoints and try again."
+        );
+      } else {
+        setError(error.message);
+      }
       throw error;
     }
   };
@@ -382,7 +396,13 @@ export const AppProvider = ({ children }) => {
       return { success: true, user };
     } catch (error) {
       console.error("Google Sign-In Error:", error);
-      setError(error.message || "Google sign-in failed");
+      if (error?.code === "auth/network-request-failed") {
+        setError(
+          "Network error while contacting Firebase. Check your internet/VPN and allow Google/Firebase endpoints in your network/ad-blocker."
+        );
+      } else {
+        setError(error.message || "Google sign-in failed");
+      }
       throw error;
     }
   };
