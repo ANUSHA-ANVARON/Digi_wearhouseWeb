@@ -2,7 +2,7 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
-import handler, { photoshootStart, photoshootStream } from "./api/drape-saree-parts.js";
+import handler, { photoshootStart, photoshootStream, garmentPhotoshootStart, garmentPhotoshootStream } from "./api/drape-saree-parts.js";
 import trainingFeedbackHandler from "./api/training-feedback.js";
 import retouchSareeHandler from "./api/retouch-saree.js";
 
@@ -64,6 +64,31 @@ app.get("/api/photoshoot/stream/:jobId", async (req, res) => {
     } catch {
       // ignore
     }
+  }
+});
+
+// Garment photoshoot (Lehenga, Anarkali, Salwar, etc.): full-dress → VTO → Gemini views
+app.post("/api/garment-photoshoot/start", async (req, res) => {
+  try {
+    await garmentPhotoshootStart(req, res);
+  } catch (e) {
+    console.error('❌ /api/garment-photoshoot/start failed:', e);
+    if (!res.headersSent) {
+      res.status(500).json({ error: 'Internal server error', message: e?.message || String(e) });
+    }
+  }
+});
+
+app.get("/api/garment-photoshoot/stream/:jobId", async (req, res) => {
+  try {
+    await garmentPhotoshootStream(req, res);
+  } catch (e) {
+    console.error('❌ /api/garment-photoshoot/stream failed:', e);
+    try {
+      if (!res.headersSent) {
+        res.status(500).json({ error: 'Internal server error', message: e?.message || String(e) });
+      }
+    } catch { /* ignore */ }
   }
 });
 

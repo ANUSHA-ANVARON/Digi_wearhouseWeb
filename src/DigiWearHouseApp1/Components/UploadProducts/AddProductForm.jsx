@@ -183,10 +183,6 @@ const AddProductForm = ({ onBack, initialData }) => {
   };
 
   const handleSubmit = () => {
-    if (formData.premium === null) {
-      alert("Please select if this product is premium (Yes/No).");
-      return;
-    }
     const dressType = formData?.dressType?.toLowerCase() || "";
     const isSaree = dressType.includes("saree") || dressType.includes("sari");
 

@@ -15,49 +15,43 @@ dotenv.config();
 
 // Helper function to get Google Cloud access token
 async function getGoogleAccessToken() {
+  // First, try gcloud CLI
   try {
     const { stdout } = await execPromise('gcloud auth application-default print-access-token');
     return stdout.trim();
-  } catch (error) {
-    const isGcloudMissing = String(error?.message || '').toLowerCase().includes('gcloud') && String(error?.message || '').toLowerCase().includes('not recognized');
-    const isSpawnMissing = error?.code === 'ENOENT' || String(error?.message || '').toLowerCase().includes('enoent');
+  } catch (gcloudError) {
+    // gcloud failed for ANY reason (not found, wrong creds path, not logged in…)
+    console.warn('gcloud CLI failed; falling back to GoogleAuth (ADC/service account):', gcloudError?.message?.split('\n')[0]);
+  }
 
-    // If gcloud isn't installed/available, fall back to Application Default Credentials (ADC)
-    if (isGcloudMissing || isSpawnMissing) {
-      try {
-        console.warn('gcloud CLI not available; falling back to GoogleAuth (ADC/service account)');
-
-        const credsPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
-        console.log('🔐 GOOGLE_APPLICATION_CREDENTIALS:', credsPath || '(missing)');
-        if (credsPath) {
-          const exists = await fs
-            .access(credsPath)
-            .then(() => true)
-            .catch(() => false);
-          console.log('🔐 Creds file exists:', exists);
-        }
-
-        const auth = new GoogleAuth({
-          scopes: ['https://www.googleapis.com/auth/cloud-platform']
-        });
-        const client = await auth.getClient();
-        const token = await client.getAccessToken();
-        // token can be string or { token }
-        const accessToken = typeof token === 'string' ? token : token?.token;
-        if (!accessToken) {
-          throw new Error('Empty access token from GoogleAuth');
-        }
-        return accessToken;
-      } catch (authErr) {
-        console.error('Failed to get access token via GoogleAuth:', authErr?.message || authErr);
-        throw new Error(
-          'Google auth failed. Install gcloud OR set GOOGLE_APPLICATION_CREDENTIALS to a service-account JSON key that has Vertex AI permissions.'
-        );
-      }
+  // Fall back to Application Default Credentials (ADC) / service-account key
+  try {
+    const credsPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+    console.log('🔐 GOOGLE_APPLICATION_CREDENTIALS:', credsPath || '(missing)');
+    if (credsPath) {
+      const exists = await fs
+        .access(credsPath)
+        .then(() => true)
+        .catch(() => false);
+      console.log('🔐 Creds file exists:', exists);
     }
 
-    console.error('Failed to get Google access token:', error.message);
-    throw new Error('Google Cloud authentication failed. Install gcloud CLI or configure GOOGLE_APPLICATION_CREDENTIALS.');
+    const auth = new GoogleAuth({
+      scopes: ['https://www.googleapis.com/auth/cloud-platform']
+    });
+    const client = await auth.getClient();
+    const token = await client.getAccessToken();
+    // token can be string or { token }
+    const accessToken = typeof token === 'string' ? token : token?.token;
+    if (!accessToken) {
+      throw new Error('Empty access token from GoogleAuth');
+    }
+    return accessToken;
+  } catch (authErr) {
+    console.error('Failed to get access token via GoogleAuth:', authErr?.message || authErr);
+    throw new Error(
+      'Google auth failed. Install gcloud OR set GOOGLE_APPLICATION_CREDENTIALS to a service-account JSON key that has Vertex AI permissions.'
+    );
   }
 }
 
@@ -168,9 +162,10 @@ async function applyVirtualTryOn(sareeImageUrl, modelImageUrl, { sampleCount = 1
         productType: "APPAREL"
       }],
       parameters: {
-        garmentType: "full_body",
+        // garmentType: "full_body",
         sampleCount: Math.max(1, Number(sampleCount) || 1),
         preserveGarmentShape: true,
+        // preserveGarmentShape: false,
         poseAlignment: true,
         outputStyle: "realistic"
       }
@@ -397,7 +392,7 @@ const GOOGLE_PROJECT_ID = process.env.GOOGLE_PROJECT_ID;
 const LOCATION = "us-central1";
 // Fixed model images (defaults to local public assets).
 // You can override these via env vars to swap models without code changes.
-const MODEL_FRONT_URL = process.env.MODEL_FRONT_URL || "public/img5.png"; // Front view model
+const MODEL_FRONT_URL = process.env.MODEL_FRONT_URL || "https://res.cloudinary.com/doiezptnn/image/upload/v1772188808/img5_s4sulb.png"; // Front view model
 const MODEL_BACK_URL = process.env.MODEL_BACK_URL || "public/image.png"; // Back view model
 
 // Retry helper for Gemini API calls
@@ -409,8 +404,13 @@ async function callGeminiWithRetry(parts, maxRetries = 3) {
     try {
       console.log(`🔄 API attempt ${attempt}/${maxRetries}...`);
 
-      // Log the payload for debugging
-      console.log('📦 Payload:', JSON.stringify({ contents: [{ parts }] }, null, 2));
+      // Log the payload for debugging (truncate base64 to avoid terminal flood)
+      const sanitizeForLog = (obj) => JSON.parse(JSON.stringify(obj, (_k, v) =>
+        typeof v === 'string' && v.length > 200 && /^[A-Za-z0-9+/=]+$/.test(v.slice(0, 200))
+          ? `[base64 ~${Math.round(v.length / 1024)}KB]`
+          : v
+      ));
+      console.log('📦 Payload parts:', sanitizeForLog({ contents: [{ parts }] }));
 
       const response = await axios.post(GEMINI_API_URL, {
         contents: [{ parts }],
@@ -429,8 +429,8 @@ async function callGeminiWithRetry(parts, maxRetries = 3) {
         timeout: 300000
       });
 
-      // Log the response for debugging
-      console.log('✅ API Response:', response.data);
+      // Log the response for debugging (truncate base64)
+      console.log('✅ API Response:', sanitizeForLog(response.data));
 
       return response;
     } catch (error) {
@@ -510,7 +510,7 @@ async function uploadGeneratedImageToCloudinary(base64Data, viewType) {
         folder: `generated-sarees/${viewType}`,
         public_id: `saree-${viewType}-${Date.now()}`,
         format: 'jpg',
-        quality: 'auto:best'
+        quality: 100
       },
       (error, result) => {
         if (error) return reject(error);
@@ -519,6 +519,21 @@ async function uploadGeneratedImageToCloudinary(base64Data, viewType) {
     );
     Readable.from(buffer).pipe(uploadStream);
   });
+}
+
+/**
+ * Produce a compact reference image for Gemini from any base64 source.
+ * Gemini only needs enough detail to understand the outfit — 768×1024 at
+ * quality 85 is sufficient and avoids payload-size timeouts.
+ */
+async function toGeminiRef(base64Data, srcMimeType) {
+  const buf = Buffer.from(base64Data, 'base64');
+  const resized = await sharp(buf)
+    .flatten({ background: { r: 255, g: 255, b: 255 } })
+    .resize(768, 1024, { fit: 'contain', background: { r: 255, g: 255, b: 255 } })
+    .jpeg({ quality: 85 })
+    .toBuffer();
+  return { data: resized.toString('base64'), mimeType: 'image/jpeg', mime_type: 'image/jpeg' };
 }
 
 // Helper: Compress base64 image data to reduce payload size
@@ -572,7 +587,7 @@ async function sanitizeCatalogOutput(image, opts = {}) {
       background: white,
       position: 'center'
     })
-    .jpeg({ quality: 95, progressive: true })
+    .jpeg({ quality: 100, progressive: false, chromaSubsampling: '4:4:4' })
     .toBuffer();
 
   // Log dimensions
@@ -1129,34 +1144,52 @@ Generate the back view NOW. Show ONLY the back view. Nothing else.` }
   return backImage;
 }
 
-async function generatePoseVariantFromFront(frontViewImage, variant) {
+async function generatePoseVariantFromFront(frontViewImage, variant, previousViewImage = null) {
   const v = String(variant || '').toLowerCase();
   const viewName = v === 'left' ? 'LEFT VIEW' : v === 'right' ? 'RIGHT VIEW' : 'BACK VIEW';
   const directionBlock = v === 'left'
-    ? '- LEFT view: model turned 90° to the left (left profile / left side view)'
+    ? 'Turn the model 90° to HER LEFT so we see her left-side profile.'
     : v === 'right'
-      ? '- RIGHT view: model turned 90° to the right (right profile / right side view)'
-      : '- BACK view: model from behind';
+      ? 'Turn the model 90° to HER RIGHT so we see her right-side profile.'
+      : 'Show the model from directly behind (back view).';
 
   const parts = [
     {
-      text: `Create EXACTLY ONE professional catalog photograph (${viewName}) based on the reference image.
+      text: `You are a professional fashion catalog photographer. Your ONLY job is to render the SAME outfit from a different angle.
 
-NON-NEGOTIABLE REQUIREMENTS:
-- Output must be EXACTLY 2400×3200 pixels, portrait
-- EXACTLY ONE person in the image
-- Same person identity as the reference (face, hair, body)
-- Same saree + blouse + drape, patterns, and colors as the reference
-- Same lighting style and simple studio backdrop (keep it clean; ideally plain/neutral)
+=== STEP 1: ANALYSE THE REFERENCE ===
+Look at the reference image carefully and identify:
+1. GARMENT TYPE (kurti, lehenga, saree, anarkali, salwar suit, etc.) — note it exactly
+2. Every garment piece present: top, bottom, dupatta/chunni/stole (if any), jacket, etc.
+3. Fabric colors and patterns on each piece
+4. Neckline shape, sleeve length and style
+5. Bottom silhouette (flared, straight, palazzo, etc.)
+6. Whether a dupatta/chunni is present — if YES note how it is draped; if NO it must NOT appear in your output
+7. Model’s hair, skin tone, and jewellery
+8. Background color and lighting
+
+=== STEP 2: RENDER THE ${viewName} ===
 ${directionBlock}
 
-FORBIDDEN:
-- Collage/split-screen
-- Multiple people
-- Text/labels/watermarks
-- Changing saree colors or blouse sleeve style
+STRICT RULES — every single one applies:
+✔ Output: EXACTLY ONE image, 2400×3200 px portrait
+✔ GARMENT TYPE must be IDENTICAL to the reference — if it is a kurti+palazzo it must remain a kurti+palazzo
+✔ Every piece of clothing from the reference must appear; nothing added, nothing removed
+✔ All colors, prints, embroidery, borders exactly as in the reference
+✔ Sleeve length, neckline, hem length identical
+✔ If NO dupatta in reference → NO dupatta in output
+✔ If dupatta IS in reference → show it naturally from this angle
+✔ Same model identity (hair, face, skin tone)
+✔ Same plain backdrop and lighting
+✔ Model fills 80–90% of image height, full body head-to-toe
 
-REFERENCE IMAGE (use for outfit + identity ONLY; do not include it in output):`
+FORBIDDEN:
+✘ Changing the garment type (e.g. turning a kurti into a saree)
+✘ Adding any garment, drape, or accessory not in the reference
+✘ Collage, split-screen, multiple people, labels, watermarks
+✘ Changing any color or pattern
+
+REFERENCE IMAGE (analyse this, then produce the ${viewName} — do NOT include this image in your output):`
     },
     {
       inline_data: {
@@ -1164,8 +1197,19 @@ REFERENCE IMAGE (use for outfit + identity ONLY; do not include it in output):`
         data: frontViewImage.data
       }
     },
+    ...(previousViewImage ? [
+      {
+        text: `CONSISTENCY REFERENCE — this is the previously generated adjacent view of the SAME outfit. Use it ONLY to keep the model identity (face, skin tone, hair), background colour, and lighting consistent across views. Do NOT copy this angle or pose:`
+      },
+      {
+        inline_data: {
+          mime_type: previousViewImage.mimeType || previousViewImage.mime_type || 'image/jpeg',
+          data: previousViewImage.data
+        }
+      }
+    ] : []),
     {
-      text: `Generate the ${viewName} now. Output ONE image only.`
+      text: `Now produce the ${viewName}. The outfit type in your output must exactly match the reference. Output ONE image only.`
     }
   ];
 
@@ -1280,17 +1324,16 @@ export async function photoshootStream(req, res) {
     send('view', { view: 'front', url: frontUrl });
     if (closed) return;
 
-    const frontRef = await sanitizeCatalogOutput(
-      { data: tryonFront.data, mimeType: tryonFront.mimeType || 'image/png', mime_type: tryonFront.mimeType || 'image/png' },
-      { stage: 'photoshoot-front-ref' }
-    );
+    const frontRef = await toGeminiRef(tryonFront.data, tryonFront.mimeType || 'image/png');
 
-    // Sequentially generate pose variants from the front reference.
+    // Sequentially generate pose variants from the front reference (each view feeds the next for continuity).
+    let prevRef = null;
     for (const v of ['left', 'right', 'back']) {
       send('status', { step: v, message: `Generating ${v} view (Gemini)...` });
-      const out = await generatePoseVariantFromFront(frontRef, v);
+      const out = await generatePoseVariantFromFront(frontRef, v, prevRef);
       const url = await uploadGeneratedImageToCloudinary(out.data, `photoshoot-${v}`);
       send('view', { view: v, url });
+      prevRef = await toGeminiRef(out.data, out.mimeType || 'image/jpeg');
       if (closed) return;
     }
 
@@ -2432,6 +2475,170 @@ export default async function handler(req, res) {
       error: 'Failed to process saree parts',
       details: error.message
     });
+  }
+}
+
+// ─── Garment Photoshoot (Lehenga, Anarkali, etc.) ───────────────────────────
+// Upload fields: full-dress, top-front, top-back, bottom
+// Flow: full-dress → Google VTO (front view) → Gemini (left, right, back)
+
+const uploadGarmentFields = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 20 * 1024 * 1024, files: 4 },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype && file.mimetype.startsWith('image/')) cb(null, true);
+    else cb(new Error('Only image files are allowed!'), false);
+  }
+}).fields([
+  { name: 'full-dress', maxCount: 1 },
+  { name: 'top-front', maxCount: 1 },
+  { name: 'top-back', maxCount: 1 },
+  { name: 'bottom', maxCount: 1 }
+]);
+
+async function uploadGarmentToCloudinary(fileBuffer, fieldName) {
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        resource_type: 'image',
+        folder: `garment-parts/${fieldName}`,
+        public_id: `${fieldName}-${Date.now()}`,
+        format: 'jpg',
+        quality: 'auto:best'
+      },
+      (error, result) => {
+        if (error) return reject(error);
+        resolve(result);
+      }
+    );
+    Readable.from(fileBuffer).pipe(uploadStream);
+  });
+}
+
+export async function garmentPhotoshootStart(req, res) {
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+  res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
+
+  if (req.method === 'OPTIONS') { res.status(200).end(); return; }
+  if (req.method !== 'POST') { res.status(405).json({ error: 'Method not allowed' }); return; }
+
+  try {
+    await new Promise((resolve, reject) => {
+      uploadGarmentFields(req, res, (err) => {
+        if (err) return reject(new Error(`File upload error: ${err.message}`));
+        resolve();
+      });
+    });
+
+    const files = req.files || {};
+    const fullDressFile = files['full-dress']?.[0];
+
+    if (!fullDressFile?.buffer) {
+      res.status(400).json({ error: 'Missing full-dress image (required for virtual try-on)' });
+      return;
+    }
+
+    const jobId = makeJobId('garment');
+
+    // Upload all provided images to Cloudinary in parallel
+    const uploadResults = await Promise.allSettled([
+      uploadGarmentToCloudinary(fullDressFile.buffer, 'full-dress'),
+      files['top-front']?.[0] ? uploadGarmentToCloudinary(files['top-front'][0].buffer, 'top-front') : Promise.resolve(null),
+      files['top-back']?.[0] ? uploadGarmentToCloudinary(files['top-back'][0].buffer, 'top-back') : Promise.resolve(null),
+      files['bottom']?.[0] ? uploadGarmentToCloudinary(files['bottom'][0].buffer, 'bottom') : Promise.resolve(null),
+    ]);
+
+    const [fullDressResult, topFrontResult, topBackResult, bottomResult] = uploadResults.map(r =>
+      r.status === 'fulfilled' ? r.value : null
+    );
+
+    const fullDressUrl = fullDressResult?.secure_url;
+    if (!fullDressUrl) throw new Error('Failed to upload full-dress image to Cloudinary');
+
+    const jobData = {
+      jobId,
+      fullDressUrl,
+      topFrontUrl: topFrontResult?.secure_url || null,
+      topBackUrl: topBackResult?.secure_url || null,
+      bottomUrl: bottomResult?.secure_url || null,
+      createdAt: new Date().toISOString()
+    };
+
+    await savePhotoshootJob(jobId, jobData);
+
+    res.json({
+      success: true,
+      jobId,
+      fullDressUrl,
+      topFrontUrl: jobData.topFrontUrl,
+      topBackUrl: jobData.topBackUrl,
+      bottomUrl: jobData.bottomUrl
+    });
+  } catch (e) {
+    console.error('❌ garmentPhotoshootStart failed:', e);
+    res.status(500).json({ error: 'Failed to start garment photoshoot', message: e?.message || String(e) });
+  }
+}
+
+export async function garmentPhotoshootStream(req, res) {
+  res.setHeader('Cache-Control', 'no-cache, no-transform');
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+
+  try { res.flushHeaders?.(); } catch { /* ignore */ }
+
+  const jobId = req.params?.jobId || req.query?.jobId;
+  const job = await loadPhotoshootJob(String(jobId || ''));
+
+  const send = (event, payload) => {
+    res.write(`event: ${event}\n`);
+    res.write(`data: ${JSON.stringify(payload)}\n\n`);
+  };
+
+  if (!job?.fullDressUrl) {
+    send('error', { message: 'Invalid jobId (missing or expired job)' });
+    res.end();
+    return;
+  }
+
+  let closed = false;
+  req.on('close', () => { closed = true; });
+
+  try {
+    // Step 1: Google Virtual Try-On with full-dress image → front view
+    send('status', { step: 'front', message: 'Generating front view (virtual try-on)...' });
+    const tryonFront = await applyVirtualTryOn(job.fullDressUrl, MODEL_FRONT_URL);
+    if (!tryonFront?.data) {
+      throw new Error('Virtual try-on failed for front view');
+    }
+
+    const frontUrl = await uploadGeneratedImageToCloudinary(tryonFront.data, 'garment-photoshoot-front');
+    send('view', { view: 'front', url: frontUrl });
+    if (closed) return;
+
+    // Prepare a compact reference for Gemini (768×1024) — full-quality image already uploaded above
+    const frontRef = await toGeminiRef(tryonFront.data, tryonFront.mimeType || 'image/png');
+
+    // Steps 2-4: Gemini-generated pose variants (left, right, back) from front reference (each feeds the next for continuity).
+    let prevRef = null;
+    for (const v of ['left', 'right', 'back']) {
+      if (closed) return;
+      send('status', { step: v, message: `Generating ${v} view (Gemini)...` });
+      const out = await generatePoseVariantFromFront(frontRef, v, prevRef);
+      const url = await uploadGeneratedImageToCloudinary(out.data, `garment-photoshoot-${v}`);
+      send('view', { view: v, url });
+      prevRef = await toGeminiRef(out.data, out.mimeType || 'image/jpeg');
+    }
+
+    send('done', { success: true });
+    res.end();
+  } catch (e) {
+    console.error('❌ garmentPhotoshootStream failed:', e);
+    send('error', { message: e?.message || String(e) });
+    res.end();
   }
 }
 

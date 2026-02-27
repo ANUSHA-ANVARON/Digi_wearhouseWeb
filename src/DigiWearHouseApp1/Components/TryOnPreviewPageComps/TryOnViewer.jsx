@@ -105,6 +105,7 @@ export const TryOnViewer = ({
 }) => {
   const displayImages = productUtils.getDisplayImages(productData);
   const isSaree = productUtils.isSareeProduct(productData);
+  const defaultPreview = displayImages[0]?.url || STATIC_MODEL_IMAGE;
   
   return (
     <div className="bg-blue-50 rounded-lg p-6">
@@ -132,7 +133,7 @@ export const TryOnViewer = ({
               
               <div className="w-full h-full relative flex items-center justify-center">
                 
-                <img src={STATIC_MODEL_IMAGE} alt="Model" className="w-full h-full object-cover object-top" />
+                <img src={defaultPreview} alt="Preview" className="w-full h-full object-cover object-top" />
               </div>
             )}
           </div>
@@ -145,12 +146,8 @@ export const TryOnViewer = ({
               <div key={`${imageData.type}-${imageData.name}`} className="relative">
          <button
   onClick={() => {
-  if (index === 0) {
-    handleTryOn(index, imageData, productData); // API call for first generated image
-  } else {
-    setTryOnResult(imageData.url); // Just swap preview for others
-  }
-}}
+    setTryOnResult(imageData.url);
+  }}
   disabled={isProcessing || (isSaree && imageData.type === 'part')}
   className={`w-full aspect-square rounded-lg overflow-hidden border-2 transition-all ${
     selectedImageIndex === index

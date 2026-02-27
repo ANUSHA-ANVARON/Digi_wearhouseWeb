@@ -7,6 +7,7 @@ import UploadModal from "../UploadSectionComponents/models/UploadModal";
 import BulkUploadNotification from "../UploadSectionComponents/Bulk/BulkUploadNotification";
 import SuccessNotification from "../UploadSectionComponents/SuccessNotification";
 import SareePartsUploader from "../UploadSectionComponents/SareePartsUploader";
+import GarmentPhotoshootUploader from "../UploadSectionComponents/GarmentPhotoshootUploader";
 
 const UploadTab = ({ formData, onChange }) => {
   // --- THIS IS THE FIX ---
@@ -30,6 +31,13 @@ const UploadTab = ({ formData, onChange }) => {
     // This is now safe because we guarded against !formData above
     const dressType = formData.dressType?.toLowerCase() || "";
     return dressType.includes("saree") || dressType.includes("sari");
+  };
+
+  // Dress types that use virtual try-on + Gemini views (non-saree garments)
+  const GARMENT_TYPES = ["lehenga", "anarkali", "sharara", "wedding", "salwar", "kurta"];
+  const isGarmentType = () => {
+    const dressType = formData.dressType?.toLowerCase() || "";
+    return GARMENT_TYPES.some((t) => dressType.includes(t));
   };
 
   const handleBulkUploadChoice = () => {
@@ -70,6 +78,8 @@ const UploadTab = ({ formData, onChange }) => {
       {/* Conditional Upload Component */}
       {isSareeType() ? (
         <SareePartsUploader formData={formData} onChange={onChange} />
+      ) : isGarmentType() ? (
+        <GarmentPhotoshootUploader formData={formData} onChange={onChange} />
       ) : (
         <ImageUploader
           formData={formData}
@@ -78,8 +88,8 @@ const UploadTab = ({ formData, onChange }) => {
         />
       )}
 
-      {/* Bulk Upload Notification - Only show for non-saree types */}
-      {!isSareeType() && (
+      {/* Bulk Upload Notification - Only show for plain image upload types */}
+      {!isSareeType() && !isGarmentType() && (
         <BulkUploadNotification
           show={showBulkNotification}
           onClose={() => setShowBulkNotification(false)}
